@@ -27,6 +27,9 @@ var getOrderItems = router.route('/getOrderItems');
 var addCustomerOrder = router.route('/addCustomerOrder');
 var getOrderByOrderId = router.route('/getOrderByOrderId');
 var getOrderItemsByOrderId = router.route('/getOrderItemsByOrderId');
+var changeOrderStatus = router.route('/changeOrderStatus');
+var changeOrderItemAsignee = router.route('/changeOrderItemAsignee');
+var getOrdersByStatus = router.route('/getOrdersByStatus');
 
 /* GET users listing. */
 router.get('/', function (req, res, next) {
@@ -154,6 +157,70 @@ getOrderItemsByOrderId.get(function (req, res) {
     res.json(orderItems);
   })
     .select('OrderItemId');
+});
+
+changeOrderStatus.post(function (req, res) {
+  CustomerOrder.findById(req.body.OrderId, function (err, order) {
+    order.OrderStatus = req.body.OrderStatus;
+    order.save(function (err, order) {
+      if (err) {
+        response.message = messages.getFailureMessage();
+        response.code = codes.getFailureCode();
+        response.data = err;
+        console.log(response);
+        res.json(response);
+      }
+      else {
+        response.message = messages.getSuccessMessage();
+        response.code = codes.getSuccessCode();
+        response.data = order;
+        console.log(response);
+        res.json(response);
+      }
+    });
+  });
+});
+
+changeOrderItemAsignee.post(function (req, res) {
+  OrderItem.findById(req.body.OrderItemId, function (err, orderItem) {
+    orderItem.AssignedBy = req.body.AssignedBy;
+    orderItem.AssignedTo = req.body.AssignedTo;
+    orderItem.save(function (err, orderItem) {
+      if (err) {
+        response.message = messages.getFailureMessage();
+        response.code = codes.getFailureCode();
+        response.data = err;
+        console.log(response);
+        res.json(response);
+      }
+      else {
+        response.message = messages.getSuccessMessage();
+        response.code = codes.getSuccessCode();
+        response.data = orderItem;
+        console.log(response);
+        res.json(response);
+      }
+    });
+  });
+});
+
+getOrdersByStatus.get(function (req, res) {
+  CustomerOrder.find({ OrderStatus: req.query.OrderStatus }, function (err, orders) {
+    if (err) {
+      response.message = messages.getFailureMessage();
+      response.code = codes.getFailureCode();
+      response.data = err;
+      console.log(response);
+      res.json(response);
+    }
+    else {
+      response.message = messages.getSuccessMessage();
+      response.code = codes.getSuccessCode();
+      response.data = orders;
+      console.log(response);
+      res.json(response);
+    }
+  });
 });
 
 module.exports = router;

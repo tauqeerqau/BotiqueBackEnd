@@ -52,7 +52,7 @@ addCustomer.post(function (req, res) {
       customer.DateOfBirth = req.body.DateOfBirth;
       var referanceContactNumber = req.body.ReferanceContactNumber;
       if (referanceContactNumber != undefined && referanceContactNumber != "") {
-        Customer.findOne({ContactNumber:referanceContactNumber},function(err,customerFromDB){
+        Customer.findOne({ ContactNumber: referanceContactNumber }, function (err, customerFromDB) {
           if (err) {
             console.log(err);
             response.message = messages.getFailureMessage();
@@ -60,16 +60,14 @@ addCustomer.post(function (req, res) {
             response.data = null;
             res.json(response);
           }
-          else if(customerFromDB==null)
-          {
+          else if (customerFromDB == null) {
             console.log(err);
             response.message = messages.getDoesNotExistMessage();
             response.code = codes.getDoesNotExistCode();
             response.data = null;
             res.json(response);
           }
-          else
-          {
+          else {
             customer.ReferanceId = customerFromDB._id;
             customer.save(function (err, user) {
               if (err) {
@@ -132,21 +130,55 @@ getAllCustomers.get(function (req, res) {
 addMeasurements.post(function (req, res) {
   var measurment = new Measurement();
   measurment.ShalwarKameezLength = req.body.ShalwarKameezLength;
-  measurment.Chest = req.body.Chest;
-  measurment.Waist = req.body.Chest;
-  measurment.Hip = req.body.Hip;
-  measurment.Sleeve = req.body.Sleeve;
-  measurment.Shoulder = req.body.Shoulder;
-  measurment.Neck = req.body.Neck;
-  measurment.Bysep = req.body.Bysep;
-  measurment.SLength = req.body.SLength;
+  measurment.ShalwarKameezChest = req.body.ShalwarKameezChest;
+  measurment.ShalwarKameezWaist = req.body.ShalwarKameezWaist;
+  measurment.ShalwarKameezHip = req.body.ShalwarKameezHip;
+  measurment.ShalwarKameezSleeve = req.body.ShalwarKameezSleeve;
+  measurment.ShalwarKameezShoulder = req.body.ShalwarKameezShoulder;
+  measurment.ShalwarKameezNeck = req.body.ShalwarKameezNeck;
+  measurment.ShalwarKameezBysep = req.body.ShalwarKameezBysep;
+  measurment.ShalwarKameezSLength = req.body.ShalwarKameezSLength;
   measurment.ShalwarKameezBottom = req.body.ShalwarKameezBottom;
-  measurment.Hb = req.body.Hb;
-  measurment.Cb = req.body.Cb;
   measurment.CoatLength = req.body.CoatLength;
-  measurment.Knee = req.body.Knee;
+  measurment.CoatChest = req.body.CoatChest;
+  measurment.CoatWaist = req.body.CoatWaist;
+  measurment.CoatHip = req.body.CoatHip;
+  measurment.CoatSleeve = req.body.CoatSleeve;
+  measurment.CoatShoulder = req.body.CoatShoulder;
+  measurment.CoatNeck = req.body.CoatNeck;
+  measurment.CoatBysep = req.body.CoatBysep;
+  measurment.CoatHB = req.body.CoatHB;
+  measurment.CoatCB = req.body.CoatCB;
+  measurment.SherwaniLength = req.body.SherwaniLength;
+  measurment.SherwaniChest = req.body.SherwaniChest;
+  measurment.SherwaniWaist = req.body.SherwaniWaist;
+  measurment.SherwaniHip = req.body.SherwaniHip;
+  measurment.SherwaniSleeve = req.body.SherwaniSleeve;
+  measurment.SherwaniShoulder = req.body.SherwaniShoulder;
+  measurment.SherwaniNeck = req.body.SherwaniNeck;
+  measurment.SherwaniBysep = req.body.SherwaniBysep;
+  measurment.SherwaniHB = req.body.SherwaniHB;
+  measurment.SherwaniCB = req.body.SherwaniCB;
+  measurment.WaistCoatLength = req.body.WaistCoatLength;
+  measurment.WaistCoatChest = req.body.WaistCoatChest;
+  measurment.WaistCoatWaist = req.body.WaistCoatWaist;
+  measurment.WaistCoatHip = req.body.WaistCoatHip;
+  measurment.WaistCoatShoulder = req.body.WaistCoatShoulder;
+  measurment.WaistCoatNeck = req.body.WaistCoatNeck;
+  measurment.WaistCoatHB = req.body.WaistCoatHB;
+  measurment.WaistCoatCB = req.body.WaistCoatCB;
+  measurment.PentWaist = req.body.PentWaist;
+  measurment.PentHip = req.body.PentHip;
+  measurment.PentLength = req.body.PentLength;
+  measurment.PentKnee = req.body.PentKnee;
   measurment.PentBottom = req.body.PentBottom;
-  measurment.Inside = req.body.Inside;
+  measurment.PentInside = req.body.PentInside;
+  measurment.TrouserWaist = req.body.TrouserWaist;
+  measurment.TrouserHip = req.body.TrouserHip;
+  measurment.TrouserLength = req.body.TrouserLength;
+  measurment.TrouserKnee = req.body.TrouserKnee;
+  measurment.TrouserBottom = req.body.TrouserBottom;
+  measurment.TrouserInside = req.body.TrouserInside;
   measurment.CustomerId = req.body.CustomerId;
   measurment.MeasurementTakenBy = req.body.MeasurementTakenBy;
   console.log("Measurement before saving is ");
@@ -207,7 +239,7 @@ getMeasurementByCustomerId.get(function (req, res) {
     .populate('MeasurementTakenBy');
 });
 
-getCustomerAndReferancesByContactNumber.get(function(req,res){
+getCustomerAndReferancesByContactNumber.get(function (req, res) {
   Customer.findOne({ ContactNumber: req.query.ContactNumber }, function (err, customer) {
     if (customer == undefined) {
       response.code = codes.getDoesNotExistCode();
@@ -216,8 +248,7 @@ getCustomerAndReferancesByContactNumber.get(function(req,res){
       console.log(response);
       res.json(response);
     }
-    else
-    {
+    else {
       Customer.find({ ReferanceId: customer._id }, function (err, customers) {
         if (err) {
           console.log(err);
@@ -226,13 +257,12 @@ getCustomerAndReferancesByContactNumber.get(function(req,res){
           response.data = err;
           res.json(err);
         }
-        else
-        {
+        else {
           response.message = messages.getSuccessMessage();
           response.code = codes.getSuccessCode();
           customers.push(customer);
           response.data = customers;
-          res.json(response);     
+          res.json(response);
         }
       });
     }
