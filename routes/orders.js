@@ -83,7 +83,7 @@ getOrderItems.get(function (req, res) {
       response.data = orderItems;
       res.json(response);
     }
-  }).populate('customerId');
+  }).populate('CustomerId');
 });
 
 addCustomerOrder.post(function (req, res) {
@@ -222,7 +222,7 @@ getOrdersByStatus.get(function (req, res) {
       console.log(response);
       res.json(response);
     }
-  }).populate('customerId');
+  }).populate('CustomerId');
 });
 
 module.exports = router;
