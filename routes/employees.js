@@ -6,6 +6,7 @@ var router = express.Router();
 var Password = require('./../utilities/Password');
 var Customer = require('./../models/Customer');
 var Employee = require('./../models/Employee');
+var OrderItem = require('./../models/OrderItem');
 var Measurement = require('./../models/Measurement');
 var Database = require('./../utilities/Database');
 var Messages = require('./../enum/Messages');
@@ -25,6 +26,7 @@ var addEmployee = router.route('/addEmployee');
 var addSystemUser = router.route('/addSystemUser');
 var getAllEmployees = router.route('/getAllEmployees');
 var login = router.route('/login');
+var getMyOrderItems = router.route('/getMyOrderItems');
 
 /* GET users listing. */
 router.get('/', function (req, res, next) {
@@ -134,6 +136,25 @@ login.post(function(req, res){
           res.json(response);
         }
       }
+    });
+  });
+
+  getMyOrderItems.post(function(req,res){
+    OrderItem.find({AssignedTo:req.body.AssignedTo},function(err,orderItems){
+        if (err) {
+            console.log(err);
+            response.message = messages.getFailureMessage();
+            response.code = codes.getFailureCode();
+            response.data = null;
+            res.json(err);
+        }
+        else {
+            console.log(orderItems);
+            response.message = messages.getSuccessMessage();
+            response.code = codes.getSuccessCode();
+            response.data = orderItems;
+            res.json(response);
+        }
     });
   });
 
