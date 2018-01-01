@@ -22,7 +22,9 @@ var userGender = new UserGender();
 db.connectDatabase();
 
 var addEmployee = router.route('/addEmployee');
+var addSystemUser = router.route('/addSystemUser');
 var getAllEmployees = router.route('/getAllEmployees');
+var login = router.route('/login');
 
 /* GET users listing. */
 router.get('/', function (req, res, next) {
@@ -84,5 +86,55 @@ getAllEmployees.get(function(req,res){
         } 
     });
 });
+
+addSystemUser.post(function(req,res){
+    Employee.findById(req.body.EmployeeId,function(err,employee){
+        employee.UserName=req.body.UserName;
+        employee.Password = password.createHash(req.body.Password);
+        employee.save(function(err,employee){
+            if (err) {
+                console.log(err);
+                response.message = messages.getFailureMessage();
+                response.code = codes.getFailureCode();
+                response.data = null;
+                res.json(err);
+            }
+            else {
+                console.log(employee);
+                response.message = messages.getSuccessMessage();
+                response.code = codes.getSuccessCode();
+                response.data = employee;
+                res.json(response);
+            }
+        });
+    });
+});
+
+login.post(function(req, res){
+    Employee.findOne({ UserName: req.body.UserName }, function (err, employee) {
+      if (employee == undefined) {
+        response.code = codes.getDoesNotExistCode();
+        response.message = messages.getDoesNotExistCode();
+        response.data = null;
+        console.log(response);
+        res.json(response);
+      }
+      else {
+        var validate = password.validateHash(employee.Password, req.body.Password);
+        if(validate==true){
+          response.message = messages.getSuccessMessage();
+          response.code = codes.getSuccessCode();
+          response.data = employee;
+          res.json(response);
+        }
+        else{
+          response.message = messages.getFailureMessage();
+          response.code = codes.getFailureCode();
+          response.data = null;
+          res.json(response);
+        }
+      }
+    });
+  });
 
 module.exports = router;
