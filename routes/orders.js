@@ -96,6 +96,8 @@ addCustomerOrder.post(function (req, res) {
   customerOrder.TryDate = req.body.TryDate;
   customerOrder.OrderTotal = req.body.OrderTotal;
   customerOrder.OrderStatus = orderStatuses.AdvancePaid();
+  customerOrder.OnCreationDateUTC = req.body.OnCreationDateUTC;
+  customerOrder.OnUpdatetedUTC = req.body.OnUpdatetedUTC;
   Customer.findOne({ ContactNumber: req.query.ContactNumber }, function (err, customer) {
     if (customer == undefined) {
       response.code = codes.getDoesNotExistCode();
@@ -220,7 +222,7 @@ getOrdersByStatus.get(function (req, res) {
       console.log(response);
       res.json(response);
     }
-  });
+  }).populate('customerId');
 });
 
 module.exports = router;
