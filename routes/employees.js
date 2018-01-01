@@ -155,7 +155,7 @@ login.post(function(req, res){
             response.data = orderItems;
             res.json(response);
         }
-    });
+    }).populate('AssignedTo');
   });
 
 module.exports = router;
