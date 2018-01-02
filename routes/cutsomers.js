@@ -129,77 +129,129 @@ getAllCustomers.get(function (req, res) {
 });
 
 addMeasurements.post(function (req, res) {
-  var measurment = new Measurement();
-  measurment.ShalwarKameezLength = req.body.ShalwarKameezLength;
-  measurment.ShalwarKameezChest = req.body.ShalwarKameezChest;
-  measurment.ShalwarKameezWaist = req.body.ShalwarKameezWaist;
-  measurment.ShalwarKameezHip = req.body.ShalwarKameezHip;
-  measurment.ShalwarKameezSleeve = req.body.ShalwarKameezSleeve;
-  measurment.ShalwarKameezShoulder = req.body.ShalwarKameezShoulder;
-  measurment.ShalwarKameezNeck = req.body.ShalwarKameezNeck;
-  measurment.ShalwarKameezBysep = req.body.ShalwarKameezBysep;
-  measurment.ShalwarKameezSLength = req.body.ShalwarKameezSLength;
-  measurment.ShalwarKameezBottom = req.body.ShalwarKameezBottom;
-  measurment.CoatLength = req.body.CoatLength;
-  measurment.CoatChest = req.body.CoatChest;
-  measurment.CoatWaist = req.body.CoatWaist;
-  measurment.CoatHip = req.body.CoatHip;
-  measurment.CoatSleeve = req.body.CoatSleeve;
-  measurment.CoatShoulder = req.body.CoatShoulder;
-  measurment.CoatNeck = req.body.CoatNeck;
-  measurment.CoatBysep = req.body.CoatBysep;
-  measurment.CoatHB = req.body.CoatHB;
-  measurment.CoatCB = req.body.CoatCB;
-  measurment.SherwaniLength = req.body.SherwaniLength;
-  measurment.SherwaniChest = req.body.SherwaniChest;
-  measurment.SherwaniWaist = req.body.SherwaniWaist;
-  measurment.SherwaniHip = req.body.SherwaniHip;
-  measurment.SherwaniSleeve = req.body.SherwaniSleeve;
-  measurment.SherwaniShoulder = req.body.SherwaniShoulder;
-  measurment.SherwaniNeck = req.body.SherwaniNeck;
-  measurment.SherwaniBysep = req.body.SherwaniBysep;
-  measurment.SherwaniHB = req.body.SherwaniHB;
-  measurment.SherwaniCB = req.body.SherwaniCB;
-  measurment.WaistCoatLength = req.body.WaistCoatLength;
-  measurment.WaistCoatChest = req.body.WaistCoatChest;
-  measurment.WaistCoatWaist = req.body.WaistCoatWaist;
-  measurment.WaistCoatHip = req.body.WaistCoatHip;
-  measurment.WaistCoatShoulder = req.body.WaistCoatShoulder;
-  measurment.WaistCoatNeck = req.body.WaistCoatNeck;
-  measurment.WaistCoatHB = req.body.WaistCoatHB;
-  measurment.WaistCoatCB = req.body.WaistCoatCB;
-  measurment.PentWaist = req.body.PentWaist;
-  measurment.PentHip = req.body.PentHip;
-  measurment.PentLength = req.body.PentLength;
-  measurment.PentKnee = req.body.PentKnee;
-  measurment.PentBottom = req.body.PentBottom;
-  measurment.PentInside = req.body.PentInside;
-  measurment.TrouserWaist = req.body.TrouserWaist;
-  measurment.TrouserHip = req.body.TrouserHip;
-  measurment.TrouserLength = req.body.TrouserLength;
-  measurment.TrouserKnee = req.body.TrouserKnee;
-  measurment.TrouserBottom = req.body.TrouserBottom;
-  measurment.TrouserInside = req.body.TrouserInside;
-  measurment.CustomerId = req.body.CustomerId;
-  measurment.MeasurementTakenBy = req.body.MeasurementTakenBy;
-  console.log("Measurement before saving is ");
-  console.log(measurment);
-  measurment.save(function (err, measurment) {
-    if (err) {
-      console.log(err);
-      response.message = messages.getFailureMessage();
-      response.code = codes.getFailureCode();
-      response.data = err;
-      res.json(err);
-    }
-    else {
-      response.message = messages.getSuccessMessage();
-      response.code = codes.getSuccessCode();
-      console.log("Measurement is");
-      console.log(measurment);
-      response.data = measurment;
-      res.json(response);
-    }
+  Measurement.findOne({ CustomerId: req.body.CustomerId }, function (err, measurment) {
+    if (measurment == null)
+      measurment = new Measurement();
+    if (req.body.ShalwarKameezLength != undefined && req.body.ShalwarKameezLength != "")
+      measurment.ShalwarKameezLength = req.body.ShalwarKameezLength;
+    if (req.body.ShalwarKameezChest != undefined && req.body.ShalwarKameezChest != "")
+      measurment.ShalwarKameezChest = req.body.ShalwarKameezChest;
+    if (req.body.ShalwarKameezWaist != undefined && req.body.ShalwarKameezWaist != "")
+      measurment.ShalwarKameezWaist = req.body.ShalwarKameezWaist;
+    if (req.body.ShalwarKameezHip != undefined && req.body.ShalwarKameezHip != "")
+      measurment.ShalwarKameezHip = req.body.ShalwarKameezHip;
+    if (req.body.ShalwarKameezSleeve != undefined && req.body.ShalwarKameezSleeve != "")
+      measurment.ShalwarKameezSleeve = req.body.ShalwarKameezSleeve;
+    if (req.body.ShalwarKameezShoulder != undefined && req.body.ShalwarKameezShoulder != "")
+      measurment.ShalwarKameezShoulder = req.body.ShalwarKameezShoulder;
+    if (req.body.ShalwarKameezNeck != undefined && req.body.ShalwarKameezNeck != "")
+      measurment.ShalwarKameezNeck = req.body.ShalwarKameezNeck;
+    if (req.body.ShalwarKameezBysep != undefined && req.body.ShalwarKameezBysep != "")
+      measurment.ShalwarKameezBysep = req.body.ShalwarKameezBysep;
+    if (req.body.ShalwarKameezSLength != undefined && req.body.ShalwarKameezSLength != "")
+      measurment.ShalwarKameezSLength = req.body.ShalwarKameezSLength;
+    if (req.body.ShalwarKameezBottom != undefined && req.body.ShalwarKameezBottom != "")
+      measurment.ShalwarKameezBottom = req.body.ShalwarKameezBottom;
+    if (req.body.CoatLength != undefined && req.body.CoatLength != "")
+      measurment.CoatLength = req.body.CoatLength;
+    if (req.body.CoatChest != undefined && req.body.CoatChest != "")
+      measurment.CoatChest = req.body.CoatChest;
+    if (req.body.CoatWaist != undefined && req.body.CoatWaist != "")
+      measurment.CoatWaist = req.body.CoatWaist;
+    if (req.body.CoatHip != undefined && req.body.CoatHip != "")
+      measurment.CoatHip = req.body.CoatHip;
+    if (req.body.CoatSleeve != undefined && req.body.CoatSleeve != "")
+      measurment.CoatSleeve = req.body.CoatSleeve;
+    if (req.body.CoatShoulder != undefined && req.body.CoatShoulder != "")
+      measurment.CoatShoulder = req.body.CoatShoulder;
+    if (req.body.CoatNeck != undefined && req.body.CoatNeck != "")
+      measurment.CoatNeck = req.body.CoatNeck;
+    if (req.body.CoatBysep != undefined && req.body.CoatBysep != "")
+      measurment.CoatBysep = req.body.CoatBysep;
+    if (req.body.CoatHB != undefined && req.body.CoatHB != "")
+      measurment.CoatHB = req.body.CoatHB;
+    if (req.body.CoatCB != undefined && req.body.CoatCB != "")
+      measurment.CoatCB = req.body.CoatCB;
+    if (req.body.SherwaniLength != undefined && req.body.SherwaniLength != "")
+      measurment.SherwaniLength = req.body.SherwaniLength;
+    if (req.body.SherwaniChest != undefined && req.body.SherwaniChest != "")
+      measurment.SherwaniChest = req.body.SherwaniChest;
+    if (req.body.SherwaniWaist != undefined && req.body.SherwaniWaist != "")
+      measurment.SherwaniWaist = req.body.SherwaniWaist;
+    if (req.body.SherwaniHip != undefined && req.body.SherwaniHip != "")
+      measurment.SherwaniHip = req.body.SherwaniHip;
+    if (req.body.SherwaniSleeve != undefined && req.body.SherwaniSleeve != "")
+      measurment.SherwaniSleeve = req.body.SherwaniSleeve;
+    if (req.body.SherwaniShoulder != undefined && req.body.SherwaniShoulder != "")
+      measurment.SherwaniShoulder = req.body.SherwaniShoulder;
+    measurment.SherwaniNeck = req.body.SherwaniNeck;
+    if (req.body.SherwaniBysep != undefined && req.body.SherwaniBysep != "")
+      measurment.SherwaniBysep = req.body.SherwaniBysep;
+    if (req.body.SherwaniHB != undefined && req.body.SherwaniHB != "")
+      measurment.SherwaniHB = req.body.SherwaniHB;
+    if (req.body.SherwaniCB != undefined && req.body.SherwaniCB != "")
+      measurment.SherwaniCB = req.body.SherwaniCB;
+    if (req.body.WaistCoatLength != undefined && req.body.WaistCoatLength != "")
+      measurment.WaistCoatLength = req.body.WaistCoatLength;
+    if (req.body.WaistCoatChest != undefined && req.body.WaistCoatChest != "")
+      measurment.WaistCoatChest = req.body.WaistCoatChest;
+    if (req.body.WaistCoatWaist != undefined && req.body.WaistCoatWaist != "")
+      measurment.WaistCoatWaist = req.body.WaistCoatWaist;
+    if (req.body.WaistCoatHip != undefined && req.body.WaistCoatHip != "")
+      measurment.WaistCoatHip = req.body.WaistCoatHip;
+    if (req.body.WaistCoatShoulder != undefined && req.body.WaistCoatShoulder != "")
+      measurment.WaistCoatShoulder = req.body.WaistCoatShoulder;
+    if (req.body.WaistCoatNeck != undefined && req.body.WaistCoatNeck != "")
+      measurment.WaistCoatNeck = req.body.WaistCoatNeck;
+    if (req.body.WaistCoatHB != undefined && req.body.WaistCoatHB != "")
+      measurment.WaistCoatHB = req.body.WaistCoatHB;
+    if (req.body.WaistCoatCB != undefined && req.body.WaistCoatCB != "")
+      measurment.WaistCoatCB = req.body.WaistCoatCB;
+    if (req.body.PentWaist != undefined && req.body.PentWaist != "")
+      measurment.PentWaist = req.body.PentWaist;
+    if (req.body.PentHip != undefined && req.body.PentHip != "")
+      measurment.PentHip = req.body.PentHip;
+    if (req.body.PentLength != undefined && req.body.PentLength != "")
+      measurment.PentLength = req.body.PentLength;
+    if (req.body.PentKnee != undefined && req.body.PentKnee != "")
+      measurment.PentKnee = req.body.PentKnee;
+    if (req.body.PentBottom != undefined && req.body.PentBottom != "")
+      measurment.PentBottom = req.body.PentBottom;
+    if (req.body.PentInside != undefined && req.body.PentInside != "")
+      measurment.PentInside = req.body.PentInside;
+    if (req.body.TrouserWaist != undefined && req.body.TrouserWaist != "")
+      measurment.TrouserWaist = req.body.TrouserWaist;
+    if (req.body.TrouserHip != undefined && req.body.TrouserHip != "")
+      measurment.TrouserHip = req.body.TrouserHip;
+    if (req.body.TrouserLength != "" && req.body.TrouserLength != "")
+      measurment.TrouserLength = req.body.TrouserLength;
+    if (req.body.TrouserKnee != undefined && req.body.TrouserKnee != "")
+      measurment.TrouserKnee = req.body.TrouserKnee;
+    if (req.body.TrouserBottom != undefined && req.body.TrouserBottom != "")
+      measurment.TrouserBottom = req.body.TrouserBottom;
+    if (req.body.TrouserInside != undefined && req.body.TrouserInside != "")
+      measurment.TrouserInside = req.body.TrouserInside;
+    measurment.CustomerId = req.body.CustomerId;
+    measurment.MeasurementTakenBy = req.body.MeasurementTakenBy;
+    console.log("Measurement before saving is ");
+    console.log(measurment);
+    measurment.save(function (err, measurment) {
+      if (err) {
+        console.log(err);
+        response.message = messages.getFailureMessage();
+        response.code = codes.getFailureCode();
+        response.data = err;
+        res.json(err);
+      }
+      else {
+        response.message = messages.getSuccessMessage();
+        response.code = codes.getSuccessCode();
+        console.log("Measurement is");
+        console.log(measurment);
+        response.data = measurment;
+        res.json(response);
+      }
+    });
   });
 });
 
