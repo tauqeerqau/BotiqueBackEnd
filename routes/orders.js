@@ -98,7 +98,8 @@ addCustomerOrder.post(function (req, res) {
   customerOrder.OrderStatus = orderStatuses.AdvancePaid();
   customerOrder.OnCreationDateUTC = req.body.OnCreationDateUTC;
   customerOrder.OnUpdatetedUTC = req.body.OnUpdatetedUTC;
-  Customer.findOne({ ContactNumber: req.query.ContactNumber }, function (err, customer) {
+  customerOrder.OrderTakenBy = req.body.OrderTakenBy;
+  Customer.findOne({ ContactNumber: contactNumber }, function (err, customer) {
     if (customer == undefined) {
       response.code = codes.getDoesNotExistCode();
       response.message = messages.getDoesNotExistMessage();
