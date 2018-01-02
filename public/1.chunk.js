@@ -140,6 +140,7 @@ var DoSubscriber = (function (_super) {
 var core_1 = __webpack_require__("./node_modules/@angular/core/index.js");
 var employee_Service_1 = __webpack_require__("./src/services/employee.Service.ts");
 var router_1 = __webpack_require__("./node_modules/@angular/router/index.js");
+var user_1 = __webpack_require__("./src/models/user.ts");
 var Login = (function () {
     function Login(_employee, router) {
         this._employee = _employee;
@@ -148,21 +149,43 @@ var Login = (function () {
         this.errorMessage = "";
         this.router = router;
     }
+    Login.prototype.EnterKey = function (event) {
+        if (event.keyCode == 13) {
+            this.login();
+        }
+    };
     Login.prototype.login = function () {
-        /*  this.errorMessage = "";
-         if (this.Email != "" && this.Email !== undefined && this.Password != "" && this.Password !== undefined) {
-           this._employee.login(this.Email, this.Password).subscribe(response=>{
-             if(response.code != 200){
-               this.errorMessage = response.message;
-             }
-             else{
-               this.router.navigate(["/app/dashboard"]);
-             }
-           });
-         }
-         else{
-           this.errorMessage = "User Name or Password is Required";
-         } */
+        var _this = this;
+        this.errorMessage = "";
+        if (this.Email != "" && this.Email !== undefined && this.Password != "" && this.Password !== undefined) {
+            this._employee.login(this.Email, this.Password).subscribe(function (response) {
+                console.log(response);
+                if (response.code != 200) {
+                    _this.errorMessage = response.message;
+                }
+                else {
+                    _this.errorMessage = response.message;
+                    localStorage.setItem('user', JSON.stringify(response.data));
+                    setTimeout(function () {
+                        _this.router.navigate(["app/customers"]);
+                    }, 1000);
+                }
+            });
+        }
+        else {
+            this.errorMessage = "User Name or Password is Required";
+        }
+    };
+    Login.prototype.ngOnInit = function () {
+        this.userObject = new user_1.UserModel();
+    };
+    Login.prototype.myFunction = function () {
+        // Get the snackbar DIV
+        var x = document.getElementById("snackbar");
+        // Add the "show" class to DIV
+        x.className = "show";
+        // After 3 seconds, remove the show class from DIV
+        setTimeout(function () { x.className = x.className.replace("show", ""); }, 3000);
     };
     Login = __decorate([
         core_1.Component({
@@ -170,6 +193,7 @@ var Login = (function () {
             styles: [__webpack_require__("./src/app/login/login.style.scss")],
             template: __webpack_require__("./src/app/login/login.template.html"),
             encapsulation: core_1.ViewEncapsulation.None,
+            providers: [employee_Service_1.EmployeeService],
             host: {
                 class: 'login-page app'
             }
@@ -225,14 +249,14 @@ exports.default = LoginModule;
 /***/ "./src/app/login/login.style.scss":
 /***/ function(module, exports) {
 
-module.exports = "/***********************************/\n/**             LOGIN             **/\n/***********************************/\n.login-page {\n  background-color: #ddd; }\n\n.login-page .page-footer {\n  margin-bottom: 25px;\n  font-size: 13px;\n  color: #818a91;\n  text-align: center; }\n  @media (min-height: 600px) {\n    .login-page .page-footer {\n      position: absolute;\n      bottom: 0;\n      left: 0;\n      right: 0; } }\n\n.widget-login-container {\n  padding-top: 10%; }\n\n.widget-login-logo {\n  margin-top: 15px;\n  margin-bottom: 15px;\n  text-align: center;\n  font-weight: 400; }\n  .widget-login-logo .fa-circle {\n    font-size: 13px;\n    margin: 0 20px; }\n\n.widget-login {\n  padding: 30px; }\n  .widget-login > header h1, .widget-login > header h2, .widget-login > header h3, .widget-login > header h4, .widget-login > header h5, .widget-login > header h6 {\n    font-weight: 400;\n    text-align: center; }\n\n.widget-login-info {\n  font-size: 13px;\n  color: #888;\n  margin-top: 1px;\n  margin-bottom: 0;\n  text-align: center; }\n  .widget-login-info.abc-checkbox {\n    margin-left: -25px; }\n\n.login-form .form-control {\n  font-size: 13px;\n  border: none;\n  background-color: #eceeef; }\n  .login-form .form-control:focus {\n    background-color: #ddd; }\n"
+module.exports = "/***********************************/\n/**             LOGIN             **/\n/***********************************/\n.login-page {\n  background-color: #ddd; }\n\n.login-page .page-footer {\n  margin-bottom: 25px;\n  font-size: 13px;\n  color: #818a91;\n  text-align: center; }\n  @media (min-height: 600px) {\n    .login-page .page-footer {\n      position: absolute;\n      bottom: 0;\n      left: 0;\n      right: 0; } }\n\n.widget-login-container {\n  padding-top: 10%; }\n\n.widget-login-logo {\n  margin-top: 15px;\n  margin-bottom: 15px;\n  text-align: center;\n  font-weight: 400; }\n  .widget-login-logo .fa-circle {\n    font-size: 13px;\n    margin: 0 20px; }\n\n.widget-login {\n  padding: 30px; }\n  .widget-login > header h1, .widget-login > header h2, .widget-login > header h3, .widget-login > header h4, .widget-login > header h5, .widget-login > header h6 {\n    font-weight: 400;\n    text-align: center; }\n\n.widget-login-info {\n  font-size: 13px;\n  color: #888;\n  margin-top: 1px;\n  margin-bottom: 0;\n  text-align: center; }\n  .widget-login-info.abc-checkbox {\n    margin-left: -25px; }\n\n.login-form .form-control {\n  font-size: 13px;\n  border: none;\n  background-color: #eceeef; }\n  .login-form .form-control:focus {\n    background-color: #ddd; }\n\n.my-btn {\n  color: white; }\n\n#snackbar {\n  visibility: hidden;\n  /* Hidden by default. Visible on click */\n  min-width: 250px;\n  /* Set a default minimum width */\n  margin-left: -125px;\n  /* Divide value of min-width by 2 */\n  background-color: #333;\n  /* Black background color */\n  color: #fff;\n  /* White text color */\n  text-align: center;\n  /* Centered text */\n  border-radius: 2px;\n  /* Rounded borders */\n  padding: 16px;\n  /* Padding */\n  position: fixed;\n  /* Sit on top of the screen */\n  z-index: 1;\n  /* Add a z-index if needed */\n  left: 50%;\n  /* Center the snackbar */\n  bottom: 30px;\n  /* 30px from the bottom */ }\n\n/* Show the snackbar when clicking on a button (class added with JavaScript) */\n#snackbar.show {\n  visibility: visible;\n  /* Show the snackbar */\n  /* Add animation: Take 0.5 seconds to fade in and out the snackbar. \r\nHowever, delay the fade out process for 2.5 seconds */\n  -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;\n  animation: fadein 0.5s, fadeout 0.5s 2.5s; }\n\n/* Animations to fade the snackbar in and out */\n@-webkit-keyframes fadein {\n  from {\n    bottom: 0;\n    opacity: 0; }\n  to {\n    bottom: 30px;\n    opacity: 1; } }\n\n@keyframes fadein {\n  from {\n    bottom: 0;\n    opacity: 0; }\n  to {\n    bottom: 30px;\n    opacity: 1; } }\n\n@-webkit-keyframes fadeout {\n  from {\n    bottom: 30px;\n    opacity: 1; }\n  to {\n    bottom: 0;\n    opacity: 0; } }\n\n@keyframes fadeout {\n  from {\n    bottom: 30px;\n    opacity: 1; }\n  to {\n    bottom: 0;\n    opacity: 0; } }\n"
 
 /***/ },
 
 /***/ "./src/app/login/login.template.html":
 /***/ function(module, exports) {
 
-module.exports = "<div class=\"container\">\r\n  <main id=\"content\" class=\"widget-login-container\" role=\"main\">\r\n    <div class=\"row\">\r\n      <div class=\"col-xl-4 col-md-6 col-xs-10 offset-xl-4 offset-md-3 offset-xs-1\">\r\n        <h5 class=\"widget-login-logo animated fadeInUp\">\r\n          <i class=\"fa fa-circle text-gray\"></i>\r\n          sing\r\n          <i class=\"fa fa-circle text-warning\"></i>\r\n        </h5>\r\n        <section class=\"widget widget-login animated fadeInUp\">\r\n          <header>\r\n            <h3>Login to your Sing App</h3>\r\n          </header>\r\n          <div class=\"widget-body\">\r\n            <p class=\"widget-login-info\">\r\n              Use Facebook, Twitter or your email to sign in.\r\n            </p>\r\n            <p class=\"widget-login-info\">\r\n              Don't have an account? Sign up now!\r\n            </p>\r\n            <form class=\"login-form mt-lg\">\r\n              <div class=\"form-group\">\r\n                <input type=\"text\" class=\"form-control\" [(ngModel)]=\"Email\" name=\"Email\" id=\"exampleInputEmail1\" placeholder=\"Username\">\r\n              </div>\r\n              <div class=\"form-group\">\r\n                <input class=\"form-control\" id=\"pswd\" type=\"password\" [(ngModel)]=\"Password\" name=\"Password\" placeholder=\"Password\">\r\n              </div>\r\n              <div class=\"row\">\r\n                <div class=\"col-md-12\">\r\n                  <p class=\"errorMessage\" style=\"color:red\">{{errorMessage}}</p>\r\n                </div>\r\n              </div>\r\n              <div class=\"clearfix\">\r\n                <div class=\"btn-toolbar pull-xs-right m-t-1\">\r\n                  <a class=\"btn btn-inverse btn-sm\" (click)=\"login()\">Login</a>\r\n                </div>\r\n              </div>\r\n              \r\n            </form>\r\n          </div>\r\n        </section>\r\n      </div>\r\n    </div>\r\n  </main>\r\n  <footer class=\"page-footer\">\r\n    2016 &copy; Sing. Admin Dashboard Template.\r\n  </footer>\r\n</div>\r\n"
+module.exports = "<div class=\"container\">\r\n  <div id=\"snackbar\"></div>\r\n  <main id=\"content\" class=\"widget-login-container\" role=\"main\">\r\n    <div class=\"row\">\r\n      <div class=\"col-xl-4 col-md-6 col-xs-10 offset-xl-4 offset-md-3 offset-xs-1\">\r\n        \r\n        <section class=\"widget widget-login animated fadeInUp\">\r\n          <header>\r\n            <h3>Login to SS Boutique</h3>\r\n          </header>\r\n          <div class=\"widget-body\">\r\n            <p class=\"widget-login-info\">\r\n              Use Facebook, Twitter or your email to sign in.\r\n            </p>\r\n            <p class=\"widget-login-info\">\r\n              Don't have an account? Sign up now!\r\n            </p>\r\n            <form class=\"login-form mt-lg\">\r\n              <div class=\"form-group\">\r\n                <input type=\"text\" class=\"form-control\" [(ngModel)]=\"Email\" name=\"Email\" id=\"exampleInputEmail1\" placeholder=\"Username\">\r\n              </div>\r\n              <div class=\"form-group\">\r\n                <input class=\"form-control\" id=\"pswd\" (keydown)=\"EnterKey($event)\" type=\"password\" [(ngModel)]=\"Password\" name=\"Password\" placeholder=\"Password\">\r\n              </div>\r\n              <div class=\"row\">\r\n                <div class=\"col-md-12\">\r\n                  <p class=\"errorMessage\" style=\"color:red\">{{errorMessage}}</p>\r\n                </div>\r\n              </div>\r\n              <div class=\"clearfix\">\r\n                <div class=\"btn-toolbar pull-xs-right m-t-1\">\r\n                  <a class=\"btn btn-success my-btn btn-sm\" (click)=\"login()\">Login</a>\r\n                </div>\r\n              </div>\r\n              \r\n            </form>\r\n          </div>\r\n        </section>\r\n      </div>\r\n    </div>\r\n  </main>\r\n  <footer class=\"page-footer\">\r\n    2016 &copy; Sing. Admin Dashboard Template.\r\n  </footer>\r\n</div>\r\n"
 
 /***/ },
 
@@ -247,6 +271,21 @@ var EmployeeRole = (function () {
     return EmployeeRole;
 }());
 exports.EmployeeRole = EmployeeRole;
+
+
+/***/ },
+
+/***/ "./src/models/user.ts":
+/***/ function(module, exports) {
+
+"use strict";
+"use strict";
+var UserModel = (function () {
+    function UserModel() {
+    }
+    return UserModel;
+}());
+exports.UserModel = UserModel;
 
 
 /***/ },
@@ -302,6 +341,28 @@ var EmployeeService = (function () {
         console.log("Extract Data");
         console.log(body);
         return body.data || {};
+    };
+    EmployeeService.prototype.getEmployees = function () {
+        var headers = new http_2.Headers();
+        headers.append('Content-Type', 'application/json; charset=UTF-8');
+        return this._http.get(this.baseURL + "employees/getAllEmployees", { headers: headers })
+            .map(function (res) { return res.json(); });
+    };
+    EmployeeService.prototype.login = function (username, password) {
+        var data;
+        data = { UserName: username, Password: password };
+        var headers = new http_2.Headers();
+        headers.append('Content-Type', 'application/json; charset=UTF-8');
+        return this._http.post(this.baseURL + "employees/login", data, { headers: headers })
+            .map(function (res) { return res.json(); });
+    };
+    EmployeeService.prototype.getAssignedItems = function (assignedTo) {
+        var data;
+        data = { AssignedTo: assignedTo };
+        var headers = new http_2.Headers();
+        headers.append('Content-Type', 'application/json; charset=UTF-8');
+        return this._http.post(this.baseURL + "employees/getMyOrderItems", data, { headers: headers })
+            .map(function (res) { return res.json(); });
     };
     EmployeeService = __decorate([
         core_1.Injectable(), 

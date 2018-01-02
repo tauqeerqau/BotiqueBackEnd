@@ -132,52 +132,82 @@ var DoSubscriber = (function (_super) {
 
 /***/ },
 
-/***/ "./src/app/employees/employee.component.ts":
+/***/ "./src/app/assignedItems/assignedItems.component.ts":
 /***/ function(module, exports, __webpack_require__) {
 
 "use strict";
-"use strict";
+/* WEBPACK VAR INJECTION */(function($) {"use strict";
 var core_1 = __webpack_require__("./node_modules/@angular/core/index.js");
-var employee_1 = __webpack_require__("./src/models/employee.ts");
+var router_1 = __webpack_require__("./node_modules/@angular/router/index.js");
 var employee_Service_1 = __webpack_require__("./src/services/employee.Service.ts");
-var EmployeeFormComponent = (function () {
-    function EmployeeFormComponent(_emplloyeeService) {
-        this._emplloyeeService = _emplloyeeService;
+var user_1 = __webpack_require__("./src/models/user.ts");
+var order_Service_1 = __webpack_require__("./src/services/order.Service.ts");
+var AssignedItemsComponent = (function () {
+    function AssignedItemsComponent(router, _employeeService, _orderService) {
+        var _this = this;
+        this._employeeService = _employeeService;
+        this._orderService = _orderService;
+        this.AssignedItems = [];
+        this.allEmployees = [];
+        this.router = router;
+        this.userObject = new user_1.UserModel();
+        this._employeeService.getAssignedItems(this.userObject._id).subscribe(function (a) {
+            _this.AssignedItems = a.data;
+        });
+        this._employeeService.getEmployees().subscribe(function (a) {
+            _this.allEmployees = a.data;
+        });
     }
-    EmployeeFormComponent.prototype.addEmployee = function () {
-        console.log("Add Employee is Cliecked TS");
-        console.log(this.newEmployee);
-        this._emplloyeeService.addEmployee(this.newEmployee).subscribe(function (res) {
-            console.log(res);
+    AssignedItemsComponent.prototype.getSelectedUser = function (orderItem, elem) {
+        var _this = this;
+        this._orderService.AssignThisOrderItemToUser(orderItem._id, this.userObject._id, elem).subscribe(function (a) {
+            if (a.code == 200) {
+                $("#snackbar").html("Assigned Successfully!");
+                _this.showToast();
+                _this._employeeService.getAssignedItems(_this.userObject._id).subscribe(function (a) {
+                    _this.AssignedItems = a.data;
+                });
+            }
+            else {
+                $("#snackbar").html("Errors!");
+                _this.showToast();
+            }
         });
     };
-    EmployeeFormComponent.prototype.onChange = function (_id) {
-        console.log("CHange is Clicked" + _id);
-        this.newEmployee.EmployeeRole = _id;
+    AssignedItemsComponent.prototype.showToast = function () {
+        // Get the snackbar DIV
+        var x = document.getElementById("snackbar");
+        // Add the "show" class to DIV
+        x.className = "show";
+        // After 3 seconds, remove the show class from DIV
+        setTimeout(function () { x.className = x.className.replace("show", ""); }, 3000);
     };
-    EmployeeFormComponent.prototype.ngOnInit = function () {
-        this.newEmployee = new employee_1.Employee();
-        console.log("NG ON INIT IS CALLED");
-        this.employeeRoles = this._emplloyeeService.getEmployeeRoles();
+    AssignedItemsComponent.prototype.searchResult = function () {
+        this.router.navigate(['/app', 'extra', 'search']);
     };
-    EmployeeFormComponent = __decorate([
+    AssignedItemsComponent = __decorate([
         core_1.Component({
-            selector: 'employee-form',
-            template: __webpack_require__("./src/app/employees/employee.template.html"),
-            styles: [__webpack_require__("./src/app/employees/employee.style.css")],
-            providers: [employee_Service_1.EmployeeService]
+            selector: 'assignedItems',
+            styles: [__webpack_require__("./src/app/assignedItems/assignedItems.style.scss")],
+            template: __webpack_require__("./src/app/assignedItems/assignedItems.template.html"),
+            encapsulation: core_1.ViewEncapsulation.None,
+            providers: [employee_Service_1.EmployeeService, order_Service_1.OrderService],
+            host: {
+                class: 'assignedItems-page app'
+            },
         }), 
-        __metadata('design:paramtypes', [(typeof (_a = typeof employee_Service_1.EmployeeService !== 'undefined' && employee_Service_1.EmployeeService) === 'function' && _a) || Object])
-    ], EmployeeFormComponent);
-    return EmployeeFormComponent;
-    var _a;
+        __metadata('design:paramtypes', [(typeof (_a = typeof router_1.Router !== 'undefined' && router_1.Router) === 'function' && _a) || Object, (typeof (_b = typeof employee_Service_1.EmployeeService !== 'undefined' && employee_Service_1.EmployeeService) === 'function' && _b) || Object, (typeof (_c = typeof order_Service_1.OrderService !== 'undefined' && order_Service_1.OrderService) === 'function' && _c) || Object])
+    ], AssignedItemsComponent);
+    return AssignedItemsComponent;
+    var _a, _b, _c;
 }());
-exports.EmployeeFormComponent = EmployeeFormComponent;
+exports.AssignedItemsComponent = AssignedItemsComponent;
 
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__("./node_modules/jquery/dist/jquery.js")))
 
 /***/ },
 
-/***/ "./src/app/employees/employee.module.ts":
+/***/ "./src/app/assignedItems/assignedItems.module.ts":
 /***/ function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -186,18 +216,18 @@ var common_1 = __webpack_require__("./node_modules/@angular/common/index.js");
 var forms_1 = __webpack_require__("./node_modules/@angular/forms/index.js");
 var core_1 = __webpack_require__("./node_modules/@angular/core/index.js");
 var router_1 = __webpack_require__("./node_modules/@angular/router/index.js");
-var employee_component_1 = __webpack_require__("./src/app/employees/employee.component.ts");
+var assignedItems_component_ts_1 = __webpack_require__("./src/app/assignedItems/assignedItems.component.ts");
 exports.routes = [
-    { path: '', component: employee_component_1.EmployeeFormComponent, pathMatch: 'full' }
+    { path: '', component: assignedItems_component_ts_1.AssignedItemsComponent, pathMatch: 'full' }
 ];
-var CustomerModule = (function () {
-    function CustomerModule() {
+var ErrorModule = (function () {
+    function ErrorModule() {
     }
-    CustomerModule.routes = exports.routes;
-    CustomerModule = __decorate([
+    ErrorModule.routes = exports.routes;
+    ErrorModule = __decorate([
         core_1.NgModule({
             declarations: [
-                employee_component_1.EmployeeFormComponent
+                assignedItems_component_ts_1.AssignedItemsComponent
             ],
             imports: [
                 common_1.CommonModule,
@@ -206,41 +236,26 @@ var CustomerModule = (function () {
             ]
         }), 
         __metadata('design:paramtypes', [])
-    ], CustomerModule);
-    return CustomerModule;
+    ], ErrorModule);
+    return ErrorModule;
 }());
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.default = CustomerModule;
+exports.default = ErrorModule;
 
 
 /***/ },
 
-/***/ "./src/app/employees/employee.style.css":
+/***/ "./src/app/assignedItems/assignedItems.style.scss":
 /***/ function(module, exports) {
 
-module.exports = ".custom-select{\r\n    width:100%;\r\n    padding:10px;\r\n}"
+module.exports = "/***********************************/\n/**          ERROR PAGE           **/\n/***********************************/\n.error-page {\n  background-color: #ddd; }\n\n.error-container {\n  padding-top: 5%;\n  text-align: center; }\n  .error-container > .btn {\n    padding-left: 35px;\n    padding-right: 35px; }\n\n.error-code {\n  margin: 20px;\n  font-size: 80px;\n  font-weight: 400;\n  color: #373a3c; }\n  @media (min-width: 768px) {\n    .error-code {\n      font-size: 180px; } }\n\n.error-info {\n  font-size: 20px;\n  color: #373a3c; }\n\n.error-help {\n  font-size: 14px; }\n\n.error-page .page-footer {\n  position: absolute;\n  bottom: 30px;\n  left: 0;\n  right: 0;\n  width: 100%;\n  font-size: 13px;\n  color: #818a91;\n  text-align: center; }\n\n.table > thead > tr > th {\n  background: white; }\n\n.table th, .table td {\n  color: black; }\n\n/* The snackbar - position it at the bottom and in the middle of the screen */\n#snackbar {\n  visibility: hidden;\n  /* Hidden by default. Visible on click */\n  min-width: 250px;\n  /* Set a default minimum width */\n  margin-left: -125px;\n  /* Divide value of min-width by 2 */\n  background-color: #333;\n  /* Black background color */\n  color: #fff;\n  /* White text color */\n  text-align: center;\n  /* Centered text */\n  border-radius: 2px;\n  /* Rounded borders */\n  padding: 16px;\n  /* Padding */\n  position: fixed;\n  /* Sit on top of the screen */\n  z-index: 1;\n  /* Add a z-index if needed */\n  left: 50%;\n  /* Center the snackbar */\n  bottom: 30px;\n  /* 30px from the bottom */ }\n\n/* Show the snackbar when clicking on a button (class added with JavaScript) */\n#snackbar.show {\n  visibility: visible;\n  /* Show the snackbar */\n  /* Add animation: Take 0.5 seconds to fade in and out the snackbar. \r\nHowever, delay the fade out process for 2.5 seconds */\n  -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;\n  animation: fadein 0.5s, fadeout 0.5s 2.5s; }\n\n/* Animations to fade the snackbar in and out */\n@-webkit-keyframes fadein {\n  from {\n    bottom: 0;\n    opacity: 0; }\n  to {\n    bottom: 30px;\n    opacity: 1; } }\n\n@keyframes fadein {\n  from {\n    bottom: 0;\n    opacity: 0; }\n  to {\n    bottom: 30px;\n    opacity: 1; } }\n\n@-webkit-keyframes fadeout {\n  from {\n    bottom: 30px;\n    opacity: 1; }\n  to {\n    bottom: 0;\n    opacity: 0; } }\n\n@keyframes fadeout {\n  from {\n    bottom: 30px;\n    opacity: 1; }\n  to {\n    bottom: 0;\n    opacity: 0; } }\n\n.selectType {\n  padding: 10px;\n  width: 320px;\n  border-radius: 0;\n  border: 1px solid #ccc;\n  color: #222222; }\n"
 
 /***/ },
 
-/***/ "./src/app/employees/employee.template.html":
+/***/ "./src/app/assignedItems/assignedItems.template.html":
 /***/ function(module, exports) {
 
-module.exports = "<h1>Add Employee Form</h1>\r\n<div class=\"container\">\r\n\r\n  <div class=\"row\">\r\n\r\n      <div class=\"col-md-6 col-lg-6 col-sm-6 col-xs-12 offset-md-3 offset-lg-3\">\r\n\r\n    <div class=\"form-group\">\r\n      <label for=\"normal-field\" class=\"col-form-label\">Select Role</label>\r\n      <select (change)=\"onChange($event.target.value)\" class=\"custom-select\">\r\n            <option *ngFor = 'let employeeRole of employeeRoles'\r\n            value={{employeeRole.RoleID}}>\r\n            {{employeeRole.Name}}\r\n        </option>\r\n        </select>\r\n    </div>\r\n\r\n    <div class=\"form-group\">\r\n      <label for=\"normal-field\" class=\"col-form-label\">Enter Name</label>\r\n\r\n        <input type=\"text\" [(ngModel)]=\"newEmployee.FullName\" id=\"normal-field\" class=\"form-control custom-inputs\" placeholder=\"Please Enter Name\">\r\n\r\n    </div>\r\n\r\n    <div class=\"form-group\">\r\n      <label for=\"normal-field\" class=\"col-form-label\">Enter Email</label>\r\n\r\n        <input type=\"text\" [(ngModel)]=\"newEmployee.Email\" id=\"normal-field\" class=\"form-control custom-inputs\" placeholder=\"Please Enter Email\">\r\n\r\n    </div>\r\n\r\n    <div class=\"form-group\">\r\n      <label for=\"normal-field\" class=\"col-form-label\">Enter Contact Number</label>\r\n \r\n        <input type=\"text\" [(ngModel)]=\"newEmployee.ContactNumber\" id=\"normal-field\" class=\"form-control custom-inputs\" placeholder=\"Enter Contact Number\">\r\n  \r\n    </div>\r\n\r\n    <div class=\"form-group\">\r\n      <label for=\"normal-field\" class=\"col-form-label\">Enter Address</label>\r\n\r\n        <input type=\"text\" [(ngModel)]=\"newEmployee.Address\" id=\"normal-field\" class=\"form-control custom-inputs\" placeholder=\"Enter Address\">\r\n\r\n    </div>\r\n\r\n\r\n    <div class=\"form-group\" style=\"text-align:center;\">\r\n        <button (click)=\"addEmployee()\" class=\"btn btn-success add-btn\">Add Employee</button>\r\n    </div>\r\n\r\n\r\n\r\n \r\n\r\n     </div>\r\n  </div>\r\n</div>"
-
-/***/ },
-
-/***/ "./src/models/employee.ts":
-/***/ function(module, exports) {
-
-"use strict";
-"use strict";
-var Employee = (function () {
-    function Employee() {
-    }
-    return Employee;
-}());
-exports.Employee = Employee;
-
+module.exports = "<div id=\"snackbar\"></div>\r\n<div class=\"container\">\r\n    <div class=\"row\">\r\n        <div class=\"col-md-12 col-xs-12 col-sm-12\">\r\n                <div class=\"table-responsive\">          \r\n                        <table class=\"table table-bordered table-striped\">\r\n                          <thead>\r\n                            <tr>\r\n                              <th>#</th>\r\n                              <th>Product Name</th>\r\n                              <th>Quantity</th>\r\n                              <th>Price</th>\r\n                              <th>Assigned To</th>\r\n                            </tr>\r\n                          </thead>\r\n                          <tbody>\r\n                            <tr *ngFor=\"let order of AssignedItems;let i=index\">\r\n                              <td>{{i}}</td>\r\n                              <td>{{order.ProductName}}</td>\r\n                              <td>{{order.Quantity}}</td>\r\n                              <td>{{order.Price}}</td>\r\n                              <td>\r\n                                    <select class=\"selectType\" (change)=\"getSelectedUser(order,$event.target.value)\">\r\n                                      <option disabled selected>Select User</option>\r\n                                      <option *ngFor=\"let user of allEmployees\" value=\"{{user._id}}\">{{user.FullName}}</option>\r\n                                    </select>\r\n                            </td>\r\n                            </tr>\r\n                          </tbody>\r\n                        </table>\r\n                        </div>\r\n        </div>\r\n    </div>\r\n</div>"
 
 /***/ },
 
@@ -255,6 +270,36 @@ var EmployeeRole = (function () {
     return EmployeeRole;
 }());
 exports.EmployeeRole = EmployeeRole;
+
+
+/***/ },
+
+/***/ "./src/models/productType.ts":
+/***/ function(module, exports) {
+
+"use strict";
+"use strict";
+var ProductType = (function () {
+    function ProductType() {
+    }
+    return ProductType;
+}());
+exports.ProductType = ProductType;
+
+
+/***/ },
+
+/***/ "./src/models/user.ts":
+/***/ function(module, exports) {
+
+"use strict";
+"use strict";
+var UserModel = (function () {
+    function UserModel() {
+    }
+    return UserModel;
+}());
+exports.UserModel = UserModel;
 
 
 /***/ },
@@ -311,6 +356,28 @@ var EmployeeService = (function () {
         console.log(body);
         return body.data || {};
     };
+    EmployeeService.prototype.getEmployees = function () {
+        var headers = new http_2.Headers();
+        headers.append('Content-Type', 'application/json; charset=UTF-8');
+        return this._http.get(this.baseURL + "employees/getAllEmployees", { headers: headers })
+            .map(function (res) { return res.json(); });
+    };
+    EmployeeService.prototype.login = function (username, password) {
+        var data;
+        data = { UserName: username, Password: password };
+        var headers = new http_2.Headers();
+        headers.append('Content-Type', 'application/json; charset=UTF-8');
+        return this._http.post(this.baseURL + "employees/login", data, { headers: headers })
+            .map(function (res) { return res.json(); });
+    };
+    EmployeeService.prototype.getAssignedItems = function (assignedTo) {
+        var data;
+        data = { AssignedTo: assignedTo };
+        var headers = new http_2.Headers();
+        headers.append('Content-Type', 'application/json; charset=UTF-8');
+        return this._http.post(this.baseURL + "employees/getMyOrderItems", data, { headers: headers })
+            .map(function (res) { return res.json(); });
+    };
     EmployeeService = __decorate([
         core_1.Injectable(), 
         __metadata('design:paramtypes', [(typeof (_a = typeof http_1.Http !== 'undefined' && http_1.Http) === 'function' && _a) || Object])
@@ -319,6 +386,102 @@ var EmployeeService = (function () {
     var _a;
 }());
 exports.EmployeeService = EmployeeService;
+
+
+/***/ },
+
+/***/ "./src/services/order.Service.ts":
+/***/ function(module, exports, __webpack_require__) {
+
+"use strict";
+"use strict";
+var core_1 = __webpack_require__("./node_modules/@angular/core/index.js");
+var http_1 = __webpack_require__("./node_modules/@angular/http/index.js");
+var http_2 = __webpack_require__("./node_modules/@angular/http/index.js");
+__webpack_require__("./node_modules/rxjs/add/operator/map.js");
+__webpack_require__("./node_modules/rxjs/add/operator/do.js");
+var productType_1 = __webpack_require__("./src/models/productType.ts");
+var Server_1 = __webpack_require__("./src/utilities/Server.ts");
+var OrderService = (function () {
+    function OrderService(_http) {
+        this._http = _http;
+        this._addCustomerOrder = 'orders/addCustomerOrder';
+        var server = new Server_1.Server();
+        this.baseURL = server.getServerURL();
+    }
+    OrderService.prototype.addCustomerOrder = function (customerOrder) {
+        console.log(customerOrder);
+        var headers = new http_2.Headers({ 'Content-Type': 'application/json' });
+        var options = new http_2.RequestOptions({ headers: headers });
+        return this._http.post(this.baseURL + this._addCustomerOrder, customerOrder, options)
+            .map(this.extractData);
+    };
+    OrderService.prototype.getProductTypes = function () {
+        var productTypes = [];
+        var productType = new productType_1.ProductType;
+        productType.Name = "Shalwar Kameez";
+        productType.TypeId = 1;
+        productTypes.push(productType);
+        productType = new productType_1.ProductType();
+        productType.Name = "Coat";
+        productType.TypeId = 2;
+        productTypes.push(productType);
+        productType = new productType_1.ProductType();
+        productType.Name = "Waist Coat";
+        productType.TypeId = 3;
+        productTypes.push(productType);
+        productType = new productType_1.ProductType();
+        productType.Name = "Sherwani";
+        productType.TypeId = 4;
+        productTypes.push(productType);
+        productType = new productType_1.ProductType();
+        productType.Name = "Pent";
+        productType.TypeId = 5;
+        productTypes.push(productType);
+        return productTypes;
+    };
+    OrderService.prototype.extractData = function (res) {
+        var body = res.json();
+        console.log("Extract Data");
+        console.log(body);
+        return body.data || {};
+    };
+    OrderService.prototype.AssignThisOrderItemToUser = function (orderItem, assignedBy, elem) {
+        var data;
+        data = { OrderItemId: orderItem, AssignedBy: assignedBy, AssignedTo: elem };
+        var headers = new http_2.Headers();
+        headers.append('Content-Type', 'application/json; charset=UTF-8');
+        return this._http.post(this.baseURL + "orders/changeOrderItemAsignee", data, { headers: headers })
+            .map(function (res) { return res.json(); });
+    };
+    OrderService.prototype.getOrdersListByOrderStatus = function (elem) {
+        var headers = new http_2.Headers();
+        headers.append('Content-Type', 'application/json; charset=UTF-8');
+        return this._http.get(this.baseURL + "orders/getOrdersByStatus?OrderStatus=" + elem, { headers: headers })
+            .map(function (res) { return res.json(); });
+    };
+    OrderService.prototype.getDetailsForOrder = function (id) {
+        var headers = new http_2.Headers();
+        headers.append('Content-Type', 'application/json; charset=UTF-8');
+        return this._http.get(this.baseURL + "orders/getOrderByOrderId?orderId=" + id, { headers: headers })
+            .map(function (res) { return res.json(); });
+    };
+    OrderService.prototype.editOrderStatus = function (elem, orderId) {
+        var data;
+        data = { OrderId: orderId, OrderStatus: elem };
+        var headers = new http_2.Headers();
+        headers.append('Content-Type', 'application/json; charset=UTF-8');
+        return this._http.post(this.baseURL + "orders/changeOrderStatus", data, { headers: headers })
+            .map(function (res) { return res.json(); });
+    };
+    OrderService = __decorate([
+        core_1.Injectable(), 
+        __metadata('design:paramtypes', [(typeof (_a = typeof http_1.Http !== 'undefined' && http_1.Http) === 'function' && _a) || Object])
+    ], OrderService);
+    return OrderService;
+    var _a;
+}());
+exports.OrderService = OrderService;
 
 
 /***/ },
