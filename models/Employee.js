@@ -14,6 +14,7 @@ var EmployeeSchema = new mongoose.Schema({
     UserName:String,
     Password:String,
     EmployeeRole:Number,
+    CNIC:String,
     OnCreationDateUTC:Number,
     OnUpdatetedUTC:Number
 });

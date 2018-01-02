@@ -26,37 +26,11 @@ var addMeasurements = router.route('/addMeasurement');
 var getAllCustomersByReferanceId = router.route('/getAllCustomersByReferanceId');
 var getMeasurementByCustomerId = router.route('/getMeasurementByCustomerId');
 var getCustomerAndReferancesByContactNumber = router.route('/getCustomerAndReferancesByContactNumber');
-var postLoginRoute = router.route('/login');
+var getCustomerOrdersByContactNumber = router.route('')
 
 /* GET users listing. */
 router.get('/', function (req, res, next) {
   res.send('respond with a resource');
-});
-
-postLoginRoute.post(function(req, res){
-  Customer.findOne({ ContactNumber: req.body.ContactNumber }, function (err, user) {
-    if (user != undefined) {
-      response.code = codes.getAlreadyExistCode();
-      response.message = messages.getAlreadyExistMessage();
-      response.data = null;
-      console.log(response);
-      res.json(response);
-    }
-    else {
-      if(req.body.password == user.password){
-        response.message = messages.getSuccessMessage();
-        response.code = codes.getSuccessCode();
-        response.data = user;
-        res.json(response);
-      }
-      else{
-        response.message = messages.getFailureMessage();
-        response.code = codes.getFailureCode();
-        response.data = null;
-        res.json(response);
-      }
-    }
-  });
 });
 
 addCustomer.post(function (req, res) {

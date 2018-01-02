@@ -49,6 +49,7 @@ addEmployee.post(function (req, res) {
             employee.FullName = req.body.FullName;
             employee.ContactNumber = req.body.ContactNumber;
             employee.Address = req.body.Address;
+            employee.CNIC = req.body.CNIC;
             employee.EmployeeRole = req.body.EmployeeRole;
             employee.save(function (err, employee) {
                 if (err) {
