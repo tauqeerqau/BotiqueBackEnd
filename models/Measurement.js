@@ -59,7 +59,12 @@ var MeasurementSchema = new mongoose.Schema({
     TrouserBottom:Number,
     TrouserInside:Number,
     CustomerId :  {type: mongoose.Schema.Types.ObjectId, ref: 'Customer'},
-    MeasurementTakenBy : {type: mongoose.Schema.Types.ObjectId, ref: 'Employee'}
+    ShalwarKameezMeasurementTakenBy : {type: mongoose.Schema.Types.ObjectId, ref: 'Employee'},
+    CoatMeasurementTakenBy : {type: mongoose.Schema.Types.ObjectId, ref: 'Employee'},
+    SherwaniMeasurementTakenBy : {type: mongoose.Schema.Types.ObjectId, ref: 'Employee'},
+    WaistCoatMeasurementTakenBy : {type: mongoose.Schema.Types.ObjectId, ref: 'Employee'},
+    PentMeasurementTakenBy : {type: mongoose.Schema.Types.ObjectId, ref: 'Employee'},
+    TrouserMeasurementTakenBy : {type: mongoose.Schema.Types.ObjectId, ref: 'Employee'}
 });
 
 // Export the Mongoose model

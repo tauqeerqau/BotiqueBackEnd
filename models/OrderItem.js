@@ -16,8 +16,8 @@ var OrderItemSchema = new mongoose.Schema({
     OnUpdatetedUTC:Number,
     OrderItemStatus:Number,
     CustomerId :  {type: mongoose.Schema.Types.ObjectId, ref: 'Customer'},
-    AssignedBy : {type: mongoose.Schema.Types.ObjectId, ref: 'Employee'},
-    AssignedTo : {type: mongoose.Schema.Types.ObjectId, ref: 'Employee'}
+    SticherName : {type: mongoose.Schema.Types.ObjectId, ref: 'Employee'},
+    MasterName : {type: mongoose.Schema.Types.ObjectId, ref: 'Employee'}
 });
 
 // Export the Mongoose model

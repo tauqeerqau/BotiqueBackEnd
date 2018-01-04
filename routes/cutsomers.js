@@ -26,7 +26,7 @@ var addMeasurements = router.route('/addMeasurement');
 var getAllCustomersByReferanceId = router.route('/getAllCustomersByReferanceId');
 var getMeasurementByCustomerId = router.route('/getMeasurementByCustomerId');
 var getCustomerAndReferancesByContactNumber = router.route('/getCustomerAndReferancesByContactNumber');
-var getCustomerOrdersByContactNumber = router.route('')
+var getCustomersByName = router.route('/getCustomersByName');
 
 /* GET users listing. */
 router.get('/', function (req, res, next) {
@@ -232,7 +232,18 @@ addMeasurements.post(function (req, res) {
     if (req.body.TrouserInside != undefined && req.body.TrouserInside != "")
       measurment.TrouserInside = req.body.TrouserInside;
     measurment.CustomerId = req.body.CustomerId;
-    measurment.MeasurementTakenBy = req.body.MeasurementTakenBy;
+    if (req.body.ShalwarKameezMeasurementTakenBy != undefined && req.body.ShalwarKameezMeasurementTakenBy != "")
+      measurment.ShalwarKameezMeasurementTakenBy = req.body.ShalwarKameezMeasurementTakenBy;
+    if (req.body.CoatMeasurementTakenBy != undefined && req.body.CoatMeasurementTakenBy != "")
+      measurment.CoatMeasurementTakenBy = req.body.CoatMeasurementTakenBy;
+    if (req.body.SherwaniMeasurementTakenBy != undefined && req.body.SherwaniMeasurementTakenBy != "")
+      measurment.SherwaniMeasurementTakenBy = req.body.SherwaniMeasurementTakenBy;
+    if (req.body.WaistCoatMeasurementTakenBy != undefined && req.body.WaistCoatMeasurementTakenBy != "")
+      measurment.WaistCoatMeasurementTakenBy = req.body.WaistCoatMeasurementTakenBy;
+    if (req.body.PentMeasurementTakenBy != undefined && req.body.PentMeasurementTakenBy != "")
+      measurment.PentMeasurementTakenBy = req.body.PentMeasurementTakenBy;
+    if (req.body.TrouserMeasurementTakenBy != undefined && req.body.TrouserMeasurementTakenBy != "")
+      measurment.TrouserMeasurementTakenBy = req.body.TrouserMeasurementTakenBy;
     console.log("Measurement before saving is ");
     console.log(measurment);
     measurment.save(function (err, measurment) {
@@ -320,6 +331,26 @@ getCustomerAndReferancesByContactNumber.get(function (req, res) {
       });
     }
   }).populate('ReferanceId');
+});
+
+getCustomersByName.get(function (req, res) {
+  Customer.find({ FullName: { $regex: '.*' + req.query.FullName + '.*' } }, function (err, customers) {
+    if(err)
+    {
+      console.log(err);
+      response.message = messages.getFailureMessage();
+      response.code = codes.getFailureCode();
+      response.data = err;
+      res.json(response); 
+    }
+    else
+    {
+      response.message = messages.getSuccessMessage();
+      response.code = codes.getSuccessCode();
+      response.data = customers;
+      res.json(response);
+    }
+  });
 });
 
 module.exports = router;

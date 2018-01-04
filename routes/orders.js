@@ -187,8 +187,12 @@ changeOrderStatus.post(function (req, res) {
 
 changeOrderItemAsignee.post(function (req, res) {
   OrderItem.findById(req.body.OrderItemId, function (err, orderItem) {
-    orderItem.AssignedBy = req.body.AssignedBy;
-    orderItem.AssignedTo = req.body.AssignedTo;
+    if (req.body.SticherName != undefined && req.body.SticherName != "")
+      orderItem.SticherName = req.body.SticherName;
+    if (req.body.MasterName != undefined && req.body.MasterName != "")
+      orderItem.MasterName = req.body.MasterName;
+    if (req.body.OrderItemStatus != undefined && req.body.OrderItemStatus != "")
+      orderItem.OrderItemStatus = req.body.OrderItemStatus;
     orderItem.save(function (err, orderItem) {
       if (err) {
         response.message = messages.getFailureMessage();
