@@ -99,6 +99,7 @@ addCustomerOrder.post(function (req, res) {
   customerOrder.OnCreationDateUTC = req.body.OnCreationDateUTC;
   customerOrder.OnUpdatetedUTC = req.body.OnUpdatetedUTC;
   customerOrder.OrderTakenBy = req.body.OrderTakenBy;
+  customerOrder.SpecialInstructions = req.body.SpecialInstructions;
   Customer.findOne({ ContactNumber: contactNumber }, function (err, customer) {
     if (customer == undefined) {
       response.code = codes.getDoesNotExistCode();
