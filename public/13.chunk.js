@@ -21500,7 +21500,7 @@ module.exports = "/*!\r\n * Datepicker for Bootstrap v1.6.1 (https://github.com/
 /***/ "./src/app/customers/customer.template.html":
 /***/ function(module, exports) {
 
-module.exports = "<h1>Add Customer Form</h1>\r\n<div id=\"snackbar\"></div>\r\n<div class=\"container\">\r\n <div class=\"row\">\r\n    <div class=\"col-md-6 col-lg-6 col-sm-6 col-xs-12 offset-md-3 offset-lg-3\">\r\n\r\n  \r\n<div class=\"form-group\">\r\n    <label for=\"normal-field\" class=\"col-form-label\">Enter Name</label>\r\n      <input type=\"text\" [(ngModel)]=\"newCustomer.FullName\" id=\"normal-field\" class=\"form-control custom-inputs\" placeholder=\"Please Enter Name\">\r\n\r\n  </div>\r\n\r\n  <div class=\"form-group\">\r\n    <label for=\"normal-field\" class=\"col-form-label\">Enter Email</label>\r\n\r\n      <input type=\"text\" [(ngModel)]=\"newCustomer.Email\" id=\"normal-field\" class=\"form-control custom-inputs\" placeholder=\"Please Enter Email\">\r\n \r\n  </div>\r\n\r\n  <div class=\"form-group\">\r\n    <label for=\"normal-field\" class=\"col-form-label\">Enter Contact Number</label>\r\n  \r\n      <input type=\"text\" [(ngModel)]=\"newCustomer.ContactNumber\" id=\"normal-field\" class=\"form-control custom-inputs\" placeholder=\"Enter Contact Number\">\r\n\r\n  </div>\r\n\r\n  <div class=\"form-group\">\r\n    <label for=\"normal-field\" class=\" col-form-label\">Enter Address</label>\r\n  \r\n      <input type=\"text\" [(ngModel)]=\"newCustomer.Address\" id=\"normal-field\" class=\"form-control custom-inputs\" placeholder=\"Enter Address\">\r\n\r\n  </div>\r\n\r\n  <div class=\"form-group\">\r\n    <label for=\"normal-field\" class=\"col-form-label\">Referance Contact Number</label>\r\n \r\n      <input type=\"text\" [(ngModel)]=\"newCustomer.ReferanceContactNumber\" id=\"normal-field\" class=\"form-control custom-inputs\" placeholder=\"Enter Referance Contact Number\">\r\n\r\n  </div>\r\n\r\n  <div class=\"form-group\">\r\n      <label for=\"datetimepicker2i\">\r\n        Date of Birth\r\n      </label>\r\n      <datetime [timepicker]=\"false\" [(ngModel)]=\"newCustomer.DateOfBirth\" name=\"datetime\" id=\"datetimepicker2i\"></datetime>\r\n  </div>\r\n\r\n  <div class=\"form-group\">\r\n     <div class=\"customerLoader\">\r\n      <i class=\"fa fa-spinner fa-spin fa-3x fa-fw\"></i>\r\n     </div>\r\n  </div>\r\n\r\n  <div class=\"form-group\" style=\"text-align:center;\">\r\n  <button (click)=\"addCustomer()\" id=\"addCustomerBtn\" class=\"btn btn-success add-btn\">Add Customer</button>\r\n  </div>\r\n  </div>\r\n </div>\r\n</div>"
+module.exports = "<h1>Add Customer Form</h1>\r\n<div id=\"snackbar\"></div>\r\n<div class=\"container\">\r\n <div class=\"row\">\r\n    <div class=\"col-md-6 col-lg-6 col-sm-6 col-xs-12 offset-md-3 offset-lg-3\">\r\n\r\n  \r\n<div class=\"form-group\">\r\n    <label for=\"normal-field\" class=\"col-form-label\">Enter Name</label>\r\n      <input type=\"text\" [(ngModel)]=\"newCustomer.FullName\" id=\"normal-field\" class=\"form-control custom-inputs\" placeholder=\"Please Enter Name\" required>\r\n\r\n  </div>\r\n\r\n  <div class=\"form-group\">\r\n    <label for=\"normal-field\" class=\"col-form-label\">Enter Email</label>\r\n\r\n      <input type=\"text\" [(ngModel)]=\"newCustomer.Email\" id=\"normal-field\" class=\"form-control custom-inputs\" placeholder=\"Please Enter Email\" required>\r\n \r\n  </div>\r\n\r\n  <div class=\"form-group\">\r\n    <label for=\"normal-field\" class=\"col-form-label\">Enter Contact Number</label>\r\n  \r\n      <input type=\"text\" [(ngModel)]=\"newCustomer.ContactNumber\" id=\"normal-field\" class=\"form-control custom-inputs\" placeholder=\"Enter Contact Number\" required>\r\n\r\n  </div>\r\n\r\n  <div class=\"form-group\">\r\n    <label for=\"normal-field\" class=\" col-form-label\">Enter Address</label>\r\n  \r\n      <input type=\"text\" [(ngModel)]=\"newCustomer.Address\" id=\"normal-field\" class=\"form-control custom-inputs\" placeholder=\"Enter Address\" required>\r\n\r\n  </div>\r\n\r\n  <div class=\"form-group\">\r\n    <label for=\"normal-field\" class=\"col-form-label\">Referance Contact Number</label>\r\n \r\n      <input type=\"text\" [(ngModel)]=\"newCustomer.ReferanceContactNumber\" id=\"normal-field\" class=\"form-control custom-inputs\" placeholder=\"Enter Referance Contact Number\" required>\r\n\r\n  </div>\r\n\r\n  <div class=\"form-group\">\r\n      <label for=\"datetimepicker2i\">\r\n        Date of Birth\r\n      </label>\r\n      <datetime [timepicker]=\"false\" [(ngModel)]=\"newCustomer.DateOfBirth\" name=\"datetime\" id=\"datetimepicker2i\"></datetime>\r\n  </div>\r\n\r\n  <div class=\"form-group\">\r\n     <div class=\"customerLoader\">\r\n      <i class=\"fa fa-spinner fa-spin fa-3x fa-fw\"></i>\r\n     </div>\r\n  </div>\r\n\r\n  <div class=\"form-group\" style=\"text-align:center;\">\r\n  <button (click)=\"addCustomer()\" id=\"addCustomerBtn\" class=\"btn btn-success add-btn\">Add Customer</button>\r\n  </div>\r\n  </div>\r\n </div>\r\n</div>"
 
 /***/ },
 
@@ -21536,6 +21536,8 @@ var CustomerService = (function () {
         this._addCustomerURL = "https://ssbotique.herokuapp.com/customers/addCustomer";
         this._getAllCustomersURL = 'https://ssbotique.herokuapp.com/customers/getAllCustomers';
         this.getCustomersByContactNumberURL = 'https://ssbotique.herokuapp.com/customers/getCustomerAndReferancesByContactNumber?ContactNumber=';
+        this.getMeasurementURL = 'https://ssbotique.herokuapp.com/customers/getMeasurementByCustomerId?CustomerId=';
+        this.getAllCustomerNameURL = 'https://ssbotique.herokuapp.com/customers/getCustomersByName?FullName=';
     }
     CustomerService.prototype.addCustomer = function (customer) {
         var headers = new http_2.Headers({ 'Content-Type': 'application/json' });
@@ -21553,11 +21555,22 @@ var CustomerService = (function () {
             .map(function (response) { return response.json(); })
             .do(function (data) { return console.log(JSON.stringify(data)); });
     };
+    CustomerService.prototype.getCustomersByContactName = function (FullName) {
+        return this._http.get(this.getAllCustomerNameURL + FullName)
+            .map(function (response) { return response.json(); })
+            .do(function (data) { return console.log(JSON.stringify(data)); });
+    };
     CustomerService.prototype.extractData = function (res) {
         var body = res.json();
         console.log("Extract Data");
         console.log(body);
         return body.data || {};
+    };
+    CustomerService.prototype.GetMeasurementById = function (CustomerId) {
+        var headers = new http_2.Headers();
+        headers.append('Content-Type', 'application/json; charset=UTF-8');
+        return this._http.get(this.getMeasurementURL + CustomerId, { headers: headers })
+            .map(function (res) { return res.json(); });
     };
     CustomerService = __decorate([
         core_1.Injectable(), 

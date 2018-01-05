@@ -166,9 +166,17 @@ var Login = (function () {
                 else {
                     _this.errorMessage = response.message;
                     localStorage.setItem('user', JSON.stringify(response.data));
-                    setTimeout(function () {
-                        _this.router.navigate(["app/customers"]);
-                    }, 1000);
+                    _this.userObject = JSON.parse(localStorage.getItem("user"));
+                    if (_this.userObject.EmployeeRole == 1) {
+                        setTimeout(function () {
+                            _this.router.navigate(["app/customers"]);
+                        }, 1000);
+                    }
+                    else {
+                        setTimeout(function () {
+                            _this.router.navigate(['app/orderdetail']);
+                        }, 1000);
+                    }
                 }
             });
         }
