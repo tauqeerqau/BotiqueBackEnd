@@ -21391,11 +21391,7 @@ var OrderdetailComponent = (function () {
         this.orderFetched = false;
         this.allEmployees = [];
         this.ordersList = [];
-        this.IsAdmin = false;
         this.userObject = JSON.parse(localStorage.getItem('user'));
-        if (this.userObject.EmployeeRole == 1) {
-            this.IsAdmin = true;
-        }
     }
     OrderdetailComponent.prototype.getOrdersByStatus = function (elem) {
         var _this = this;
@@ -21461,7 +21457,6 @@ var OrderdetailComponent = (function () {
     OrderdetailComponent.prototype.viewThisOrder = function (order) {
         var _this = this;
         this._orderService.getDetailsForOrder(order._id).subscribe(function (a) {
-            console.log(a);
             _this.OneOrder = a;
             _this.orderFetched = true;
             _this.OneOrder.DeliveryDate = new Date(_this.OneOrder.DeliveryDate * 1000);
@@ -21471,13 +21466,9 @@ var OrderdetailComponent = (function () {
             _this.allEmployees = a.data;
         });
     };
-    OrderdetailComponent.prototype.getSelectedStitcher = function (elem) {
-        this.StitcherId = elem;
-        console.log(elem);
-    };
-    OrderdetailComponent.prototype.assignItems = function (orderItem) {
+    OrderdetailComponent.prototype.getSelectedUser = function (orderItem, elem) {
         var _this = this;
-        this._orderService.AssignThisOrderItemToUser(orderItem._id, this.userObject._id, this.StitcherId, this.MasterId).subscribe(function (a) {
+        this._orderService.AssignThisOrderItemToUser(orderItem._id, this.userObject._id, elem).subscribe(function (a) {
             if (a.code == 200) {
                 $("#snackbar").html("Assigned Successfully!");
                 _this.showToast();
@@ -21487,10 +21478,6 @@ var OrderdetailComponent = (function () {
                 _this.showToast();
             }
         });
-    };
-    OrderdetailComponent.prototype.getSelectedMaster = function (elem) {
-        this.MasterId = elem;
-        console.log(elem);
     };
     OrderdetailComponent.prototype.showToast = function () {
         // Get the snackbar DIV
@@ -21592,7 +21579,7 @@ module.exports = ".custom-select {\n  width: 100%;\n  padding: 10px; }\n\n.add-b
 /***/ "./src/app/orderDetails/orderdetail.template.html":
 /***/ function(module, exports) {
 
-module.exports = "<div class=\"row\">\r\n\r\n  <div id=\"snackbar\"></div>\r\n\r\n<div class=\"col-md-12 col-lg-12 col-sm-12 col-xs-12\">\r\n  <select class=\"selectType\" (change)=\"getOrdersByStatus($event.target.value)\">\r\n     <option disabled selected>Select Status</option>\r\n     <option value=\"100\">Pending</option>\r\n     <option value=\"200\">Cutting</option>\r\n     <option value=\"300\">Stiching</option>\r\n     <option value=\"400\">Ready at warehouse</option>\r\n     <option value=\"500\">Reached Outlet</option>\r\n  </select>\r\n  <div class=\"table-responsive\">          \r\n      <table class=\"table table-bordered table-striped\">\r\n        <thead>\r\n          <tr>\r\n            <th>#</th>\r\n            <th>Customer Name</th>\r\n            <th>Contact Number</th>\r\n            <th>Try Date</th>\r\n            <th>Delivery Date</th>\r\n            <th *ngIf=\"this.IsAdmin\">Order Total</th>\r\n            <th>Change Status</th>\r\n            <th>View</th>\r\n          </tr>\r\n        </thead>\r\n        <tbody>\r\n          <tr *ngFor=\"let order of ordersList;let i=index\">\r\n            <td>{{i}}</td>\r\n            <td>{{order.CustomerId.FullName}}</td>\r\n            <td>{{order.CustomerId.ContactNumber}}</td>\r\n            <td>{{order.TryDate}}\r\n            <td>{{order.DeliveryDate}}</td>\r\n            <td *ngIf=\"this.IsAdmin\">{{order.OrderTotal}}</td>\r\n            \r\n            <td><select class=\"selectType\" (change)=\"setOrderStatus($event.target.value,order)\">\r\n              <option disabled selected>Select Status</option>\r\n              <option value=\"100\">Pending</option>\r\n              <option value=\"200\">Cutting</option>\r\n              <option value=\"300\">Stiching</option>\r\n              <option value=\"400\">Ready at warehouse</option>\r\n              <option value=\"500\">Reached Outlet</option>\r\n            </select></td>\r\n            <td><button class=\"btn btn-primary view\" (click)=\"viewThisOrder(order)\">View</button></td>\r\n          </tr>\r\n        </tbody>\r\n      </table>\r\n      </div>\r\n\r\n\r\n</div>\r\n\r\n<div class=\"col-md-8 col-lg-8 col-sm-8 offset-lg-2 offset-md-2 offset-sm-2 col-xs-12\">\r\n\r\n\r\n  <div *ngIf=\"orderFetched\" class=\"order-detail\">\r\n\r\n\r\n  <h1 class=\"detail-heading\">Order Detail</h1>\r\n\r\n\r\n  <p class=\"heading\">Name : <span class=\"value\">{{OneOrder.CustomerId.FullName}}</span></p>\r\n\r\n  <p class=\"heading\">Contact Number : <span class=\"value\">{{OneOrder.CustomerId.ContactNumber}}</span></p>\r\n\r\n  <p class=\"heading\">Email : <span class=\"value\">{{OneOrder.CustomerId.Email}}</span></p>\r\n\r\n  <p class=\"heading\">Delivery Date : <span class=\"value\">{{OneOrder.DeliveryDate}}</span></p>\r\n\r\n  <p class=\"heading\">Try Date : <span class=\"value\">{{OneOrder.TryDate}}</span></p>\r\n\r\n  <p class=\"heading\" *ngIf=\"this.IsAdmin\">Order Total : <span class=\"value\">{{OneOrder.OrderTotal}}</span></p>\r\n\r\n  <p class=\"heading\" *ngIf=\"this.IsAdmin\">Advance Received : <span class=\"value\">{{OneOrder.AdvanceReceived}}</span></p>\r\n\r\n  <p class=\"heading\">Special Instructions: <span class=\"value\">{{OneOrder.SpecialInstructions}}</span></p>\r\n\r\n\r\n\r\n  <div class=\"table-responsive\">          \r\n      <table class=\"table table-bordered\">\r\n        <thead>\r\n          <tr>\r\n            <th>#</th>\r\n            <th>Product Name</th>\r\n            <th>Quantity</th>\r\n            <th *ngIf=\"this.IsAdmin\">Price</th>\r\n            <th>Special Instructions</th>\r\n            <th>Stitcher</th>\r\n            <th>Master</th>\r\n            <th>Action</th>\r\n            \r\n          </tr>\r\n        </thead>\r\n        <tbody>\r\n          <tr *ngFor=\"let orderitem of OneOrder.OrderItemId;let i=index\">\r\n            <td>{{i}}</td>\r\n            <td>{{orderitem.ProductName}}</td>\r\n            <td>{{orderitem.Quantity}}</td>\r\n            <td *ngIf=\"this.IsAdmin\">{{orderitem.Price}}</td>\r\n            <td>{{orderitem.SpecialInstructions}}</td>\r\n            <td>\r\n              <select class=\"selectType\" (change)=\"getSelectedStitcher($event.target.value)\">\r\n                <option disabled selected>Select User</option>\r\n                <option *ngFor=\"let user of allEmployees\" value=\"{{user._id}}\">{{user.FullName}}</option>\r\n              </select>\r\n            </td>\r\n\r\n            <td>\r\n              <select class=\"selectType\" (change)=\"getSelectedMaster($event.target.value)\">\r\n                <option disabled selected>Select User</option>\r\n                <option *ngFor=\"let user of allEmployees\" value=\"{{user._id}}\">{{user.FullName}}</option>\r\n              </select>\r\n            </td>\r\n            <td>\r\n              <button class=\"btn btn-info\" (click)='assignItems(orderitem)'>Assign</button>\r\n            </td>\r\n          </tr>\r\n        </tbody>\r\n      </table>\r\n      </div>\r\n\r\n\r\n</div>\r\n\r\n\r\n</div>\r\n\r\n  \r\n</div>"
+module.exports = "<div class=\"row\">\r\n\r\n  <div id=\"snackbar\"></div>\r\n\r\n<div class=\"col-md-12 col-lg-12 col-sm-12 col-xs-12\">\r\n  <select class=\"selectType\" (change)=\"getOrdersByStatus($event.target.value)\">\r\n     <option disabled selected>Select Status</option>\r\n     <option value=\"100\">Advance Paid</option>\r\n     <option value=\"200\">Received For Delivery</option>\r\n     <option value=\"300\">Delivered & Paid</option>\r\n     <option value=\"400\">Delivered but not Paid</option>\r\n  </select>\r\n  <div class=\"table-responsive\">          \r\n      <table class=\"table table-bordered table-striped\">\r\n        <thead>\r\n          <tr>\r\n            <th>#</th>\r\n            <th>Customer Name</th>\r\n            <th>Contact Number</th>\r\n            <th>Try Date</th>\r\n            <th>Delivery Date</th>\r\n            <th>Order Total</th>\r\n            <th>Change Status</th>\r\n            <th>View</th>\r\n          </tr>\r\n        </thead>\r\n        <tbody>\r\n          <tr *ngFor=\"let order of ordersList;let i=index\">\r\n            <td>{{i}}</td>\r\n            <td>{{order.CustomerId.FullName}}</td>\r\n            <td>{{order.CustomerId.ContactNumber}}</td>\r\n            <td>{{order.TryDate}}\r\n            <td>{{order.DeliveryDate}}</td>\r\n            <td>{{order.OrderTotal}}</td>\r\n            <td><select class=\"selectType\" (change)=\"setOrderStatus($event.target.value,order)\">\r\n              <option disabled selected>Select Status</option>\r\n              <option value=\"100\">Advance Paid</option>\r\n              <option value=\"200\">Received For Delivery</option>\r\n              <option value=\"300\">Delivered & Paid</option>\r\n              <option value=\"400\">Delivered but not Paid</option>\r\n            </select></td>\r\n            <td><button class=\"btn btn-primary view\" (click)=\"viewThisOrder(order)\">View</button></td>\r\n          </tr>\r\n        </tbody>\r\n      </table>\r\n      </div>\r\n\r\n\r\n</div>\r\n\r\n<div class=\"col-md-8 col-lg-8 col-sm-8 offset-lg-2 offset-md-2 offset-sm-2 col-xs-12\">\r\n\r\n\r\n  <div *ngIf=\"orderFetched\" class=\"order-detail\">\r\n\r\n\r\n  <h1 class=\"detail-heading\">Order Detail</h1>\r\n\r\n\r\n  <p class=\"heading\">Name : <span class=\"value\">{{OneOrder.CustomerId.FullName}}</span></p>\r\n\r\n  <p class=\"heading\">Contact Number : <span class=\"value\">{{OneOrder.CustomerId.ContactNumber}}</span></p>\r\n\r\n  <p class=\"heading\">Email : <span class=\"value\">{{OneOrder.CustomerId.Email}}</span></p>\r\n\r\n  <p class=\"heading\">Delivery Date : <span class=\"value\">{{OneOrder.DeliveryDate}}</span></p>\r\n\r\n  <p class=\"heading\">Try Date : <span class=\"value\">{{OneOrder.TryDate}}</span></p>\r\n\r\n  <p class=\"heading\">Order Total : <span class=\"value\">{{OneOrder.OrderTotal}}</span></p>\r\n\r\n  <p class=\"heading\">Advance Received : <span class=\"value\">{{OneOrder.AdvanceReceived}}</span></p>\r\n\r\n\r\n\r\n  <div class=\"table-responsive\">          \r\n      <table class=\"table table-bordered\">\r\n        <thead>\r\n          <tr>\r\n            <th>#</th>\r\n            <th>Product Name</th>\r\n            <th>Quantity</th>\r\n            <th>Price</th>\r\n            <th>Assign to User</th>\r\n          </tr>\r\n        </thead>\r\n        <tbody>\r\n          <tr *ngFor=\"let orderitem of OneOrder.OrderItemId;let i=index\">\r\n            <td>{{i}}</td>\r\n            <td>{{orderitem.ProductName}}</td>\r\n            <td>{{orderitem.Quantity}}</td>\r\n            <td>{{orderitem.Price}}</td>\r\n            <td>\r\n              <select class=\"selectType\" (change)=\"getSelectedUser(orderitem,$event.target.value)\">\r\n                <option disabled selected>Select User</option>\r\n                <option *ngFor=\"let user of allEmployees\" value=\"{{user._id}}\">{{user.FullName}}</option>\r\n              </select>\r\n            </td>\r\n          </tr>\r\n        </tbody>\r\n      </table>\r\n      </div>\r\n\r\n\r\n</div>\r\n\r\n\r\n</div>\r\n\r\n  \r\n</div>"
 
 /***/ },
 
@@ -21703,8 +21690,6 @@ var CustomerService = (function () {
         this._addCustomerURL = "https://ssbotique.herokuapp.com/customers/addCustomer";
         this._getAllCustomersURL = 'https://ssbotique.herokuapp.com/customers/getAllCustomers';
         this.getCustomersByContactNumberURL = 'https://ssbotique.herokuapp.com/customers/getCustomerAndReferancesByContactNumber?ContactNumber=';
-        this.getMeasurementURL = 'https://ssbotique.herokuapp.com/customers/getMeasurementByCustomerId?CustomerId=';
-        this.getAllCustomerNameURL = 'https://ssbotique.herokuapp.com/customers/getCustomersByName?FullName=';
     }
     CustomerService.prototype.addCustomer = function (customer) {
         var headers = new http_2.Headers({ 'Content-Type': 'application/json' });
@@ -21722,22 +21707,11 @@ var CustomerService = (function () {
             .map(function (response) { return response.json(); })
             .do(function (data) { return console.log(JSON.stringify(data)); });
     };
-    CustomerService.prototype.getCustomersByContactName = function (FullName) {
-        return this._http.get(this.getAllCustomerNameURL + FullName)
-            .map(function (response) { return response.json(); })
-            .do(function (data) { return console.log(JSON.stringify(data)); });
-    };
     CustomerService.prototype.extractData = function (res) {
         var body = res.json();
         console.log("Extract Data");
         console.log(body);
         return body.data || {};
-    };
-    CustomerService.prototype.GetMeasurementById = function (CustomerId) {
-        var headers = new http_2.Headers();
-        headers.append('Content-Type', 'application/json; charset=UTF-8');
-        return this._http.get(this.getMeasurementURL + CustomerId, { headers: headers })
-            .map(function (res) { return res.json(); });
     };
     CustomerService = __decorate([
         core_1.Injectable(), 
@@ -21893,9 +21867,9 @@ var OrderService = (function () {
         console.log(body);
         return body.data || {};
     };
-    OrderService.prototype.AssignThisOrderItemToUser = function (orderItem, assignedBy, stitcher, master) {
+    OrderService.prototype.AssignThisOrderItemToUser = function (orderItem, assignedBy, elem) {
         var data;
-        data = { OrderItemId: orderItem, AssignedBy: assignedBy, SticherName: stitcher, MasterName: master };
+        data = { OrderItemId: orderItem, AssignedBy: assignedBy, AssignedTo: elem };
         var headers = new http_2.Headers();
         headers.append('Content-Type', 'application/json; charset=UTF-8');
         return this._http.post(this.baseURL + "orders/changeOrderItemAsignee", data, { headers: headers })
