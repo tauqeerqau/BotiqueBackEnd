@@ -809,7 +809,7 @@ var Server = (function () {
     }
     Server.prototype.getServerURL = function () {
         // return "http://localhost:3100/";
-        return "https://ssbotique.herokuapp.com/";
+        return "https://ssbotique.azurewebsites.net/";
     };
     return Server;
 }());
