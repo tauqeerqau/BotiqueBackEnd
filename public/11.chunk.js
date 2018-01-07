@@ -21602,11 +21602,11 @@ var CustomerService = (function () {
     function CustomerService(_http) {
         this._http = _http;
         // private _addCustomerURL = 'http://localhost:3100/customers/addCustomer';
-        this._addCustomerURL = "https://ssbotique.herokuapp.com/customers/addCustomer";
-        this._getAllCustomersURL = 'https://ssbotique.herokuapp.com/customers/getAllCustomers';
-        this.getCustomersByContactNumberURL = 'https://ssbotique.herokuapp.com/customers/getCustomerAndReferancesByContactNumber?ContactNumber=';
-        this.getMeasurementURL = 'https://ssbotique.herokuapp.com/customers/getMeasurementByCustomerId?CustomerId=';
-        this.getAllCustomerNameURL = 'https://ssbotique.herokuapp.com/customers/getCustomersByName?FullName=';
+        this._addCustomerURL = "https://ssbotique.azurewebsites.net/customers/addCustomer";
+        this._getAllCustomersURL = 'https://ssbotique.azurewebsites.net/customers/getAllCustomers';
+        this.getCustomersByContactNumberURL = 'https://ssbotique.azurewebsites.net/customers/getCustomerAndReferancesByContactNumber?ContactNumber=';
+        this.getMeasurementURL = 'https://ssbotique.azurewebsites.net/customers/getMeasurementByCustomerId?CustomerId=';
+        this.getAllCustomerNameURL = 'https://ssbotique.azurewebsites.net/customers/getCustomersByName?FullName=';
     }
     CustomerService.prototype.addCustomer = function (customer) {
         var headers = new http_2.Headers({ 'Content-Type': 'application/json' });
