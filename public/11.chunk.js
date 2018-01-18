@@ -21598,34 +21598,57 @@ var http_1 = __webpack_require__("./node_modules/@angular/http/index.js");
 var http_2 = __webpack_require__("./node_modules/@angular/http/index.js");
 __webpack_require__("./node_modules/rxjs/add/operator/map.js");
 __webpack_require__("./node_modules/rxjs/add/operator/do.js");
+var Server_1 = __webpack_require__("./src/utilities/Server.ts");
 var CustomerService = (function () {
     function CustomerService(_http) {
         this._http = _http;
-        // private _addCustomerURL = 'http://localhost:3100/customers/addCustomer';
-        this._addCustomerURL = "https://ssbotique.azurewebsites.net/customers/addCustomer";
-        this._getAllCustomersURL = 'https://ssbotique.azurewebsites.net/customers/getAllCustomers';
-        this.getCustomersByContactNumberURL = 'https://ssbotique.azurewebsites.net/customers/getCustomerAndReferancesByContactNumber?ContactNumber=';
-        this.getMeasurementURL = 'https://ssbotique.azurewebsites.net/customers/getMeasurementByCustomerId?CustomerId=';
-        this.getAllCustomerNameURL = 'https://ssbotique.azurewebsites.net/customers/getCustomersByName?FullName=';
+        this._addCustomerURL = 'customers/addCustomer';
+        this._getAllCustomersURL = 'customers/addCustomer';
+        this.getCustomersByContactNumberURL = 'customers/getCustomerAndReferancesByContactNumber?ContactNumber=';
+        this.getMeasurementURL = 'customers/getMeasurementByCustomerId?CustomerId=';
+        this.getAllCustomerNameURL = 'customers/getCustomersByName?FullName=';
+        this._addPattern = "customers/addCustomerPattern";
+        var server = new Server_1.Server();
+        this.baseURL = server.getServerURL();
     }
+    // private _addCustomerURL = 'http://localhost:3100/customers/addCustomer';
+    //  private _addCustomerURL = "https://ssbotique.herokuapp.com/customers/addCustomer";
+    //  private _getAllCustomersURL = 'https://ssbotique.herokuapp.com/customers/getAllCustomers';
+    // private getCustomersByContactNumberURL = 'https://ssbotique.herokuapp.com/customers/getCustomerAndReferancesByContactNumber?ContactNumber=';
+    // private getMeasurementURL = 'https://ssbotique.herokuapp.com/customers/getMeasurementByCustomerId?CustomerId=';
+    // private getAllCustomerNameURL ='https://ssbotique.herokuapp.com/customers/getCustomersByName?FullName=';
     CustomerService.prototype.addCustomer = function (customer) {
         var headers = new http_2.Headers({ 'Content-Type': 'application/json' });
         var options = new http_2.RequestOptions({ headers: headers });
-        return this._http.post(this._addCustomerURL, customer, options)
+        console.log(this.baseURL);
+        console.log("Customer Received in Service");
+        console.log(customer);
+        return this._http.post(this.baseURL + this._addCustomerURL, customer, options)
             .map(function (res) { return res.json(); });
     };
     CustomerService.prototype.getAllCustomers = function () {
-        return this._http.get(this._getAllCustomersURL)
+        return this._http.get(this.baseURL + this._getAllCustomersURL)
             .map(function (response) { return response.json(); })
             .do(function (data) { return console.log(JSON.stringify(data)); });
     };
     CustomerService.prototype.getCustomersByContactNumber = function (contactNumber) {
-        return this._http.get(this.getCustomersByContactNumberURL + contactNumber)
+        return this._http.get(this.baseURL + this.getCustomersByContactNumberURL + contactNumber)
             .map(function (response) { return response.json(); })
             .do(function (data) { return console.log(JSON.stringify(data)); });
     };
+    CustomerService.prototype.addPatternService = function (customer_id) {
+        var obj = { id: customer_id };
+        console.log("Object is");
+        console.log(obj);
+        var headers = new http_2.Headers({ 'Content-Type': 'application/json' });
+        var options = new http_2.RequestOptions({ headers: headers });
+        console.log("Base URL is " + this.baseURL);
+        return this._http.post(this.baseURL + this._addPattern, obj, options)
+            .map(function (res) { return res.json(); })
+            .do(function (data) { return console.log(JSON.stringify(data)); });
+    };
     CustomerService.prototype.getCustomersByContactName = function (FullName) {
-        return this._http.get(this.getAllCustomerNameURL + FullName)
+        return this._http.get(this.baseURL + this.getAllCustomerNameURL + FullName)
             .map(function (response) { return response.json(); })
             .do(function (data) { return console.log(JSON.stringify(data)); });
     };
