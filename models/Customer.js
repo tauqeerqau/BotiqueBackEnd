@@ -15,6 +15,7 @@ var CustomerSchema = new mongoose.Schema({
     DateOfBirth:Number,
     OnCreationDateUTC:Number,
     OnUpdatetedUTC:Number,
+    HasPattern:Boolean,
     ReferanceId :  {type: mongoose.Schema.Types.ObjectId, ref: 'Customer'}
 });
 

@@ -21,6 +21,7 @@ var userGender = new UserGender();
 db.connectDatabase();
 
 var addCustomer = router.route('/addCustomer');
+var addCustomerPattern = router.route('/addCustomerPattern');
 var getAllCustomers = router.route('/getAllCustomers');
 var addMeasurements = router.route('/addMeasurement');
 var getAllCustomersByReferanceId = router.route('/getAllCustomersByReferanceId');
@@ -349,6 +350,29 @@ getCustomersByName.get(function (req, res) {
       response.code = codes.getSuccessCode();
       response.data = customers;
       res.json(response);
+    }
+  });
+});
+
+addCustomerPattern.post(function(req,res){
+  Customer.findById(req.body.id,function(err,customer){
+    if(customer==null)
+    {
+      console.log(err);
+      response.message = messages.getFailureMessage();
+      response.code = codes.getFailureCode();
+      response.data = err;
+      res.json(response); 
+    }
+    else
+    {
+      customer.HasPattern=true;
+      customer.save(function(err,customer){
+        response.message = messages.getSuccessMessage();
+        response.code = codes.getSuccessCode();
+        response.data = customer;
+        res.json(response);
+      });
     }
   });
 });
