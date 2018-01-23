@@ -374,7 +374,7 @@ var Server = (function () {
     }
     Server.prototype.getServerURL = function () {
         // return "http://localhost:3100/";
-        return "https://ssbotique.azurewebsites.net/";
+        return "https://ssbotiquenew.azurewebsites.net/";
     };
     return Server;
 }());

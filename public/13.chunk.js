@@ -21385,7 +21385,23 @@ var Pattern = (function () {
         this._customerService = _customerService;
     }
     Pattern.prototype.searchByName = function () {
+        var _this = this;
         console.log("Search By Name");
+        console.log(this.searchCustomer.FullName);
+        if (this.searchCustomer.FullName == "") {
+            alert("Please Enter Your Full Name");
+        }
+        this._customerService.getCustomersByFullName(this.searchCustomer.FullName).subscribe(function (res) {
+            if (res.code == 200) {
+                _this.customers = res.data;
+                console.log("custeomer " + res.data);
+                $("#snackbar").html("Data is Available");
+            }
+            else {
+                _this.customers = null;
+                $("#snackbar").html("Data not Available");
+            }
+        });
     };
     /*
         search():void{
@@ -21397,9 +21413,13 @@ var Pattern = (function () {
         if (this.searchCustomer.ContactNumber == "") {
             alert("Please Enter Your Number");
         }
+        if (this.searchCustomer.FullName == "") {
+            alert("Please Enter Your Full Name");
+        }
         this._customerService.getCustomersByContactNumber(this.searchCustomer.ContactNumber).subscribe(function (res) {
             if (res.code == 200) {
                 _this.customers = res.data;
+                console.log("custeomer " + res.data);
                 $("#snackbar").html("Data is Available");
             }
             else {
@@ -21521,7 +21541,7 @@ module.exports = "/*!\r\n * Datepicker for Bootstrap v1.6.1 (https://github.com/
 /***/ "./src/app/pattern/pattern.template.html":
 /***/ function(module, exports) {
 
-module.exports = "<h1>Add Pattern Form</h1>\r\n<div id=\"snackbar\"></div>\r\n\r\n<div class=\"container\">\r\n\r\n  <div class=\"row\">\r\n    <div class=\"col-md-6 col-lg-6 col-sm-6 offset-lg-3 offset-md-3 offset-sm-3 common-form\">\r\n      <div class=\"form-group\">\r\n        \r\n                <label for=\"normal-field\" class=\"col-form-label\">Enter Contact Name</label>\r\n        \r\n                 <input type=\"text\"  id=\"normal-field\" class=\"form-control custom-inputs\"\r\n                  placeholder=\"Please Enter Customer Contact Name\"> \r\n                 <!-- <input type=\"text\" [(ngModel)]=\"newMeasurement.CustomerContactName\" id=\"normal-field\" class=\"form-control custom-inputs\"\r\n                  placeholder=\"Please Enter Customer Contact Name\"> -->\r\n              </div>\r\n              <div class=\"form-group\">\r\n                <button (click)=\"searchByName()\" class=\"btn btn-primary\">Search</button>\r\n              </div>\r\n      <div class=\"form-group\">\r\n\r\n        <label for=\"normal-field\" class=\"col-form-label\">Enter Contact Number</label>\r\n\r\n        <!-- <input type=\"text\" [(ngModel)]=\"newMeasurement.CustomerContactNumber\" id=\"normal-field\" class=\"form-control custom-inputs\"\r\n          placeholder=\"Please Enter Customer Contact Number\"> --> \r\n\r\n          <input type=\"text\" [(ngModel)]=\"searchCustomer.ContactNumber\"  id=\"normal-field\" class=\"form-control custom-inputs\"\r\n          placeholder=\"Please Enter Customer Contact Number\">\r\n\r\n      </div>\r\n\r\n      <div class=\"form-group\">\r\n        <button (click)=\"search()\" class=\"btn btn-primary\">Search</button>\r\n      </div>\r\n\r\n\r\n      <div class=\"form-group\">\r\n        <select (change)=\"getcutomerId($event.target.value)\">\r\n          <option disabled selected>Select Customers</option>\r\n          <option *ngFor='let customer of customers' value={{customer._id}}>\r\n            {{customer.FullName}}\r\n            \r\n          </option>\r\n        </select>\r\n        \r\n      </div>\r\n\r\n      <div class=\"form-group\" style=\"margin-top: 33%\">\r\n        <button (click)=\"addPattern()\"  class=\"btn btn-primary\">Add Pattern</button>\r\n      </div>\r\n\r\n  <!--     <div class=\"row\" id=\"selectType\">\r\n        <h1 class=\"record-text\">Record Measurements for:</h1>\r\n       \r\n      </div> -->\r\n    </div>\r\n  </div>\r\n\r\n  <div class=\"row row-2\">\r\n\r\n    </div>\r\n   \r\n    \r\n \r\n\r\n    \r\n\r\n    \r\n\r\n      \r\n\r\n       \r\n\r\n          \r\n        \r\n\r\n</div>"
+module.exports = "<h1>Add Pattern Form</h1>\r\n<div id=\"snackbar\"></div>\r\n\r\n<div class=\"container\">\r\n\r\n  <div class=\"row\">\r\n    <div class=\"col-md-6 col-lg-6 col-sm-6 offset-lg-3 offset-md-3 offset-sm-3 common-form\">\r\n      <div class=\"form-group\">\r\n        \r\n                <label for=\"normal-field\" class=\"col-form-label\">Enter Contact Name</label>\r\n        \r\n                 <input type=\"text\" [(ngModel)]=\"searchCustomer.FullName\" id=\"normal-field\" class=\"form-control custom-inputs\"\r\n                  placeholder=\"Please Enter Customer Contact Name\"> \r\n              </div>\r\n              <div class=\"form-group\">\r\n                <button (click)=\"searchByName()\" class=\"btn btn-primary\">Search</button>\r\n              </div>\r\n      <div class=\"form-group\">\r\n\r\n        <label for=\"normal-field\" class=\"col-form-label\">Enter Contact Number</label>\r\n\r\n        <!-- <input type=\"text\" [(ngModel)]=\"newMeasurement.CustomerContactNumber\" id=\"normal-field\" class=\"form-control custom-inputs\"\r\n          placeholder=\"Please Enter Customer Contact Number\"> --> \r\n\r\n          <input type=\"text\" [(ngModel)]=\"searchCustomer.ContactNumber\"  id=\"normal-field\" class=\"form-control custom-inputs\"\r\n          placeholder=\"Please Enter Customer Contact Number\">\r\n\r\n      </div>\r\n\r\n      <div class=\"form-group\">\r\n        <button (click)=\"search()\" class=\"btn btn-primary\">Search</button>\r\n      </div>\r\n\r\n\r\n      <div class=\"form-group\">\r\n        <select (change)=\"getcutomerId($event.target.value)\">\r\n          <option disabled selected>Select Customers</option>\r\n          <option *ngFor='let customer of customers' value={{customer._id}}>\r\n            {{customer.FullName}}\r\n            \r\n          </option>\r\n        </select>\r\n        \r\n      </div>\r\n\r\n      <div class=\"form-group\" style=\"margin-top: 33%\">\r\n        <button (click)=\"addPattern()\"  class=\"btn btn-primary\">Add Pattern</button>\r\n      </div>\r\n\r\n  <!--     <div class=\"row\" id=\"selectType\">\r\n        <h1 class=\"record-text\">Record Measurements for:</h1>\r\n       \r\n      </div> -->\r\n    </div>\r\n  </div>\r\n\r\n  <div class=\"row row-2\">\r\n\r\n    </div>\r\n   \r\n    \r\n \r\n\r\n    \r\n\r\n    \r\n\r\n      \r\n\r\n       \r\n\r\n          \r\n        \r\n\r\n</div>"
 
 /***/ },
 
@@ -21588,6 +21608,14 @@ var CustomerService = (function () {
             .map(function (response) { return response.json(); })
             .do(function (data) { return console.log(JSON.stringify(data)); });
     };
+    CustomerService.prototype.getCustomersByFullName = function (FullName) {
+        console.log("Its get in service Full Name ID ", FullName);
+        var obj = { id: FullName };
+        console.log("object is " + obj);
+        return this._http.get(this.baseURL + this.getAllCustomerNameURL + FullName)
+            .map(function (response) { return response.json(); })
+            .do(function (data) { return console.log(JSON.stringify(data)); });
+    };
     CustomerService.prototype.addPatternService = function (customer_id) {
         var obj = { id: customer_id };
         console.log("Object is");
@@ -21638,7 +21666,7 @@ var Server = (function () {
     }
     Server.prototype.getServerURL = function () {
         // return "http://localhost:3100/";
-        return "https://ssbotique.azurewebsites.net/";
+        return "https://ssbotiquenew.azurewebsites.net/";
     };
     return Server;
 }());

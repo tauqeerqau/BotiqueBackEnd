@@ -652,6 +652,14 @@ var CustomerService = (function () {
             .map(function (response) { return response.json(); })
             .do(function (data) { return console.log(JSON.stringify(data)); });
     };
+    CustomerService.prototype.getCustomersByFullName = function (FullName) {
+        console.log("Its get in service Full Name ID ", FullName);
+        var obj = { id: FullName };
+        console.log("object is " + obj);
+        return this._http.get(this.baseURL + this.getAllCustomerNameURL + FullName)
+            .map(function (response) { return response.json(); })
+            .do(function (data) { return console.log(JSON.stringify(data)); });
+    };
     CustomerService.prototype.addPatternService = function (customer_id) {
         var obj = { id: customer_id };
         console.log("Object is");
@@ -832,7 +840,7 @@ var Server = (function () {
     }
     Server.prototype.getServerURL = function () {
         // return "http://localhost:3100/";
-        return "https://ssbotique.azurewebsites.net/";
+        return "https://ssbotiquenew.azurewebsites.net/";
     };
     return Server;
 }());
