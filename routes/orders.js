@@ -30,7 +30,7 @@ var getOrderItemsByOrderId = router.route('/getOrderItemsByOrderId');
 var changeOrderStatus = router.route('/changeOrderStatus');
 var changeOrderItemAsignee = router.route('/changeOrderItemAsignee');
 var getOrdersByStatus = router.route('/getOrdersByStatus');
-
+var getOrderItemsByStatus = router.route('/getOrderItemsByStatus');
 /* GET users listing. */
 router.get('/', function (req, res, next) {
   res.send('respond with a resource');
@@ -229,6 +229,25 @@ getOrdersByStatus.get(function (req, res) {
       res.json(response);
     }
   }).populate('CustomerId');
+});
+
+getOrderItemsByStatus.get(function(req,res){
+OrderItem.find({OrderItemStatus:req.query.OrderItemStatus},function(err,orderItems){
+  if (err) {
+    response.message = messages.getFailureMessage();
+    response.code = codes.getFailureCode();
+    response.data = err;
+    console.log(response);
+    res.json(response);
+  }
+  else {
+    response.message = messages.getSuccessMessage();
+    response.code = codes.getSuccessCode();
+    response.data = orderItems;
+    console.log(response);
+    res.json(response);
+  }
+});
 });
 
 module.exports = router;
