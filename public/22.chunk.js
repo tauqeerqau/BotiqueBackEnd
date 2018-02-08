@@ -1,31 +1,213 @@
 webpackJsonpac__name_([22],{
 
-/***/ "./src/app/profile/profile.component.ts":
+/***/ "./node_modules/rxjs/add/operator/do.js":
 /***/ function(module, exports, __webpack_require__) {
 
 "use strict";
 "use strict";
-var core_1 = __webpack_require__("./node_modules/@angular/core/index.js");
-var Profile = (function () {
-    function Profile() {
-    }
-    Profile = __decorate([
-        core_1.Component({
-            selector: '[profile]',
-            template: __webpack_require__("./src/app/profile/profile.template.html"),
-            encapsulation: core_1.ViewEncapsulation.None,
-            styles: [__webpack_require__("./src/app/profile/profile.style.scss")]
-        }), 
-        __metadata('design:paramtypes', [])
-    ], Profile);
-    return Profile;
-}());
-exports.Profile = Profile;
-
+var Observable_1 = __webpack_require__("./node_modules/rxjs/Observable.js");
+var do_1 = __webpack_require__("./node_modules/rxjs/operator/do.js");
+Observable_1.Observable.prototype.do = do_1._do;
+Observable_1.Observable.prototype._do = do_1._do;
+//# sourceMappingURL=do.js.map
 
 /***/ },
 
-/***/ "./src/app/profile/profile.module.ts":
+/***/ "./node_modules/rxjs/operator/do.js":
+/***/ function(module, exports, __webpack_require__) {
+
+"use strict";
+"use strict";
+var __extends = (this && this.__extends) || function (d, b) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    function __() { this.constructor = d; }
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+};
+var Subscriber_1 = __webpack_require__("./node_modules/rxjs/Subscriber.js");
+/**
+ * Perform a side effect for every emission on the source Observable, but return
+ * an Observable that is identical to the source.
+ *
+ * <span class="informal">Intercepts each emission on the source and runs a
+ * function, but returns an output which is identical to the source.</span>
+ *
+ * <img src="./img/do.png" width="100%">
+ *
+ * Returns a mirrored Observable of the source Observable, but modified so that
+ * the provided Observer is called to perform a side effect for every value,
+ * error, and completion emitted by the source. Any errors that are thrown in
+ * the aforementioned Observer or handlers are safely sent down the error path
+ * of the output Observable.
+ *
+ * This operator is useful for debugging your Observables for the correct values
+ * or performing other side effects.
+ *
+ * Note: this is different to a `subscribe` on the Observable. If the Observable
+ * returned by `do` is not subscribed, the side effects specified by the
+ * Observer will never happen. `do` therefore simply spies on existing
+ * execution, it does not trigger an execution to happen like `subscribe` does.
+ *
+ * @example <caption>Map every every click to the clientX position of that click, while also logging the click event</caption>
+ * var clicks = Rx.Observable.fromEvent(document, 'click');
+ * var positions = clicks
+ *   .do(ev => console.log(ev))
+ *   .map(ev => ev.clientX);
+ * positions.subscribe(x => console.log(x));
+ *
+ * @see {@link map}
+ * @see {@link subscribe}
+ *
+ * @param {Observer|function} [nextOrObserver] A normal Observer object or a
+ * callback for `next`.
+ * @param {function} [error] Callback for errors in the source.
+ * @param {function} [complete] Callback for the completion of the source.
+ * @return {Observable} An Observable identical to the source, but runs the
+ * specified Observer or callback(s) for each item.
+ * @method do
+ * @name do
+ * @owner Observable
+ */
+function _do(nextOrObserver, error, complete) {
+    return this.lift(new DoOperator(nextOrObserver, error, complete));
+}
+exports._do = _do;
+var DoOperator = (function () {
+    function DoOperator(nextOrObserver, error, complete) {
+        this.nextOrObserver = nextOrObserver;
+        this.error = error;
+        this.complete = complete;
+    }
+    DoOperator.prototype.call = function (subscriber, source) {
+        return source._subscribe(new DoSubscriber(subscriber, this.nextOrObserver, this.error, this.complete));
+    };
+    return DoOperator;
+}());
+/**
+ * We need this JSDoc comment for affecting ESDoc.
+ * @ignore
+ * @extends {Ignored}
+ */
+var DoSubscriber = (function (_super) {
+    __extends(DoSubscriber, _super);
+    function DoSubscriber(destination, nextOrObserver, error, complete) {
+        _super.call(this, destination);
+        var safeSubscriber = new Subscriber_1.Subscriber(nextOrObserver, error, complete);
+        safeSubscriber.syncErrorThrowable = true;
+        this.add(safeSubscriber);
+        this.safeSubscriber = safeSubscriber;
+    }
+    DoSubscriber.prototype._next = function (value) {
+        var safeSubscriber = this.safeSubscriber;
+        safeSubscriber.next(value);
+        if (safeSubscriber.syncErrorThrown) {
+            this.destination.error(safeSubscriber.syncErrorValue);
+        }
+        else {
+            this.destination.next(value);
+        }
+    };
+    DoSubscriber.prototype._error = function (err) {
+        var safeSubscriber = this.safeSubscriber;
+        safeSubscriber.error(err);
+        if (safeSubscriber.syncErrorThrown) {
+            this.destination.error(safeSubscriber.syncErrorValue);
+        }
+        else {
+            this.destination.error(err);
+        }
+    };
+    DoSubscriber.prototype._complete = function () {
+        var safeSubscriber = this.safeSubscriber;
+        safeSubscriber.complete();
+        if (safeSubscriber.syncErrorThrown) {
+            this.destination.error(safeSubscriber.syncErrorValue);
+        }
+        else {
+            this.destination.complete();
+        }
+    };
+    return DoSubscriber;
+}(Subscriber_1.Subscriber));
+//# sourceMappingURL=do.js.map
+
+/***/ },
+
+/***/ "./src/app/assignedItems/assignedItems.component.ts":
+/***/ function(module, exports, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function($) {"use strict";
+var core_1 = __webpack_require__("./node_modules/@angular/core/index.js");
+var router_1 = __webpack_require__("./node_modules/@angular/router/index.js");
+var employee_Service_1 = __webpack_require__("./src/services/employee.Service.ts");
+var user_1 = __webpack_require__("./src/models/user.ts");
+var order_Service_1 = __webpack_require__("./src/services/order.Service.ts");
+var AssignedItemsComponent = (function () {
+    function AssignedItemsComponent(router, _employeeService, _orderService) {
+        var _this = this;
+        this._employeeService = _employeeService;
+        this._orderService = _orderService;
+        this.AssignedItems = [];
+        this.allEmployees = [];
+        this.router = router;
+        this.userObject = new user_1.UserModel();
+        this._employeeService.getAssignedItems(this.userObject._id).subscribe(function (a) {
+            _this.AssignedItems = a.data;
+        });
+        this._employeeService.getEmployees().subscribe(function (a) {
+            _this.allEmployees = a.data;
+        });
+    }
+    AssignedItemsComponent.prototype.getSelectedUser = function (orderItem, elem) {
+        var _this = this;
+        this._orderService.AssignThisOrderItemToUser(orderItem._id, this.userObject._id, elem).subscribe(function (a) {
+            if (a.code == 200) {
+                $("#snackbar").html("Assigned Successfully!");
+                _this.showToast();
+                _this._employeeService.getAssignedItems(_this.userObject._id).subscribe(function (a) {
+                    _this.AssignedItems = a.data;
+                });
+            }
+            else {
+                $("#snackbar").html("Errors!");
+                _this.showToast();
+            }
+        });
+    };
+    AssignedItemsComponent.prototype.showToast = function () {
+        // Get the snackbar DIV
+        var x = document.getElementById("snackbar");
+        // Add the "show" class to DIV
+        x.className = "show";
+        // After 3 seconds, remove the show class from DIV
+        setTimeout(function () { x.className = x.className.replace("show", ""); }, 3000);
+    };
+    AssignedItemsComponent.prototype.searchResult = function () {
+        this.router.navigate(['/app', 'extra', 'search']);
+    };
+    AssignedItemsComponent = __decorate([
+        core_1.Component({
+            selector: 'assignedItems',
+            styles: [__webpack_require__("./src/app/assignedItems/assignedItems.style.scss")],
+            template: __webpack_require__("./src/app/assignedItems/assignedItems.template.html"),
+            encapsulation: core_1.ViewEncapsulation.None,
+            providers: [employee_Service_1.EmployeeService, order_Service_1.OrderService],
+            host: {
+                class: 'assignedItems-page app'
+            },
+        }), 
+        __metadata('design:paramtypes', [(typeof (_a = typeof router_1.Router !== 'undefined' && router_1.Router) === 'function' && _a) || Object, (typeof (_b = typeof employee_Service_1.EmployeeService !== 'undefined' && employee_Service_1.EmployeeService) === 'function' && _b) || Object, (typeof (_c = typeof order_Service_1.OrderService !== 'undefined' && order_Service_1.OrderService) === 'function' && _c) || Object])
+    ], AssignedItemsComponent);
+    return AssignedItemsComponent;
+    var _a, _b, _c;
+}());
+exports.AssignedItemsComponent = AssignedItemsComponent;
+
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__("./node_modules/jquery/dist/jquery.js")))
+
+/***/ },
+
+/***/ "./src/app/assignedItems/assignedItems.module.ts":
 /***/ function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -34,19 +216,18 @@ var common_1 = __webpack_require__("./node_modules/@angular/common/index.js");
 var forms_1 = __webpack_require__("./node_modules/@angular/forms/index.js");
 var core_1 = __webpack_require__("./node_modules/@angular/core/index.js");
 var router_1 = __webpack_require__("./node_modules/@angular/router/index.js");
-var profile_component_1 = __webpack_require__("./src/app/profile/profile.component.ts");
+var assignedItems_component_ts_1 = __webpack_require__("./src/app/assignedItems/assignedItems.component.ts");
 exports.routes = [
-    { path: '', component: profile_component_1.Profile, pathMatch: 'full' }
+    { path: '', component: assignedItems_component_ts_1.AssignedItemsComponent, pathMatch: 'full' }
 ];
-var FormModule = (function () {
-    function FormModule() {
+var ErrorModule = (function () {
+    function ErrorModule() {
     }
-    FormModule.routes = exports.routes;
-    FormModule = __decorate([
+    ErrorModule.routes = exports.routes;
+    ErrorModule = __decorate([
         core_1.NgModule({
             declarations: [
-                // Components / Directives/ Pipes
-                profile_component_1.Profile
+                assignedItems_component_ts_1.AssignedItemsComponent
             ],
             imports: [
                 common_1.CommonModule,
@@ -55,26 +236,271 @@ var FormModule = (function () {
             ]
         }), 
         __metadata('design:paramtypes', [])
-    ], FormModule);
-    return FormModule;
+    ], ErrorModule);
+    return ErrorModule;
 }());
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.default = FormModule;
+exports.default = ErrorModule;
 
 
 /***/ },
 
-/***/ "./src/app/profile/profile.style.scss":
+/***/ "./src/app/assignedItems/assignedItems.style.scss":
 /***/ function(module, exports) {
 
-module.exports = "/***********************************/\n/**          Post Links           **/\n/***********************************/\n.post-links {\n  margin-bottom: 0;\n  font-size: 0.875rem;\n  padding-left: 0; }\n  .post-links::after {\n    content: \"\";\n    display: table;\n    clear: both; }\n  .post-links > li {\n    float: left;\n    list-style: none; }\n    .post-links > li + li:before {\n      color: #999;\n      content: \"\\25cf\";\n      padding: 0 8px; }\n    .post-links > li > a {\n      text-decoration: none;\n      color: #999999; }\n      .post-links > li > a:hover {\n        color: #999999; }\n  .post-links.no-separator > li + li {\n    margin-left: 12px; }\n    .post-links.no-separator > li + li:before {\n      content: normal; }\n\n/***********************************/\n/**          Post Comments           **/\n/***********************************/\n.post-comments {\n  font-size: 0.875rem;\n  padding-left: 0; }\n  .post-comments::after {\n    content: \"\";\n    display: table;\n    clear: both; }\n  .post-links + .post-comments {\n    margin-top: 0.5rem; }\n  .post-comments > li {\n    padding: 10px;\n    border-top: 1px solid #e7e7e7;\n    list-style: none; }\n    .post-comments > li::after {\n      content: \"\";\n      display: table;\n      clear: both; }\n    .post-comments > li:last-child {\n      padding-bottom: 0; }\n  .post-comments p:last-child {\n    margin-bottom: 0; }\n  .post-comments .avatar {\n    margin-top: 1px; }\n  .post-comments .author {\n    margin-top: 0;\n    margin-bottom: 2px;\n    color: #7ca9dd; }\n  .post-comments .comment-body {\n    overflow: auto; }\n  .post-comments h6.author > small {\n    font-size: 11px; }\n  .widget > footer .post-comments {\n    margin-left: -20px;\n    margin-right: -20px; }\n\n/***********************************/\n/**           Post User           **/\n/***********************************/\n.post-user {\n  position: relative; }\n  .post-user::after {\n    content: \"\";\n    display: table;\n    clear: both; }\n  .post-user img {\n    border: 3px solid white; }\n\n/***********************************/\n/**           Profile             **/\n/***********************************/\n.user-profile .label {\n  padding: 5px; }\n\n.post-user-profile {\n  margin-top: -75px; }\n  .post-user-profile .contacts {\n    display: block;\n    margin-top: 25px;\n    margin-left: -10px;\n    margin-right: -10px;\n    padding-left: 0;\n    text-align: center; }\n    .post-user-profile .contacts > li {\n      display: inline-block;\n      line-height: 2.2;\n      list-style: none;\n      text-align: left;\n      margin: 0 10px; }\n      @media (min-width: 992px) {\n        .post-user-profile .contacts > li {\n          width: 150px;\n          white-space: nowrap; } }\n      .post-user-profile .contacts > li > a {\n        color: #a2a2a2;\n        text-decoration: none; }\n        .post-user-profile .contacts > li > a:hover, .post-user-profile .contacts > li > a:focus {\n          color: #555555; }\n    .post-user-profile .contacts .fa {\n      font-size: 1.25rem;\n      vertical-align: middle; }\n\n.stats-row-profile .stat-item {\n  border-left: 0;\n  padding-left: 15px;\n  text-align: center; }\n  @media (min-width: 992px) {\n    .stats-row-profile .stat-item {\n      padding-right: 0; } }\n  .stats-row-profile .stat-item .value {\n    font-size: 28px;\n    font-weight: 300; }\n\n.activities h3 {\n  margin-left: 20px; }\n\n.activities .event {\n  margin-top: 1rem;\n  width: 100%; }\n\n.event {\n  background: #fff;\n  border-radius: 0.25rem;\n  padding: 20px 20px 0;\n  position: relative; }\n  .event .post-comments {\n    margin-left: -20px;\n    margin-right: -20px; }\n  .event > footer {\n    margin: 20px -20px 0;\n    padding: 10px 20px;\n    border-bottom-left-radius: 0.25rem;\n    border-bottom-right-radius: 0.25rem;\n    background-color: #f3f3f3; }\n    .event > footer::after {\n      content: \"\";\n      display: table;\n      clear: both; }\n    .event > footer .thumb {\n      margin-left: 10px; }\n\n.event-heading {\n  margin: 0 0 2px;\n  font-weight: 600; }\n  .event-heading > a {\n    text-decoration: none;\n    color: #7ca9dd; }\n  .event-heading > small {\n    font-weight: 600; }\n    .event-heading > small > a {\n      text-decoration: none;\n      color: #999999; }\n\n.event-map {\n  display: block;\n  height: 200px;\n  margin: 0 -20px -20px;\n  overflow: visible !important; }\n\n.event-image {\n  margin: 0 -20px -20px;\n  max-height: 260px;\n  overflow: hidden; }\n  .event-image > img {\n    max-width: 100%; }\n"
+module.exports = "/***********************************/\n/**          ERROR PAGE           **/\n/***********************************/\n.error-page {\n  background-color: #ddd; }\n\n.error-container {\n  padding-top: 5%;\n  text-align: center; }\n  .error-container > .btn {\n    padding-left: 35px;\n    padding-right: 35px; }\n\n.error-code {\n  margin: 20px;\n  font-size: 80px;\n  font-weight: 400;\n  color: #373a3c; }\n  @media (min-width: 768px) {\n    .error-code {\n      font-size: 180px; } }\n\n.error-info {\n  font-size: 20px;\n  color: #373a3c; }\n\n.error-help {\n  font-size: 14px; }\n\n.error-page .page-footer {\n  position: absolute;\n  bottom: 30px;\n  left: 0;\n  right: 0;\n  width: 100%;\n  font-size: 13px;\n  color: #818a91;\n  text-align: center; }\n\n.table > thead > tr > th {\n  background: white; }\n\n.table th, .table td {\n  color: black; }\n\n/* The snackbar - position it at the bottom and in the middle of the screen */\n#snackbar {\n  visibility: hidden;\n  /* Hidden by default. Visible on click */\n  min-width: 250px;\n  /* Set a default minimum width */\n  margin-left: -125px;\n  /* Divide value of min-width by 2 */\n  background-color: #333;\n  /* Black background color */\n  color: #fff;\n  /* White text color */\n  text-align: center;\n  /* Centered text */\n  border-radius: 2px;\n  /* Rounded borders */\n  padding: 16px;\n  /* Padding */\n  position: fixed;\n  /* Sit on top of the screen */\n  z-index: 1;\n  /* Add a z-index if needed */\n  left: 50%;\n  /* Center the snackbar */\n  bottom: 30px;\n  /* 30px from the bottom */ }\n\n/* Show the snackbar when clicking on a button (class added with JavaScript) */\n#snackbar.show {\n  visibility: visible;\n  /* Show the snackbar */\n  /* Add animation: Take 0.5 seconds to fade in and out the snackbar. \r\nHowever, delay the fade out process for 2.5 seconds */\n  -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;\n  animation: fadein 0.5s, fadeout 0.5s 2.5s; }\n\n/* Animations to fade the snackbar in and out */\n@-webkit-keyframes fadein {\n  from {\n    bottom: 0;\n    opacity: 0; }\n  to {\n    bottom: 30px;\n    opacity: 1; } }\n\n@keyframes fadein {\n  from {\n    bottom: 0;\n    opacity: 0; }\n  to {\n    bottom: 30px;\n    opacity: 1; } }\n\n@-webkit-keyframes fadeout {\n  from {\n    bottom: 30px;\n    opacity: 1; }\n  to {\n    bottom: 0;\n    opacity: 0; } }\n\n@keyframes fadeout {\n  from {\n    bottom: 30px;\n    opacity: 1; }\n  to {\n    bottom: 0;\n    opacity: 0; } }\n\n.selectType {\n  padding: 10px;\n  width: 320px;\n  border-radius: 0;\n  border: 1px solid #ccc;\n  color: #222222; }\n"
 
 /***/ },
 
-/***/ "./src/app/profile/profile.template.html":
+/***/ "./src/app/assignedItems/assignedItems.template.html":
 /***/ function(module, exports) {
 
-module.exports = "<ol class=\"breadcrumb\">\r\n  <li class=\"breadcrumb-item\">YOU ARE HERE</li>\r\n  <li class=\"active breadcrumb-item\">Profile</li>\r\n</ol>\r\n<h1 class=\"page-title\">User - <span class=\"fw-semi-bold\">Profile</span></h1>\r\n<div class=\"row profile\">\r\n  <div class=\"col-lg-6 col-xs-12\">\r\n    <section class=\"widget\">\r\n      <div class=\"widget-body\">\r\n        <div class=\"widget-top-overflow text-white\">\r\n          <div class=\"height-250 overflow-hidden\">\r\n            <img class=\"img-fluid\" src=\"assets/img/pictures/19.jpg\">\r\n          </div>\r\n          <div class=\"btn-toolbar\">\r\n            <a href=\"#\" class=\"btn btn-outline btn-sm pull-right\">\r\n              <i class=\"fa fa-twitter mr-xs\"></i>\r\n              Follow\r\n            </a>\r\n          </div>\r\n        </div>\r\n        <div class=\"row\">\r\n          <div class=\"col-md-5 col-xs-12 text-xs-center\">\r\n            <div class=\"post-user post-user-profile\">\r\n              <span class=\"thumb-xlg\">\r\n                <img class=\"img-circle\" src=\"assets/img/people/a5.jpg\" alt=\"...\">\r\n              </span>\r\n              <h5 class=\"fw-normal\">Adam <span class=\"fw-semi-bold\">Johns</span></h5>\r\n              <p>UI/UX designer</p>\r\n              <a href=\"#\" class=\"btn btn-danger btn-sm mt\">\r\n                &nbsp;Send\r\n                <i class=\"fa fa-envelope ml-xs\"></i>&nbsp;\r\n              </a>\r\n              <ul class=\"contacts\">\r\n                <li><i class=\"fa fa-phone fa-fw mr-xs\"></i><a href=\"#\"> +375 29 555-55-55</a></li>\r\n                <li><i class=\"fa fa-envelope fa-fw mr-xs\"></i><a href=\"#\"> psmith@example.com</a></li>\r\n                <li><i class=\"fa fa-map-marker fa-fw mr-xs\"></i><a href=\"#\"> Minsk, Belarus</a></li>\r\n              </ul>\r\n            </div>\r\n          </div>\r\n          <div class=\"col-md-7 col-xs-12\">\r\n            <div class=\"stats-row stats-row-profile mt text-xs-right\">\r\n              <div class=\"stat-item\">\r\n                <p class=\"value text-xs-right\">251</p>\r\n                <h6 class=\"name\">Posts</h6>\r\n              </div>\r\n              <div class=\"stat-item\">\r\n                <p class=\"value text-xs-right\">9.38%</p>\r\n                <h6 class=\"name\">Conversion</h6>\r\n              </div>\r\n              <div class=\"stat-item\">\r\n                <p class=\"value text-xs-right\">842</p>\r\n                <h6 class=\"name\">Followers</h6>\r\n              </div>\r\n            </div>\r\n            <p class=\"text-xs-right mt-lg\">\r\n              <a href=\"#\" class=\"tag tag-warning\"> UI/UX </a>\r\n              <a href=\"#\" class=\"tag tag-danger ml-xs\"> Web Design </a>\r\n              <a href=\"#\" class=\"tag tag-default ml-xs\"> Mobile Apps </a>\r\n            </p>\r\n            <p class=\"lead mt-lg\">\r\n              My name is Adam Johns and here is my new Sing user profile page.\r\n            </p>\r\n            <p>\r\n              I love reading people's summaries page especially those who are in the same industry as me.\r\n              Sometimes it's much easier to find your concentration during the night.\r\n            </p>\r\n          </div>\r\n        </div>\r\n      </div>\r\n    </section>\r\n  </div>\r\n  <div class=\"col-lg-6 col-xs-12\">\r\n    <section class=\"activities\">\r\n      <h2 class=\"m-l-1\">Activities</h2>\r\n      <section class=\"event\">\r\n        <span class=\"thumb-sm avatar pull-left mr-sm\">\r\n          <img class=\"img-circle\" src=\"assets/img/people/a5.jpg\" alt=\"...\">\r\n        </span>\r\n        <h5 class=\"event-heading\"><a href=\"#\">Bob Nilson</a> <small><a href=\"#\">@nils</a></small></h5>\r\n        <p class=\"text-muted\">February 22, 2014 at 01:59 PM</p>\r\n        <p class=\"fs-mini\">\r\n          There is no such thing as maturity. There is instead an ever-evolving process of maturing.\r\n          Because when there is a maturity, there is ...\r\n        </p>\r\n        <footer>\r\n          <ul class=\"post-links\">\r\n            <li><a href=\"#\">1 hour</a></li>\r\n            <li><a href=\"#\"><span class=\"text-danger\"><i class=\"fa fa-heart\"></i> Like</span></a></li>\r\n            <li><a href=\"#\">Comment</a></li>\r\n          </ul>\r\n        </footer>\r\n      </section>\r\n      <section class=\"event\">\r\n        <h5 class=\"event-heading\"><a href=\"#\">Jessica Smith</a> <small>@jess</small></h5>\r\n        <p class=\"text-muted\">February 22, 2014 at 01:59 PM</p>\r\n        <p class=\"fs-mini\">\r\n          Check out this awesome photo I made in Italy last summer. Seems it was lost somewhere deep inside\r\n          my brand new HDD 40TB. Thanks god I found it!\r\n        </p>\r\n        <footer>\r\n          <div class=\"clearfix\">\r\n            <ul class=\"post-links mt-sm pull-left\">\r\n              <li><a href=\"#\">1 hour</a></li>\r\n              <li><a href=\"#\"><span class=\"text-danger\"><i class=\"fa fa-heart-o\"></i> Like</span></a></li>\r\n              <li><a href=\"#\">Comment</a></li>\r\n            </ul>\r\n\r\n            <span class=\"thumb thumb-sm pull-right\">\r\n              <a href=\"#\">\r\n                <img class=\"img-circle\" src=\"assets/img/people/a1.jpg\">\r\n              </a>\r\n            </span>\r\n            <span class=\"thumb thumb-sm pull-right\">\r\n              <a href=\"#\"><img class=\"img-circle\" src=\"assets/img/people/a5.jpg\"></a>\r\n            </span>\r\n            <span class=\"thumb thumb-sm pull-right\">\r\n              <a href=\"#\"><img class=\"img-circle\" src=\"assets/img/people/a3.jpg\"></a>\r\n            </span>\r\n          </div>\r\n          <ul class=\"post-comments mt-sm\">\r\n            <li>\r\n              <span class=\"thumb-xs avatar pull-left mr-sm\">\r\n                <img class=\"img-circle\" src=\"assets/img/people/a1.jpg\" alt=\"...\">\r\n              </span>\r\n              <div class=\"comment-body\">\r\n                <h6 class=\"author fs-sm fw-semi-bold\">Ignacio Abad <small>6 mins ago</small></h6>\r\n                <p>Hey, have you heard anything about that?</p>\r\n              </div>\r\n            </li>\r\n            <li>\r\n              <span class=\"thumb-xs avatar pull-left mr-sm\">\r\n                <img class=\"img-circle\" src=\"assets/img/avatar.png\" alt=\"...\">\r\n              </span>\r\n              <div class=\"comment-body\">\r\n                <input class=\"form-control form-control-sm\" type=\"text\" placeholder=\"Write your comment...\">\r\n              </div>\r\n            </li>\r\n          </ul>\r\n        </footer>\r\n      </section>\r\n      <form class=\"mt\" action=\"#\">\r\n        <div class=\"form-group mb-0\">\r\n          <label class=\"sr-only\" for=\"new-event\">New event</label>\r\n          <textarea class=\"form-control\" id=\"new-event\" placeholder=\"Post something...\" rows=\"3\"></textarea>\r\n        </div>\r\n        <div class=\"btn-toolbar\">\r\n          <div class=\"btn-group\">\r\n            <a href=\"#\" class=\"btn btn-sm btn-gray\">\r\n              <i class=\"fa fa-camera fa-lg\"></i>\r\n            </a>\r\n            <a href=\"#\" class=\"btn btn-sm btn-gray\">\r\n              <i class=\"fa fa-map-marker fa-lg\"></i>\r\n            </a>\r\n          </div>\r\n          <button type=\"submit\" class=\"btn btn-danger btn-sm pull-right\">Post</button>\r\n        </div>\r\n      </form>\r\n    </section>\r\n  </div>\r\n</div>\r\n"
+module.exports = "<div id=\"snackbar\"></div>\r\n<div class=\"container\">\r\n    <div class=\"row\">\r\n        <div class=\"col-md-12 col-xs-12 col-sm-12\">\r\n                <div class=\"table-responsive\">          \r\n                        <table class=\"table table-bordered table-striped\">\r\n                          <thead>\r\n                            <tr>\r\n                              <th>#</th>\r\n                              <th>Product Name</th>\r\n                              <th>Quantity</th>\r\n                              <th>Price</th>\r\n                              <th>Assigned To</th>\r\n                            </tr>\r\n                          </thead>\r\n                          <tbody>\r\n                            <tr *ngFor=\"let order of AssignedItems;let i=index\">\r\n                              <td>{{i}}</td>\r\n                              <td>{{order.ProductName}}</td>\r\n                              <td>{{order.Quantity}}</td>\r\n                              <td>{{order.Price}}</td>\r\n                              <td>\r\n                                    <select class=\"selectType\" (change)=\"getSelectedUser(order,$event.target.value)\">\r\n                                      <option disabled selected>Select User</option>\r\n                                      <option *ngFor=\"let user of allEmployees\" value=\"{{user._id}}\">{{user.FullName}}</option>\r\n                                    </select>\r\n                            </td>\r\n                            </tr>\r\n                          </tbody>\r\n                        </table>\r\n                        </div>\r\n        </div>\r\n    </div>\r\n</div>"
+
+/***/ },
+
+/***/ "./src/models/employeeRole.ts":
+/***/ function(module, exports) {
+
+"use strict";
+"use strict";
+var EmployeeRole = (function () {
+    function EmployeeRole() {
+    }
+    return EmployeeRole;
+}());
+exports.EmployeeRole = EmployeeRole;
+
+
+/***/ },
+
+/***/ "./src/models/productType.ts":
+/***/ function(module, exports) {
+
+"use strict";
+"use strict";
+var ProductType = (function () {
+    function ProductType() {
+    }
+    return ProductType;
+}());
+exports.ProductType = ProductType;
+
+
+/***/ },
+
+/***/ "./src/services/employee.Service.ts":
+/***/ function(module, exports, __webpack_require__) {
+
+"use strict";
+"use strict";
+var core_1 = __webpack_require__("./node_modules/@angular/core/index.js");
+var http_1 = __webpack_require__("./node_modules/@angular/http/index.js");
+var http_2 = __webpack_require__("./node_modules/@angular/http/index.js");
+__webpack_require__("./node_modules/rxjs/add/operator/map.js");
+__webpack_require__("./node_modules/rxjs/add/operator/do.js");
+var Server_1 = __webpack_require__("./src/utilities/Server.ts");
+var employeeRole_1 = __webpack_require__("./src/models/employeeRole.ts");
+var EmployeeService = (function () {
+    function EmployeeService(_http) {
+        this._http = _http;
+        this._addEmployeeURL = 'employees/addEmployee';
+        this.getEmployeeRolesURL = 'app/employees/EmployeeRole.js';
+        var server = new Server_1.Server();
+        this.baseURL = server.getServerURL();
+    }
+    EmployeeService.prototype.addEmployee = function (employee) {
+        var headers = new http_2.Headers({ 'Content-Type': 'application/json' });
+        var options = new http_2.RequestOptions({ headers: headers });
+        return this._http.post(this.baseURL + this._addEmployeeURL, employee, options)
+            .map(this.extractData);
+    };
+    EmployeeService.prototype.getEmployeeRoles = function () {
+        var employeeRoles = [];
+        var employeeRole = new employeeRole_1.EmployeeRole();
+        employeeRole.Name = "Master";
+        employeeRole.RoleID = 1;
+        employeeRoles.push(employeeRole);
+        employeeRole = new employeeRole_1.EmployeeRole();
+        employeeRole.Name = "Shoe Maker";
+        employeeRole.RoleID = 2;
+        employeeRoles.push(employeeRole);
+        employeeRole = new employeeRole_1.EmployeeRole();
+        employeeRole.Name = "Sticher";
+        employeeRole.RoleID = 3;
+        employeeRoles.push(employeeRole);
+        employeeRole = new employeeRole_1.EmployeeRole();
+        employeeRole.Name = "Embroidery worker";
+        employeeRole.RoleID = 4;
+        employeeRoles.push(employeeRole);
+        return employeeRoles;
+    };
+    EmployeeService.prototype.extractData = function (res) {
+        var body = res.json();
+        console.log("Extract Data");
+        console.log(body);
+        return body.data || {};
+    };
+    EmployeeService.prototype.getEmployees = function () {
+        var headers = new http_2.Headers();
+        headers.append('Content-Type', 'application/json; charset=UTF-8');
+        return this._http.get(this.baseURL + "employees/getAllEmployees", { headers: headers })
+            .map(function (res) { return res.json(); });
+    };
+    EmployeeService.prototype.login = function (username, password) {
+        var data;
+        data = { UserName: username, Password: password };
+        var headers = new http_2.Headers();
+        headers.append('Content-Type', 'application/json; charset=UTF-8');
+        return this._http.post(this.baseURL + "employees/login", data, { headers: headers })
+            .map(function (res) { return res.json(); });
+    };
+    EmployeeService.prototype.getAssignedItems = function (assignedTo) {
+        var data;
+        data = { AssignedTo: assignedTo };
+        var headers = new http_2.Headers();
+        headers.append('Content-Type', 'application/json; charset=UTF-8');
+        return this._http.post(this.baseURL + "employees/getMyOrderItems", data, { headers: headers })
+            .map(function (res) { return res.json(); });
+    };
+    EmployeeService = __decorate([
+        core_1.Injectable(), 
+        __metadata('design:paramtypes', [(typeof (_a = typeof http_1.Http !== 'undefined' && http_1.Http) === 'function' && _a) || Object])
+    ], EmployeeService);
+    return EmployeeService;
+    var _a;
+}());
+exports.EmployeeService = EmployeeService;
+
+
+/***/ },
+
+/***/ "./src/services/order.Service.ts":
+/***/ function(module, exports, __webpack_require__) {
+
+"use strict";
+"use strict";
+var core_1 = __webpack_require__("./node_modules/@angular/core/index.js");
+var http_1 = __webpack_require__("./node_modules/@angular/http/index.js");
+var http_2 = __webpack_require__("./node_modules/@angular/http/index.js");
+__webpack_require__("./node_modules/rxjs/add/operator/map.js");
+__webpack_require__("./node_modules/rxjs/add/operator/do.js");
+var productType_1 = __webpack_require__("./src/models/productType.ts");
+var Server_1 = __webpack_require__("./src/utilities/Server.ts");
+var OrderService = (function () {
+    function OrderService(_http) {
+        this._http = _http;
+        this._addCustomerOrder = 'orders/addCustomerOrder';
+        var server = new Server_1.Server();
+        this.baseURL = server.getServerURL();
+    }
+    OrderService.prototype.addCustomerOrder = function (customerOrder) {
+        console.log(customerOrder);
+        var headers = new http_2.Headers({ 'Content-Type': 'application/json' });
+        var options = new http_2.RequestOptions({ headers: headers });
+        return this._http.post(this.baseURL + this._addCustomerOrder, customerOrder, options)
+            .map(this.extractData);
+    };
+    OrderService.prototype.getProductTypes = function () {
+        var productTypes = [];
+        var productType = new productType_1.ProductType;
+        productType.Name = "Shalwar Kameez";
+        productType.TypeId = 1;
+        productTypes.push(productType);
+        productType = new productType_1.ProductType();
+        productType.Name = "Coat";
+        productType.TypeId = 2;
+        productTypes.push(productType);
+        productType = new productType_1.ProductType();
+        productType.Name = "Waist Coat";
+        productType.TypeId = 3;
+        productTypes.push(productType);
+        productType = new productType_1.ProductType();
+        productType.Name = "Sherwani";
+        productType.TypeId = 4;
+        productTypes.push(productType);
+        productType = new productType_1.ProductType();
+        productType.Name = "Pent";
+        productType.TypeId = 5;
+        productTypes.push(productType);
+        return productTypes;
+    };
+    OrderService.prototype.extractData = function (res) {
+        var body = res.json();
+        console.log("Extract Data");
+        console.log(body);
+        return body.data || {};
+    };
+    OrderService.prototype.AssignThisOrderItemToUser = function (orderItem, assignedBy, stitcher, master) {
+        var data;
+        data = { OrderItemId: orderItem, AssignedBy: assignedBy, SticherName: stitcher, MasterName: master };
+        var headers = new http_2.Headers();
+        headers.append('Content-Type', 'application/json; charset=UTF-8');
+        return this._http.post(this.baseURL + "orders/changeOrderItemAsignee", data, { headers: headers })
+            .map(function (res) { return res.json(); });
+    };
+    OrderService.prototype.addUserSystem = function (CustomerId, Name, Password) {
+        var data;
+        data = { EmployeeId: CustomerId, UserName: Name, Password: Password };
+        var headers = new http_2.Headers();
+        headers.append('Content-Type', 'application/json; charset=UTF-8');
+        return this._http.post(this.baseURL + "/employees/addSystemUser", data, { headers: headers })
+            .map(function (res) { return res.json(); });
+    };
+    OrderService.prototype.getOrdersListByOrderStatus = function (elem) {
+        var headers = new http_2.Headers();
+        headers.append('Content-Type', 'application/json; charset=UTF-8');
+        return this._http.get(this.baseURL + "orders/getOrdersByStatus?OrderStatus=" + elem, { headers: headers })
+            .map(function (res) { return res.json(); });
+    };
+    OrderService.prototype.getOrderItem = function (elem) {
+        var headers = new http_2.Headers();
+        headers.append('Content-Type', 'application/json; charset=UTF-8');
+        return this._http.get(this.baseURL + "orders/getOrderItemsByStatus?OrderItemStatus=" + elem, { headers: headers })
+            .map(function (res) { return res.json(); });
+    };
+    OrderService.prototype.getDetailsForOrder = function (id) {
+        var headers = new http_2.Headers();
+        headers.append('Content-Type', 'application/json; charset=UTF-8');
+        return this._http.get(this.baseURL + "orders/getOrderByOrderId?orderId=" + id, { headers: headers })
+            .map(function (res) { return res.json(); });
+    };
+    OrderService.prototype.editOrderStatus = function (elem, orderId) {
+        var data;
+        data = { OrderId: orderId, OrderStatus: elem };
+        var headers = new http_2.Headers();
+        headers.append('Content-Type', 'application/json; charset=UTF-8');
+        return this._http.post(this.baseURL + "orders/changeOrderStatus", data, { headers: headers })
+            .map(function (res) { return res.json(); });
+    };
+    OrderService = __decorate([
+        core_1.Injectable(), 
+        __metadata('design:paramtypes', [(typeof (_a = typeof http_1.Http !== 'undefined' && http_1.Http) === 'function' && _a) || Object])
+    ], OrderService);
+    return OrderService;
+    var _a;
+}());
+exports.OrderService = OrderService;
+
+
+/***/ },
+
+/***/ "./src/utilities/Server.ts":
+/***/ function(module, exports) {
+
+"use strict";
+"use strict";
+var Server = (function () {
+    function Server() {
+    }
+    Server.prototype.getServerURL = function () {
+        // return "http://localhost:3100/";
+        return "https://ssbotiquenew.azurewebsites.net/";
+    };
+    return Server;
+}());
+exports.Server = Server;
+
 
 /***/ }
 

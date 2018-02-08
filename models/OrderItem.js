@@ -14,6 +14,8 @@ var OrderItemSchema = new mongoose.Schema({
     Quantity:Number,
     OnCreationDateUTC:Number,
     OnUpdatetedUTC:Number,
+    DeliveryDate:Number,
+    TryDate:Number,
     OrderItemStatus:Number,
     CustomerId :  {type: mongoose.Schema.Types.ObjectId, ref: 'Customer'},
     SticherName : {type: mongoose.Schema.Types.ObjectId, ref: 'Employee'},

@@ -1,2599 +1,852 @@
 webpackJsonpac__name_([21],{
 
-/***/ "./node_modules/jquery-ui/ui/core.js":
-/***/ function(module, exports, __webpack_require__) {
-
-var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
- * jQuery UI Core 1.11.4
- * http://jqueryui.com
- *
- * Copyright jQuery Foundation and other contributors
- * Released under the MIT license.
- * http://jquery.org/license
- *
- * http://api.jqueryui.com/category/ui-core/
- */
-(function( factory ) {
-	if ( true ) {
-
-		// AMD. Register as an anonymous module.
-		!(__WEBPACK_AMD_DEFINE_ARRAY__ = [ __webpack_require__("./node_modules/jquery/dist/jquery.js") ], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
-	} else {
-
-		// Browser globals
-		factory( jQuery );
-	}
-}(function( $ ) {
-
-// $.ui might exist from components with no dependencies, e.g., $.ui.position
-$.ui = $.ui || {};
-
-$.extend( $.ui, {
-	version: "1.11.4",
-
-	keyCode: {
-		BACKSPACE: 8,
-		COMMA: 188,
-		DELETE: 46,
-		DOWN: 40,
-		END: 35,
-		ENTER: 13,
-		ESCAPE: 27,
-		HOME: 36,
-		LEFT: 37,
-		PAGE_DOWN: 34,
-		PAGE_UP: 33,
-		PERIOD: 190,
-		RIGHT: 39,
-		SPACE: 32,
-		TAB: 9,
-		UP: 38
-	}
-});
-
-// plugins
-$.fn.extend({
-	scrollParent: function( includeHidden ) {
-		var position = this.css( "position" ),
-			excludeStaticParent = position === "absolute",
-			overflowRegex = includeHidden ? /(auto|scroll|hidden)/ : /(auto|scroll)/,
-			scrollParent = this.parents().filter( function() {
-				var parent = $( this );
-				if ( excludeStaticParent && parent.css( "position" ) === "static" ) {
-					return false;
-				}
-				return overflowRegex.test( parent.css( "overflow" ) + parent.css( "overflow-y" ) + parent.css( "overflow-x" ) );
-			}).eq( 0 );
-
-		return position === "fixed" || !scrollParent.length ? $( this[ 0 ].ownerDocument || document ) : scrollParent;
-	},
-
-	uniqueId: (function() {
-		var uuid = 0;
-
-		return function() {
-			return this.each(function() {
-				if ( !this.id ) {
-					this.id = "ui-id-" + ( ++uuid );
-				}
-			});
-		};
-	})(),
-
-	removeUniqueId: function() {
-		return this.each(function() {
-			if ( /^ui-id-\d+$/.test( this.id ) ) {
-				$( this ).removeAttr( "id" );
-			}
-		});
-	}
-});
-
-// selectors
-function focusable( element, isTabIndexNotNaN ) {
-	var map, mapName, img,
-		nodeName = element.nodeName.toLowerCase();
-	if ( "area" === nodeName ) {
-		map = element.parentNode;
-		mapName = map.name;
-		if ( !element.href || !mapName || map.nodeName.toLowerCase() !== "map" ) {
-			return false;
-		}
-		img = $( "img[usemap='#" + mapName + "']" )[ 0 ];
-		return !!img && visible( img );
-	}
-	return ( /^(input|select|textarea|button|object)$/.test( nodeName ) ?
-		!element.disabled :
-		"a" === nodeName ?
-			element.href || isTabIndexNotNaN :
-			isTabIndexNotNaN) &&
-		// the element and all of its ancestors must be visible
-		visible( element );
-}
-
-function visible( element ) {
-	return $.expr.filters.visible( element ) &&
-		!$( element ).parents().addBack().filter(function() {
-			return $.css( this, "visibility" ) === "hidden";
-		}).length;
-}
-
-$.extend( $.expr[ ":" ], {
-	data: $.expr.createPseudo ?
-		$.expr.createPseudo(function( dataName ) {
-			return function( elem ) {
-				return !!$.data( elem, dataName );
-			};
-		}) :
-		// support: jQuery <1.8
-		function( elem, i, match ) {
-			return !!$.data( elem, match[ 3 ] );
-		},
-
-	focusable: function( element ) {
-		return focusable( element, !isNaN( $.attr( element, "tabindex" ) ) );
-	},
-
-	tabbable: function( element ) {
-		var tabIndex = $.attr( element, "tabindex" ),
-			isTabIndexNaN = isNaN( tabIndex );
-		return ( isTabIndexNaN || tabIndex >= 0 ) && focusable( element, !isTabIndexNaN );
-	}
-});
-
-// support: jQuery <1.8
-if ( !$( "<a>" ).outerWidth( 1 ).jquery ) {
-	$.each( [ "Width", "Height" ], function( i, name ) {
-		var side = name === "Width" ? [ "Left", "Right" ] : [ "Top", "Bottom" ],
-			type = name.toLowerCase(),
-			orig = {
-				innerWidth: $.fn.innerWidth,
-				innerHeight: $.fn.innerHeight,
-				outerWidth: $.fn.outerWidth,
-				outerHeight: $.fn.outerHeight
-			};
-
-		function reduce( elem, size, border, margin ) {
-			$.each( side, function() {
-				size -= parseFloat( $.css( elem, "padding" + this ) ) || 0;
-				if ( border ) {
-					size -= parseFloat( $.css( elem, "border" + this + "Width" ) ) || 0;
-				}
-				if ( margin ) {
-					size -= parseFloat( $.css( elem, "margin" + this ) ) || 0;
-				}
-			});
-			return size;
-		}
-
-		$.fn[ "inner" + name ] = function( size ) {
-			if ( size === undefined ) {
-				return orig[ "inner" + name ].call( this );
-			}
-
-			return this.each(function() {
-				$( this ).css( type, reduce( this, size ) + "px" );
-			});
-		};
-
-		$.fn[ "outer" + name] = function( size, margin ) {
-			if ( typeof size !== "number" ) {
-				return orig[ "outer" + name ].call( this, size );
-			}
-
-			return this.each(function() {
-				$( this).css( type, reduce( this, size, true, margin ) + "px" );
-			});
-		};
-	});
-}
-
-// support: jQuery <1.8
-if ( !$.fn.addBack ) {
-	$.fn.addBack = function( selector ) {
-		return this.add( selector == null ?
-			this.prevObject : this.prevObject.filter( selector )
-		);
-	};
-}
-
-// support: jQuery 1.6.1, 1.6.2 (http://bugs.jquery.com/ticket/9413)
-if ( $( "<a>" ).data( "a-b", "a" ).removeData( "a-b" ).data( "a-b" ) ) {
-	$.fn.removeData = (function( removeData ) {
-		return function( key ) {
-			if ( arguments.length ) {
-				return removeData.call( this, $.camelCase( key ) );
-			} else {
-				return removeData.call( this );
-			}
-		};
-	})( $.fn.removeData );
-}
-
-// deprecated
-$.ui.ie = !!/msie [\w.]+/.exec( navigator.userAgent.toLowerCase() );
-
-$.fn.extend({
-	focus: (function( orig ) {
-		return function( delay, fn ) {
-			return typeof delay === "number" ?
-				this.each(function() {
-					var elem = this;
-					setTimeout(function() {
-						$( elem ).focus();
-						if ( fn ) {
-							fn.call( elem );
-						}
-					}, delay );
-				}) :
-				orig.apply( this, arguments );
-		};
-	})( $.fn.focus ),
-
-	disableSelection: (function() {
-		var eventType = "onselectstart" in document.createElement( "div" ) ?
-			"selectstart" :
-			"mousedown";
-
-		return function() {
-			return this.bind( eventType + ".ui-disableSelection", function( event ) {
-				event.preventDefault();
-			});
-		};
-	})(),
-
-	enableSelection: function() {
-		return this.unbind( ".ui-disableSelection" );
-	},
-
-	zIndex: function( zIndex ) {
-		if ( zIndex !== undefined ) {
-			return this.css( "zIndex", zIndex );
-		}
-
-		if ( this.length ) {
-			var elem = $( this[ 0 ] ), position, value;
-			while ( elem.length && elem[ 0 ] !== document ) {
-				// Ignore z-index if position is set to a value where z-index is ignored by the browser
-				// This makes behavior of this function consistent across browsers
-				// WebKit always returns auto if the element is positioned
-				position = elem.css( "position" );
-				if ( position === "absolute" || position === "relative" || position === "fixed" ) {
-					// IE returns 0 when zIndex is not specified
-					// other browsers return a string
-					// we ignore the case of nested elements with an explicit value of 0
-					// <div style="z-index: -10;"><div style="z-index: 0;"></div></div>
-					value = parseInt( elem.css( "zIndex" ), 10 );
-					if ( !isNaN( value ) && value !== 0 ) {
-						return value;
-					}
-				}
-				elem = elem.parent();
-			}
-		}
-
-		return 0;
-	}
-});
-
-// $.ui.plugin is deprecated. Use $.widget() extensions instead.
-$.ui.plugin = {
-	add: function( module, option, set ) {
-		var i,
-			proto = $.ui[ module ].prototype;
-		for ( i in set ) {
-			proto.plugins[ i ] = proto.plugins[ i ] || [];
-			proto.plugins[ i ].push( [ option, set[ i ] ] );
-		}
-	},
-	call: function( instance, name, args, allowDisconnected ) {
-		var i,
-			set = instance.plugins[ name ];
-
-		if ( !set ) {
-			return;
-		}
-
-		if ( !allowDisconnected && ( !instance.element[ 0 ].parentNode || instance.element[ 0 ].parentNode.nodeType === 11 ) ) {
-			return;
-		}
-
-		for ( i = 0; i < set.length; i++ ) {
-			if ( instance.options[ set[ i ][ 0 ] ] ) {
-				set[ i ][ 1 ].apply( instance.element, args );
-			}
-		}
-	}
-};
-
-}));
-
-
-/***/ },
-
-/***/ "./node_modules/jquery-ui/ui/mouse.js":
-/***/ function(module, exports, __webpack_require__) {
-
-var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
- * jQuery UI Mouse 1.11.4
- * http://jqueryui.com
- *
- * Copyright jQuery Foundation and other contributors
- * Released under the MIT license.
- * http://jquery.org/license
- *
- * http://api.jqueryui.com/mouse/
- */
-(function( factory ) {
-	if ( true ) {
-
-		// AMD. Register as an anonymous module.
-		!(__WEBPACK_AMD_DEFINE_ARRAY__ = [
-			__webpack_require__("./node_modules/jquery/dist/jquery.js"),
-			__webpack_require__("./node_modules/jquery-ui/ui/widget.js")
-		], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
-	} else {
-
-		// Browser globals
-		factory( jQuery );
-	}
-}(function( $ ) {
-
-var mouseHandled = false;
-$( document ).mouseup( function() {
-	mouseHandled = false;
-});
-
-return $.widget("ui.mouse", {
-	version: "1.11.4",
-	options: {
-		cancel: "input,textarea,button,select,option",
-		distance: 1,
-		delay: 0
-	},
-	_mouseInit: function() {
-		var that = this;
-
-		this.element
-			.bind("mousedown." + this.widgetName, function(event) {
-				return that._mouseDown(event);
-			})
-			.bind("click." + this.widgetName, function(event) {
-				if (true === $.data(event.target, that.widgetName + ".preventClickEvent")) {
-					$.removeData(event.target, that.widgetName + ".preventClickEvent");
-					event.stopImmediatePropagation();
-					return false;
-				}
-			});
-
-		this.started = false;
-	},
-
-	// TODO: make sure destroying one instance of mouse doesn't mess with
-	// other instances of mouse
-	_mouseDestroy: function() {
-		this.element.unbind("." + this.widgetName);
-		if ( this._mouseMoveDelegate ) {
-			this.document
-				.unbind("mousemove." + this.widgetName, this._mouseMoveDelegate)
-				.unbind("mouseup." + this.widgetName, this._mouseUpDelegate);
-		}
-	},
-
-	_mouseDown: function(event) {
-		// don't let more than one widget handle mouseStart
-		if ( mouseHandled ) {
-			return;
-		}
-
-		this._mouseMoved = false;
-
-		// we may have missed mouseup (out of window)
-		(this._mouseStarted && this._mouseUp(event));
-
-		this._mouseDownEvent = event;
-
-		var that = this,
-			btnIsLeft = (event.which === 1),
-			// event.target.nodeName works around a bug in IE 8 with
-			// disabled inputs (#7620)
-			elIsCancel = (typeof this.options.cancel === "string" && event.target.nodeName ? $(event.target).closest(this.options.cancel).length : false);
-		if (!btnIsLeft || elIsCancel || !this._mouseCapture(event)) {
-			return true;
-		}
-
-		this.mouseDelayMet = !this.options.delay;
-		if (!this.mouseDelayMet) {
-			this._mouseDelayTimer = setTimeout(function() {
-				that.mouseDelayMet = true;
-			}, this.options.delay);
-		}
-
-		if (this._mouseDistanceMet(event) && this._mouseDelayMet(event)) {
-			this._mouseStarted = (this._mouseStart(event) !== false);
-			if (!this._mouseStarted) {
-				event.preventDefault();
-				return true;
-			}
-		}
-
-		// Click event may never have fired (Gecko & Opera)
-		if (true === $.data(event.target, this.widgetName + ".preventClickEvent")) {
-			$.removeData(event.target, this.widgetName + ".preventClickEvent");
-		}
-
-		// these delegates are required to keep context
-		this._mouseMoveDelegate = function(event) {
-			return that._mouseMove(event);
-		};
-		this._mouseUpDelegate = function(event) {
-			return that._mouseUp(event);
-		};
-
-		this.document
-			.bind( "mousemove." + this.widgetName, this._mouseMoveDelegate )
-			.bind( "mouseup." + this.widgetName, this._mouseUpDelegate );
-
-		event.preventDefault();
-
-		mouseHandled = true;
-		return true;
-	},
-
-	_mouseMove: function(event) {
-		// Only check for mouseups outside the document if you've moved inside the document
-		// at least once. This prevents the firing of mouseup in the case of IE<9, which will
-		// fire a mousemove event if content is placed under the cursor. See #7778
-		// Support: IE <9
-		if ( this._mouseMoved ) {
-			// IE mouseup check - mouseup happened when mouse was out of window
-			if ($.ui.ie && ( !document.documentMode || document.documentMode < 9 ) && !event.button) {
-				return this._mouseUp(event);
-
-			// Iframe mouseup check - mouseup occurred in another document
-			} else if ( !event.which ) {
-				return this._mouseUp( event );
-			}
-		}
-
-		if ( event.which || event.button ) {
-			this._mouseMoved = true;
-		}
-
-		if (this._mouseStarted) {
-			this._mouseDrag(event);
-			return event.preventDefault();
-		}
-
-		if (this._mouseDistanceMet(event) && this._mouseDelayMet(event)) {
-			this._mouseStarted =
-				(this._mouseStart(this._mouseDownEvent, event) !== false);
-			(this._mouseStarted ? this._mouseDrag(event) : this._mouseUp(event));
-		}
-
-		return !this._mouseStarted;
-	},
-
-	_mouseUp: function(event) {
-		this.document
-			.unbind( "mousemove." + this.widgetName, this._mouseMoveDelegate )
-			.unbind( "mouseup." + this.widgetName, this._mouseUpDelegate );
-
-		if (this._mouseStarted) {
-			this._mouseStarted = false;
-
-			if (event.target === this._mouseDownEvent.target) {
-				$.data(event.target, this.widgetName + ".preventClickEvent", true);
-			}
-
-			this._mouseStop(event);
-		}
-
-		mouseHandled = false;
-		return false;
-	},
-
-	_mouseDistanceMet: function(event) {
-		return (Math.max(
-				Math.abs(this._mouseDownEvent.pageX - event.pageX),
-				Math.abs(this._mouseDownEvent.pageY - event.pageY)
-			) >= this.options.distance
-		);
-	},
-
-	_mouseDelayMet: function(/* event */) {
-		return this.mouseDelayMet;
-	},
-
-	// These are placeholder methods, to be overriden by extending plugin
-	_mouseStart: function(/* event */) {},
-	_mouseDrag: function(/* event */) {},
-	_mouseStop: function(/* event */) {},
-	_mouseCapture: function(/* event */) { return true; }
-});
-
-}));
-
-
-/***/ },
-
-/***/ "./node_modules/jquery-ui/ui/sortable.js":
-/***/ function(module, exports, __webpack_require__) {
-
-var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
- * jQuery UI Sortable 1.11.4
- * http://jqueryui.com
- *
- * Copyright jQuery Foundation and other contributors
- * Released under the MIT license.
- * http://jquery.org/license
- *
- * http://api.jqueryui.com/sortable/
- */
-(function( factory ) {
-	if ( true ) {
-
-		// AMD. Register as an anonymous module.
-		!(__WEBPACK_AMD_DEFINE_ARRAY__ = [
-			__webpack_require__("./node_modules/jquery/dist/jquery.js"),
-			__webpack_require__("./node_modules/jquery-ui/ui/core.js"),
-			__webpack_require__("./node_modules/jquery-ui/ui/mouse.js"),
-			__webpack_require__("./node_modules/jquery-ui/ui/widget.js")
-		], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
-	} else {
-
-		// Browser globals
-		factory( jQuery );
-	}
-}(function( $ ) {
-
-return $.widget("ui.sortable", $.ui.mouse, {
-	version: "1.11.4",
-	widgetEventPrefix: "sort",
-	ready: false,
-	options: {
-		appendTo: "parent",
-		axis: false,
-		connectWith: false,
-		containment: false,
-		cursor: "auto",
-		cursorAt: false,
-		dropOnEmpty: true,
-		forcePlaceholderSize: false,
-		forceHelperSize: false,
-		grid: false,
-		handle: false,
-		helper: "original",
-		items: "> *",
-		opacity: false,
-		placeholder: false,
-		revert: false,
-		scroll: true,
-		scrollSensitivity: 20,
-		scrollSpeed: 20,
-		scope: "default",
-		tolerance: "intersect",
-		zIndex: 1000,
-
-		// callbacks
-		activate: null,
-		beforeStop: null,
-		change: null,
-		deactivate: null,
-		out: null,
-		over: null,
-		receive: null,
-		remove: null,
-		sort: null,
-		start: null,
-		stop: null,
-		update: null
-	},
-
-	_isOverAxis: function( x, reference, size ) {
-		return ( x >= reference ) && ( x < ( reference + size ) );
-	},
-
-	_isFloating: function( item ) {
-		return (/left|right/).test(item.css("float")) || (/inline|table-cell/).test(item.css("display"));
-	},
-
-	_create: function() {
-		this.containerCache = {};
-		this.element.addClass("ui-sortable");
-
-		//Get the items
-		this.refresh();
-
-		//Let's determine the parent's offset
-		this.offset = this.element.offset();
-
-		//Initialize mouse events for interaction
-		this._mouseInit();
-
-		this._setHandleClassName();
-
-		//We're ready to go
-		this.ready = true;
-
-	},
-
-	_setOption: function( key, value ) {
-		this._super( key, value );
-
-		if ( key === "handle" ) {
-			this._setHandleClassName();
-		}
-	},
-
-	_setHandleClassName: function() {
-		this.element.find( ".ui-sortable-handle" ).removeClass( "ui-sortable-handle" );
-		$.each( this.items, function() {
-			( this.instance.options.handle ?
-				this.item.find( this.instance.options.handle ) : this.item )
-				.addClass( "ui-sortable-handle" );
-		});
-	},
-
-	_destroy: function() {
-		this.element
-			.removeClass( "ui-sortable ui-sortable-disabled" )
-			.find( ".ui-sortable-handle" )
-				.removeClass( "ui-sortable-handle" );
-		this._mouseDestroy();
-
-		for ( var i = this.items.length - 1; i >= 0; i-- ) {
-			this.items[i].item.removeData(this.widgetName + "-item");
-		}
-
-		return this;
-	},
-
-	_mouseCapture: function(event, overrideHandle) {
-		var currentItem = null,
-			validHandle = false,
-			that = this;
-
-		if (this.reverting) {
-			return false;
-		}
-
-		if(this.options.disabled || this.options.type === "static") {
-			return false;
-		}
-
-		//We have to refresh the items data once first
-		this._refreshItems(event);
-
-		//Find out if the clicked node (or one of its parents) is a actual item in this.items
-		$(event.target).parents().each(function() {
-			if($.data(this, that.widgetName + "-item") === that) {
-				currentItem = $(this);
-				return false;
-			}
-		});
-		if($.data(event.target, that.widgetName + "-item") === that) {
-			currentItem = $(event.target);
-		}
-
-		if(!currentItem) {
-			return false;
-		}
-		if(this.options.handle && !overrideHandle) {
-			$(this.options.handle, currentItem).find("*").addBack().each(function() {
-				if(this === event.target) {
-					validHandle = true;
-				}
-			});
-			if(!validHandle) {
-				return false;
-			}
-		}
-
-		this.currentItem = currentItem;
-		this._removeCurrentsFromItems();
-		return true;
-
-	},
-
-	_mouseStart: function(event, overrideHandle, noActivation) {
-
-		var i, body,
-			o = this.options;
-
-		this.currentContainer = this;
-
-		//We only need to call refreshPositions, because the refreshItems call has been moved to mouseCapture
-		this.refreshPositions();
-
-		//Create and append the visible helper
-		this.helper = this._createHelper(event);
-
-		//Cache the helper size
-		this._cacheHelperProportions();
-
-		/*
-		 * - Position generation -
-		 * This block generates everything position related - it's the core of draggables.
-		 */
-
-		//Cache the margins of the original element
-		this._cacheMargins();
-
-		//Get the next scrolling parent
-		this.scrollParent = this.helper.scrollParent();
-
-		//The element's absolute position on the page minus margins
-		this.offset = this.currentItem.offset();
-		this.offset = {
-			top: this.offset.top - this.margins.top,
-			left: this.offset.left - this.margins.left
-		};
-
-		$.extend(this.offset, {
-			click: { //Where the click happened, relative to the element
-				left: event.pageX - this.offset.left,
-				top: event.pageY - this.offset.top
-			},
-			parent: this._getParentOffset(),
-			relative: this._getRelativeOffset() //This is a relative to absolute position minus the actual position calculation - only used for relative positioned helper
-		});
-
-		// Only after we got the offset, we can change the helper's position to absolute
-		// TODO: Still need to figure out a way to make relative sorting possible
-		this.helper.css("position", "absolute");
-		this.cssPosition = this.helper.css("position");
-
-		//Generate the original position
-		this.originalPosition = this._generatePosition(event);
-		this.originalPageX = event.pageX;
-		this.originalPageY = event.pageY;
-
-		//Adjust the mouse offset relative to the helper if "cursorAt" is supplied
-		(o.cursorAt && this._adjustOffsetFromHelper(o.cursorAt));
-
-		//Cache the former DOM position
-		this.domPosition = { prev: this.currentItem.prev()[0], parent: this.currentItem.parent()[0] };
-
-		//If the helper is not the original, hide the original so it's not playing any role during the drag, won't cause anything bad this way
-		if(this.helper[0] !== this.currentItem[0]) {
-			this.currentItem.hide();
-		}
-
-		//Create the placeholder
-		this._createPlaceholder();
-
-		//Set a containment if given in the options
-		if(o.containment) {
-			this._setContainment();
-		}
-
-		if( o.cursor && o.cursor !== "auto" ) { // cursor option
-			body = this.document.find( "body" );
-
-			// support: IE
-			this.storedCursor = body.css( "cursor" );
-			body.css( "cursor", o.cursor );
-
-			this.storedStylesheet = $( "<style>*{ cursor: "+o.cursor+" !important; }</style>" ).appendTo( body );
-		}
-
-		if(o.opacity) { // opacity option
-			if (this.helper.css("opacity")) {
-				this._storedOpacity = this.helper.css("opacity");
-			}
-			this.helper.css("opacity", o.opacity);
-		}
-
-		if(o.zIndex) { // zIndex option
-			if (this.helper.css("zIndex")) {
-				this._storedZIndex = this.helper.css("zIndex");
-			}
-			this.helper.css("zIndex", o.zIndex);
-		}
-
-		//Prepare scrolling
-		if(this.scrollParent[0] !== this.document[0] && this.scrollParent[0].tagName !== "HTML") {
-			this.overflowOffset = this.scrollParent.offset();
-		}
-
-		//Call callbacks
-		this._trigger("start", event, this._uiHash());
-
-		//Recache the helper size
-		if(!this._preserveHelperProportions) {
-			this._cacheHelperProportions();
-		}
-
-
-		//Post "activate" events to possible containers
-		if( !noActivation ) {
-			for ( i = this.containers.length - 1; i >= 0; i-- ) {
-				this.containers[ i ]._trigger( "activate", event, this._uiHash( this ) );
-			}
-		}
-
-		//Prepare possible droppables
-		if($.ui.ddmanager) {
-			$.ui.ddmanager.current = this;
-		}
-
-		if ($.ui.ddmanager && !o.dropBehaviour) {
-			$.ui.ddmanager.prepareOffsets(this, event);
-		}
-
-		this.dragging = true;
-
-		this.helper.addClass("ui-sortable-helper");
-		this._mouseDrag(event); //Execute the drag once - this causes the helper not to be visible before getting its correct position
-		return true;
-
-	},
-
-	_mouseDrag: function(event) {
-		var i, item, itemElement, intersection,
-			o = this.options,
-			scrolled = false;
-
-		//Compute the helpers position
-		this.position = this._generatePosition(event);
-		this.positionAbs = this._convertPositionTo("absolute");
-
-		if (!this.lastPositionAbs) {
-			this.lastPositionAbs = this.positionAbs;
-		}
-
-		//Do scrolling
-		if(this.options.scroll) {
-			if(this.scrollParent[0] !== this.document[0] && this.scrollParent[0].tagName !== "HTML") {
-
-				if((this.overflowOffset.top + this.scrollParent[0].offsetHeight) - event.pageY < o.scrollSensitivity) {
-					this.scrollParent[0].scrollTop = scrolled = this.scrollParent[0].scrollTop + o.scrollSpeed;
-				} else if(event.pageY - this.overflowOffset.top < o.scrollSensitivity) {
-					this.scrollParent[0].scrollTop = scrolled = this.scrollParent[0].scrollTop - o.scrollSpeed;
-				}
-
-				if((this.overflowOffset.left + this.scrollParent[0].offsetWidth) - event.pageX < o.scrollSensitivity) {
-					this.scrollParent[0].scrollLeft = scrolled = this.scrollParent[0].scrollLeft + o.scrollSpeed;
-				} else if(event.pageX - this.overflowOffset.left < o.scrollSensitivity) {
-					this.scrollParent[0].scrollLeft = scrolled = this.scrollParent[0].scrollLeft - o.scrollSpeed;
-				}
-
-			} else {
-
-				if(event.pageY - this.document.scrollTop() < o.scrollSensitivity) {
-					scrolled = this.document.scrollTop(this.document.scrollTop() - o.scrollSpeed);
-				} else if(this.window.height() - (event.pageY - this.document.scrollTop()) < o.scrollSensitivity) {
-					scrolled = this.document.scrollTop(this.document.scrollTop() + o.scrollSpeed);
-				}
-
-				if(event.pageX - this.document.scrollLeft() < o.scrollSensitivity) {
-					scrolled = this.document.scrollLeft(this.document.scrollLeft() - o.scrollSpeed);
-				} else if(this.window.width() - (event.pageX - this.document.scrollLeft()) < o.scrollSensitivity) {
-					scrolled = this.document.scrollLeft(this.document.scrollLeft() + o.scrollSpeed);
-				}
-
-			}
-
-			if(scrolled !== false && $.ui.ddmanager && !o.dropBehaviour) {
-				$.ui.ddmanager.prepareOffsets(this, event);
-			}
-		}
-
-		//Regenerate the absolute position used for position checks
-		this.positionAbs = this._convertPositionTo("absolute");
-
-		//Set the helper position
-		if(!this.options.axis || this.options.axis !== "y") {
-			this.helper[0].style.left = this.position.left+"px";
-		}
-		if(!this.options.axis || this.options.axis !== "x") {
-			this.helper[0].style.top = this.position.top+"px";
-		}
-
-		//Rearrange
-		for (i = this.items.length - 1; i >= 0; i--) {
-
-			//Cache variables and intersection, continue if no intersection
-			item = this.items[i];
-			itemElement = item.item[0];
-			intersection = this._intersectsWithPointer(item);
-			if (!intersection) {
-				continue;
-			}
-
-			// Only put the placeholder inside the current Container, skip all
-			// items from other containers. This works because when moving
-			// an item from one container to another the
-			// currentContainer is switched before the placeholder is moved.
-			//
-			// Without this, moving items in "sub-sortables" can cause
-			// the placeholder to jitter between the outer and inner container.
-			if (item.instance !== this.currentContainer) {
-				continue;
-			}
-
-			// cannot intersect with itself
-			// no useless actions that have been done before
-			// no action if the item moved is the parent of the item checked
-			if (itemElement !== this.currentItem[0] &&
-				this.placeholder[intersection === 1 ? "next" : "prev"]()[0] !== itemElement &&
-				!$.contains(this.placeholder[0], itemElement) &&
-				(this.options.type === "semi-dynamic" ? !$.contains(this.element[0], itemElement) : true)
-			) {
-
-				this.direction = intersection === 1 ? "down" : "up";
-
-				if (this.options.tolerance === "pointer" || this._intersectsWithSides(item)) {
-					this._rearrange(event, item);
-				} else {
-					break;
-				}
-
-				this._trigger("change", event, this._uiHash());
-				break;
-			}
-		}
-
-		//Post events to containers
-		this._contactContainers(event);
-
-		//Interconnect with droppables
-		if($.ui.ddmanager) {
-			$.ui.ddmanager.drag(this, event);
-		}
-
-		//Call callbacks
-		this._trigger("sort", event, this._uiHash());
-
-		this.lastPositionAbs = this.positionAbs;
-		return false;
-
-	},
-
-	_mouseStop: function(event, noPropagation) {
-
-		if(!event) {
-			return;
-		}
-
-		//If we are using droppables, inform the manager about the drop
-		if ($.ui.ddmanager && !this.options.dropBehaviour) {
-			$.ui.ddmanager.drop(this, event);
-		}
-
-		if(this.options.revert) {
-			var that = this,
-				cur = this.placeholder.offset(),
-				axis = this.options.axis,
-				animation = {};
-
-			if ( !axis || axis === "x" ) {
-				animation.left = cur.left - this.offset.parent.left - this.margins.left + (this.offsetParent[0] === this.document[0].body ? 0 : this.offsetParent[0].scrollLeft);
-			}
-			if ( !axis || axis === "y" ) {
-				animation.top = cur.top - this.offset.parent.top - this.margins.top + (this.offsetParent[0] === this.document[0].body ? 0 : this.offsetParent[0].scrollTop);
-			}
-			this.reverting = true;
-			$(this.helper).animate( animation, parseInt(this.options.revert, 10) || 500, function() {
-				that._clear(event);
-			});
-		} else {
-			this._clear(event, noPropagation);
-		}
-
-		return false;
-
-	},
-
-	cancel: function() {
-
-		if(this.dragging) {
-
-			this._mouseUp({ target: null });
-
-			if(this.options.helper === "original") {
-				this.currentItem.css(this._storedCSS).removeClass("ui-sortable-helper");
-			} else {
-				this.currentItem.show();
-			}
-
-			//Post deactivating events to containers
-			for (var i = this.containers.length - 1; i >= 0; i--){
-				this.containers[i]._trigger("deactivate", null, this._uiHash(this));
-				if(this.containers[i].containerCache.over) {
-					this.containers[i]._trigger("out", null, this._uiHash(this));
-					this.containers[i].containerCache.over = 0;
-				}
-			}
-
-		}
-
-		if (this.placeholder) {
-			//$(this.placeholder[0]).remove(); would have been the jQuery way - unfortunately, it unbinds ALL events from the original node!
-			if(this.placeholder[0].parentNode) {
-				this.placeholder[0].parentNode.removeChild(this.placeholder[0]);
-			}
-			if(this.options.helper !== "original" && this.helper && this.helper[0].parentNode) {
-				this.helper.remove();
-			}
-
-			$.extend(this, {
-				helper: null,
-				dragging: false,
-				reverting: false,
-				_noFinalSort: null
-			});
-
-			if(this.domPosition.prev) {
-				$(this.domPosition.prev).after(this.currentItem);
-			} else {
-				$(this.domPosition.parent).prepend(this.currentItem);
-			}
-		}
-
-		return this;
-
-	},
-
-	serialize: function(o) {
-
-		var items = this._getItemsAsjQuery(o && o.connected),
-			str = [];
-		o = o || {};
-
-		$(items).each(function() {
-			var res = ($(o.item || this).attr(o.attribute || "id") || "").match(o.expression || (/(.+)[\-=_](.+)/));
-			if (res) {
-				str.push((o.key || res[1]+"[]")+"="+(o.key && o.expression ? res[1] : res[2]));
-			}
-		});
-
-		if(!str.length && o.key) {
-			str.push(o.key + "=");
-		}
-
-		return str.join("&");
-
-	},
-
-	toArray: function(o) {
-
-		var items = this._getItemsAsjQuery(o && o.connected),
-			ret = [];
-
-		o = o || {};
-
-		items.each(function() { ret.push($(o.item || this).attr(o.attribute || "id") || ""); });
-		return ret;
-
-	},
-
-	/* Be careful with the following core functions */
-	_intersectsWith: function(item) {
-
-		var x1 = this.positionAbs.left,
-			x2 = x1 + this.helperProportions.width,
-			y1 = this.positionAbs.top,
-			y2 = y1 + this.helperProportions.height,
-			l = item.left,
-			r = l + item.width,
-			t = item.top,
-			b = t + item.height,
-			dyClick = this.offset.click.top,
-			dxClick = this.offset.click.left,
-			isOverElementHeight = ( this.options.axis === "x" ) || ( ( y1 + dyClick ) > t && ( y1 + dyClick ) < b ),
-			isOverElementWidth = ( this.options.axis === "y" ) || ( ( x1 + dxClick ) > l && ( x1 + dxClick ) < r ),
-			isOverElement = isOverElementHeight && isOverElementWidth;
-
-		if ( this.options.tolerance === "pointer" ||
-			this.options.forcePointerForContainers ||
-			(this.options.tolerance !== "pointer" && this.helperProportions[this.floating ? "width" : "height"] > item[this.floating ? "width" : "height"])
-		) {
-			return isOverElement;
-		} else {
-
-			return (l < x1 + (this.helperProportions.width / 2) && // Right Half
-				x2 - (this.helperProportions.width / 2) < r && // Left Half
-				t < y1 + (this.helperProportions.height / 2) && // Bottom Half
-				y2 - (this.helperProportions.height / 2) < b ); // Top Half
-
-		}
-	},
-
-	_intersectsWithPointer: function(item) {
-
-		var isOverElementHeight = (this.options.axis === "x") || this._isOverAxis(this.positionAbs.top + this.offset.click.top, item.top, item.height),
-			isOverElementWidth = (this.options.axis === "y") || this._isOverAxis(this.positionAbs.left + this.offset.click.left, item.left, item.width),
-			isOverElement = isOverElementHeight && isOverElementWidth,
-			verticalDirection = this._getDragVerticalDirection(),
-			horizontalDirection = this._getDragHorizontalDirection();
-
-		if (!isOverElement) {
-			return false;
-		}
-
-		return this.floating ?
-			( ((horizontalDirection && horizontalDirection === "right") || verticalDirection === "down") ? 2 : 1 )
-			: ( verticalDirection && (verticalDirection === "down" ? 2 : 1) );
-
-	},
-
-	_intersectsWithSides: function(item) {
-
-		var isOverBottomHalf = this._isOverAxis(this.positionAbs.top + this.offset.click.top, item.top + (item.height/2), item.height),
-			isOverRightHalf = this._isOverAxis(this.positionAbs.left + this.offset.click.left, item.left + (item.width/2), item.width),
-			verticalDirection = this._getDragVerticalDirection(),
-			horizontalDirection = this._getDragHorizontalDirection();
-
-		if (this.floating && horizontalDirection) {
-			return ((horizontalDirection === "right" && isOverRightHalf) || (horizontalDirection === "left" && !isOverRightHalf));
-		} else {
-			return verticalDirection && ((verticalDirection === "down" && isOverBottomHalf) || (verticalDirection === "up" && !isOverBottomHalf));
-		}
-
-	},
-
-	_getDragVerticalDirection: function() {
-		var delta = this.positionAbs.top - this.lastPositionAbs.top;
-		return delta !== 0 && (delta > 0 ? "down" : "up");
-	},
-
-	_getDragHorizontalDirection: function() {
-		var delta = this.positionAbs.left - this.lastPositionAbs.left;
-		return delta !== 0 && (delta > 0 ? "right" : "left");
-	},
-
-	refresh: function(event) {
-		this._refreshItems(event);
-		this._setHandleClassName();
-		this.refreshPositions();
-		return this;
-	},
-
-	_connectWith: function() {
-		var options = this.options;
-		return options.connectWith.constructor === String ? [options.connectWith] : options.connectWith;
-	},
-
-	_getItemsAsjQuery: function(connected) {
-
-		var i, j, cur, inst,
-			items = [],
-			queries = [],
-			connectWith = this._connectWith();
-
-		if(connectWith && connected) {
-			for (i = connectWith.length - 1; i >= 0; i--){
-				cur = $(connectWith[i], this.document[0]);
-				for ( j = cur.length - 1; j >= 0; j--){
-					inst = $.data(cur[j], this.widgetFullName);
-					if(inst && inst !== this && !inst.options.disabled) {
-						queries.push([$.isFunction(inst.options.items) ? inst.options.items.call(inst.element) : $(inst.options.items, inst.element).not(".ui-sortable-helper").not(".ui-sortable-placeholder"), inst]);
-					}
-				}
-			}
-		}
-
-		queries.push([$.isFunction(this.options.items) ? this.options.items.call(this.element, null, { options: this.options, item: this.currentItem }) : $(this.options.items, this.element).not(".ui-sortable-helper").not(".ui-sortable-placeholder"), this]);
-
-		function addItems() {
-			items.push( this );
-		}
-		for (i = queries.length - 1; i >= 0; i--){
-			queries[i][0].each( addItems );
-		}
-
-		return $(items);
-
-	},
-
-	_removeCurrentsFromItems: function() {
-
-		var list = this.currentItem.find(":data(" + this.widgetName + "-item)");
-
-		this.items = $.grep(this.items, function (item) {
-			for (var j=0; j < list.length; j++) {
-				if(list[j] === item.item[0]) {
-					return false;
-				}
-			}
-			return true;
-		});
-
-	},
-
-	_refreshItems: function(event) {
-
-		this.items = [];
-		this.containers = [this];
-
-		var i, j, cur, inst, targetData, _queries, item, queriesLength,
-			items = this.items,
-			queries = [[$.isFunction(this.options.items) ? this.options.items.call(this.element[0], event, { item: this.currentItem }) : $(this.options.items, this.element), this]],
-			connectWith = this._connectWith();
-
-		if(connectWith && this.ready) { //Shouldn't be run the first time through due to massive slow-down
-			for (i = connectWith.length - 1; i >= 0; i--){
-				cur = $(connectWith[i], this.document[0]);
-				for (j = cur.length - 1; j >= 0; j--){
-					inst = $.data(cur[j], this.widgetFullName);
-					if(inst && inst !== this && !inst.options.disabled) {
-						queries.push([$.isFunction(inst.options.items) ? inst.options.items.call(inst.element[0], event, { item: this.currentItem }) : $(inst.options.items, inst.element), inst]);
-						this.containers.push(inst);
-					}
-				}
-			}
-		}
-
-		for (i = queries.length - 1; i >= 0; i--) {
-			targetData = queries[i][1];
-			_queries = queries[i][0];
-
-			for (j=0, queriesLength = _queries.length; j < queriesLength; j++) {
-				item = $(_queries[j]);
-
-				item.data(this.widgetName + "-item", targetData); // Data for target checking (mouse manager)
-
-				items.push({
-					item: item,
-					instance: targetData,
-					width: 0, height: 0,
-					left: 0, top: 0
-				});
-			}
-		}
-
-	},
-
-	refreshPositions: function(fast) {
-
-		// Determine whether items are being displayed horizontally
-		this.floating = this.items.length ?
-			this.options.axis === "x" || this._isFloating( this.items[ 0 ].item ) :
-			false;
-
-		//This has to be redone because due to the item being moved out/into the offsetParent, the offsetParent's position will change
-		if(this.offsetParent && this.helper) {
-			this.offset.parent = this._getParentOffset();
-		}
-
-		var i, item, t, p;
-
-		for (i = this.items.length - 1; i >= 0; i--){
-			item = this.items[i];
-
-			//We ignore calculating positions of all connected containers when we're not over them
-			if(item.instance !== this.currentContainer && this.currentContainer && item.item[0] !== this.currentItem[0]) {
-				continue;
-			}
-
-			t = this.options.toleranceElement ? $(this.options.toleranceElement, item.item) : item.item;
-
-			if (!fast) {
-				item.width = t.outerWidth();
-				item.height = t.outerHeight();
-			}
-
-			p = t.offset();
-			item.left = p.left;
-			item.top = p.top;
-		}
-
-		if(this.options.custom && this.options.custom.refreshContainers) {
-			this.options.custom.refreshContainers.call(this);
-		} else {
-			for (i = this.containers.length - 1; i >= 0; i--){
-				p = this.containers[i].element.offset();
-				this.containers[i].containerCache.left = p.left;
-				this.containers[i].containerCache.top = p.top;
-				this.containers[i].containerCache.width = this.containers[i].element.outerWidth();
-				this.containers[i].containerCache.height = this.containers[i].element.outerHeight();
-			}
-		}
-
-		return this;
-	},
-
-	_createPlaceholder: function(that) {
-		that = that || this;
-		var className,
-			o = that.options;
-
-		if(!o.placeholder || o.placeholder.constructor === String) {
-			className = o.placeholder;
-			o.placeholder = {
-				element: function() {
-
-					var nodeName = that.currentItem[0].nodeName.toLowerCase(),
-						element = $( "<" + nodeName + ">", that.document[0] )
-							.addClass(className || that.currentItem[0].className+" ui-sortable-placeholder")
-							.removeClass("ui-sortable-helper");
-
-					if ( nodeName === "tbody" ) {
-						that._createTrPlaceholder(
-							that.currentItem.find( "tr" ).eq( 0 ),
-							$( "<tr>", that.document[ 0 ] ).appendTo( element )
-						);
-					} else if ( nodeName === "tr" ) {
-						that._createTrPlaceholder( that.currentItem, element );
-					} else if ( nodeName === "img" ) {
-						element.attr( "src", that.currentItem.attr( "src" ) );
-					}
-
-					if ( !className ) {
-						element.css( "visibility", "hidden" );
-					}
-
-					return element;
-				},
-				update: function(container, p) {
-
-					// 1. If a className is set as 'placeholder option, we don't force sizes - the class is responsible for that
-					// 2. The option 'forcePlaceholderSize can be enabled to force it even if a class name is specified
-					if(className && !o.forcePlaceholderSize) {
-						return;
-					}
-
-					//If the element doesn't have a actual height by itself (without styles coming from a stylesheet), it receives the inline height from the dragged item
-					if(!p.height()) { p.height(that.currentItem.innerHeight() - parseInt(that.currentItem.css("paddingTop")||0, 10) - parseInt(that.currentItem.css("paddingBottom")||0, 10)); }
-					if(!p.width()) { p.width(that.currentItem.innerWidth() - parseInt(that.currentItem.css("paddingLeft")||0, 10) - parseInt(that.currentItem.css("paddingRight")||0, 10)); }
-				}
-			};
-		}
-
-		//Create the placeholder
-		that.placeholder = $(o.placeholder.element.call(that.element, that.currentItem));
-
-		//Append it after the actual current item
-		that.currentItem.after(that.placeholder);
-
-		//Update the size of the placeholder (TODO: Logic to fuzzy, see line 316/317)
-		o.placeholder.update(that, that.placeholder);
-
-	},
-
-	_createTrPlaceholder: function( sourceTr, targetTr ) {
-		var that = this;
-
-		sourceTr.children().each(function() {
-			$( "<td>&#160;</td>", that.document[ 0 ] )
-				.attr( "colspan", $( this ).attr( "colspan" ) || 1 )
-				.appendTo( targetTr );
-		});
-	},
-
-	_contactContainers: function(event) {
-		var i, j, dist, itemWithLeastDistance, posProperty, sizeProperty, cur, nearBottom, floating, axis,
-			innermostContainer = null,
-			innermostIndex = null;
-
-		// get innermost container that intersects with item
-		for (i = this.containers.length - 1; i >= 0; i--) {
-
-			// never consider a container that's located within the item itself
-			if($.contains(this.currentItem[0], this.containers[i].element[0])) {
-				continue;
-			}
-
-			if(this._intersectsWith(this.containers[i].containerCache)) {
-
-				// if we've already found a container and it's more "inner" than this, then continue
-				if(innermostContainer && $.contains(this.containers[i].element[0], innermostContainer.element[0])) {
-					continue;
-				}
-
-				innermostContainer = this.containers[i];
-				innermostIndex = i;
-
-			} else {
-				// container doesn't intersect. trigger "out" event if necessary
-				if(this.containers[i].containerCache.over) {
-					this.containers[i]._trigger("out", event, this._uiHash(this));
-					this.containers[i].containerCache.over = 0;
-				}
-			}
-
-		}
-
-		// if no intersecting containers found, return
-		if(!innermostContainer) {
-			return;
-		}
-
-		// move the item into the container if it's not there already
-		if(this.containers.length === 1) {
-			if (!this.containers[innermostIndex].containerCache.over) {
-				this.containers[innermostIndex]._trigger("over", event, this._uiHash(this));
-				this.containers[innermostIndex].containerCache.over = 1;
-			}
-		} else {
-
-			//When entering a new container, we will find the item with the least distance and append our item near it
-			dist = 10000;
-			itemWithLeastDistance = null;
-			floating = innermostContainer.floating || this._isFloating(this.currentItem);
-			posProperty = floating ? "left" : "top";
-			sizeProperty = floating ? "width" : "height";
-			axis = floating ? "clientX" : "clientY";
-
-			for (j = this.items.length - 1; j >= 0; j--) {
-				if(!$.contains(this.containers[innermostIndex].element[0], this.items[j].item[0])) {
-					continue;
-				}
-				if(this.items[j].item[0] === this.currentItem[0]) {
-					continue;
-				}
-
-				cur = this.items[j].item.offset()[posProperty];
-				nearBottom = false;
-				if ( event[ axis ] - cur > this.items[ j ][ sizeProperty ] / 2 ) {
-					nearBottom = true;
-				}
-
-				if ( Math.abs( event[ axis ] - cur ) < dist ) {
-					dist = Math.abs( event[ axis ] - cur );
-					itemWithLeastDistance = this.items[ j ];
-					this.direction = nearBottom ? "up": "down";
-				}
-			}
-
-			//Check if dropOnEmpty is enabled
-			if(!itemWithLeastDistance && !this.options.dropOnEmpty) {
-				return;
-			}
-
-			if(this.currentContainer === this.containers[innermostIndex]) {
-				if ( !this.currentContainer.containerCache.over ) {
-					this.containers[ innermostIndex ]._trigger( "over", event, this._uiHash() );
-					this.currentContainer.containerCache.over = 1;
-				}
-				return;
-			}
-
-			itemWithLeastDistance ? this._rearrange(event, itemWithLeastDistance, null, true) : this._rearrange(event, null, this.containers[innermostIndex].element, true);
-			this._trigger("change", event, this._uiHash());
-			this.containers[innermostIndex]._trigger("change", event, this._uiHash(this));
-			this.currentContainer = this.containers[innermostIndex];
-
-			//Update the placeholder
-			this.options.placeholder.update(this.currentContainer, this.placeholder);
-
-			this.containers[innermostIndex]._trigger("over", event, this._uiHash(this));
-			this.containers[innermostIndex].containerCache.over = 1;
-		}
-
-
-	},
-
-	_createHelper: function(event) {
-
-		var o = this.options,
-			helper = $.isFunction(o.helper) ? $(o.helper.apply(this.element[0], [event, this.currentItem])) : (o.helper === "clone" ? this.currentItem.clone() : this.currentItem);
-
-		//Add the helper to the DOM if that didn't happen already
-		if(!helper.parents("body").length) {
-			$(o.appendTo !== "parent" ? o.appendTo : this.currentItem[0].parentNode)[0].appendChild(helper[0]);
-		}
-
-		if(helper[0] === this.currentItem[0]) {
-			this._storedCSS = { width: this.currentItem[0].style.width, height: this.currentItem[0].style.height, position: this.currentItem.css("position"), top: this.currentItem.css("top"), left: this.currentItem.css("left") };
-		}
-
-		if(!helper[0].style.width || o.forceHelperSize) {
-			helper.width(this.currentItem.width());
-		}
-		if(!helper[0].style.height || o.forceHelperSize) {
-			helper.height(this.currentItem.height());
-		}
-
-		return helper;
-
-	},
-
-	_adjustOffsetFromHelper: function(obj) {
-		if (typeof obj === "string") {
-			obj = obj.split(" ");
-		}
-		if ($.isArray(obj)) {
-			obj = {left: +obj[0], top: +obj[1] || 0};
-		}
-		if ("left" in obj) {
-			this.offset.click.left = obj.left + this.margins.left;
-		}
-		if ("right" in obj) {
-			this.offset.click.left = this.helperProportions.width - obj.right + this.margins.left;
-		}
-		if ("top" in obj) {
-			this.offset.click.top = obj.top + this.margins.top;
-		}
-		if ("bottom" in obj) {
-			this.offset.click.top = this.helperProportions.height - obj.bottom + this.margins.top;
-		}
-	},
-
-	_getParentOffset: function() {
-
-
-		//Get the offsetParent and cache its position
-		this.offsetParent = this.helper.offsetParent();
-		var po = this.offsetParent.offset();
-
-		// This is a special case where we need to modify a offset calculated on start, since the following happened:
-		// 1. The position of the helper is absolute, so it's position is calculated based on the next positioned parent
-		// 2. The actual offset parent is a child of the scroll parent, and the scroll parent isn't the document, which means that
-		//    the scroll is included in the initial calculation of the offset of the parent, and never recalculated upon drag
-		if(this.cssPosition === "absolute" && this.scrollParent[0] !== this.document[0] && $.contains(this.scrollParent[0], this.offsetParent[0])) {
-			po.left += this.scrollParent.scrollLeft();
-			po.top += this.scrollParent.scrollTop();
-		}
-
-		// This needs to be actually done for all browsers, since pageX/pageY includes this information
-		// with an ugly IE fix
-		if( this.offsetParent[0] === this.document[0].body || (this.offsetParent[0].tagName && this.offsetParent[0].tagName.toLowerCase() === "html" && $.ui.ie)) {
-			po = { top: 0, left: 0 };
-		}
-
-		return {
-			top: po.top + (parseInt(this.offsetParent.css("borderTopWidth"),10) || 0),
-			left: po.left + (parseInt(this.offsetParent.css("borderLeftWidth"),10) || 0)
-		};
-
-	},
-
-	_getRelativeOffset: function() {
-
-		if(this.cssPosition === "relative") {
-			var p = this.currentItem.position();
-			return {
-				top: p.top - (parseInt(this.helper.css("top"),10) || 0) + this.scrollParent.scrollTop(),
-				left: p.left - (parseInt(this.helper.css("left"),10) || 0) + this.scrollParent.scrollLeft()
-			};
-		} else {
-			return { top: 0, left: 0 };
-		}
-
-	},
-
-	_cacheMargins: function() {
-		this.margins = {
-			left: (parseInt(this.currentItem.css("marginLeft"),10) || 0),
-			top: (parseInt(this.currentItem.css("marginTop"),10) || 0)
-		};
-	},
-
-	_cacheHelperProportions: function() {
-		this.helperProportions = {
-			width: this.helper.outerWidth(),
-			height: this.helper.outerHeight()
-		};
-	},
-
-	_setContainment: function() {
-
-		var ce, co, over,
-			o = this.options;
-		if(o.containment === "parent") {
-			o.containment = this.helper[0].parentNode;
-		}
-		if(o.containment === "document" || o.containment === "window") {
-			this.containment = [
-				0 - this.offset.relative.left - this.offset.parent.left,
-				0 - this.offset.relative.top - this.offset.parent.top,
-				o.containment === "document" ? this.document.width() : this.window.width() - this.helperProportions.width - this.margins.left,
-				(o.containment === "document" ? this.document.width() : this.window.height() || this.document[0].body.parentNode.scrollHeight) - this.helperProportions.height - this.margins.top
-			];
-		}
-
-		if(!(/^(document|window|parent)$/).test(o.containment)) {
-			ce = $(o.containment)[0];
-			co = $(o.containment).offset();
-			over = ($(ce).css("overflow") !== "hidden");
-
-			this.containment = [
-				co.left + (parseInt($(ce).css("borderLeftWidth"),10) || 0) + (parseInt($(ce).css("paddingLeft"),10) || 0) - this.margins.left,
-				co.top + (parseInt($(ce).css("borderTopWidth"),10) || 0) + (parseInt($(ce).css("paddingTop"),10) || 0) - this.margins.top,
-				co.left+(over ? Math.max(ce.scrollWidth,ce.offsetWidth) : ce.offsetWidth) - (parseInt($(ce).css("borderLeftWidth"),10) || 0) - (parseInt($(ce).css("paddingRight"),10) || 0) - this.helperProportions.width - this.margins.left,
-				co.top+(over ? Math.max(ce.scrollHeight,ce.offsetHeight) : ce.offsetHeight) - (parseInt($(ce).css("borderTopWidth"),10) || 0) - (parseInt($(ce).css("paddingBottom"),10) || 0) - this.helperProportions.height - this.margins.top
-			];
-		}
-
-	},
-
-	_convertPositionTo: function(d, pos) {
-
-		if(!pos) {
-			pos = this.position;
-		}
-		var mod = d === "absolute" ? 1 : -1,
-			scroll = this.cssPosition === "absolute" && !(this.scrollParent[0] !== this.document[0] && $.contains(this.scrollParent[0], this.offsetParent[0])) ? this.offsetParent : this.scrollParent,
-			scrollIsRootNode = (/(html|body)/i).test(scroll[0].tagName);
-
-		return {
-			top: (
-				pos.top	+																// The absolute mouse position
-				this.offset.relative.top * mod +										// Only for relative positioned nodes: Relative offset from element to offset parent
-				this.offset.parent.top * mod -											// The offsetParent's offset without borders (offset + border)
-				( ( this.cssPosition === "fixed" ? -this.scrollParent.scrollTop() : ( scrollIsRootNode ? 0 : scroll.scrollTop() ) ) * mod)
-			),
-			left: (
-				pos.left +																// The absolute mouse position
-				this.offset.relative.left * mod +										// Only for relative positioned nodes: Relative offset from element to offset parent
-				this.offset.parent.left * mod	-										// The offsetParent's offset without borders (offset + border)
-				( ( this.cssPosition === "fixed" ? -this.scrollParent.scrollLeft() : scrollIsRootNode ? 0 : scroll.scrollLeft() ) * mod)
-			)
-		};
-
-	},
-
-	_generatePosition: function(event) {
-
-		var top, left,
-			o = this.options,
-			pageX = event.pageX,
-			pageY = event.pageY,
-			scroll = this.cssPosition === "absolute" && !(this.scrollParent[0] !== this.document[0] && $.contains(this.scrollParent[0], this.offsetParent[0])) ? this.offsetParent : this.scrollParent, scrollIsRootNode = (/(html|body)/i).test(scroll[0].tagName);
-
-		// This is another very weird special case that only happens for relative elements:
-		// 1. If the css position is relative
-		// 2. and the scroll parent is the document or similar to the offset parent
-		// we have to refresh the relative offset during the scroll so there are no jumps
-		if(this.cssPosition === "relative" && !(this.scrollParent[0] !== this.document[0] && this.scrollParent[0] !== this.offsetParent[0])) {
-			this.offset.relative = this._getRelativeOffset();
-		}
-
-		/*
-		 * - Position constraining -
-		 * Constrain the position to a mix of grid, containment.
-		 */
-
-		if(this.originalPosition) { //If we are not dragging yet, we won't check for options
-
-			if(this.containment) {
-				if(event.pageX - this.offset.click.left < this.containment[0]) {
-					pageX = this.containment[0] + this.offset.click.left;
-				}
-				if(event.pageY - this.offset.click.top < this.containment[1]) {
-					pageY = this.containment[1] + this.offset.click.top;
-				}
-				if(event.pageX - this.offset.click.left > this.containment[2]) {
-					pageX = this.containment[2] + this.offset.click.left;
-				}
-				if(event.pageY - this.offset.click.top > this.containment[3]) {
-					pageY = this.containment[3] + this.offset.click.top;
-				}
-			}
-
-			if(o.grid) {
-				top = this.originalPageY + Math.round((pageY - this.originalPageY) / o.grid[1]) * o.grid[1];
-				pageY = this.containment ? ( (top - this.offset.click.top >= this.containment[1] && top - this.offset.click.top <= this.containment[3]) ? top : ((top - this.offset.click.top >= this.containment[1]) ? top - o.grid[1] : top + o.grid[1])) : top;
-
-				left = this.originalPageX + Math.round((pageX - this.originalPageX) / o.grid[0]) * o.grid[0];
-				pageX = this.containment ? ( (left - this.offset.click.left >= this.containment[0] && left - this.offset.click.left <= this.containment[2]) ? left : ((left - this.offset.click.left >= this.containment[0]) ? left - o.grid[0] : left + o.grid[0])) : left;
-			}
-
-		}
-
-		return {
-			top: (
-				pageY -																// The absolute mouse position
-				this.offset.click.top -													// Click offset (relative to the element)
-				this.offset.relative.top	-											// Only for relative positioned nodes: Relative offset from element to offset parent
-				this.offset.parent.top +												// The offsetParent's offset without borders (offset + border)
-				( ( this.cssPosition === "fixed" ? -this.scrollParent.scrollTop() : ( scrollIsRootNode ? 0 : scroll.scrollTop() ) ))
-			),
-			left: (
-				pageX -																// The absolute mouse position
-				this.offset.click.left -												// Click offset (relative to the element)
-				this.offset.relative.left	-											// Only for relative positioned nodes: Relative offset from element to offset parent
-				this.offset.parent.left +												// The offsetParent's offset without borders (offset + border)
-				( ( this.cssPosition === "fixed" ? -this.scrollParent.scrollLeft() : scrollIsRootNode ? 0 : scroll.scrollLeft() ))
-			)
-		};
-
-	},
-
-	_rearrange: function(event, i, a, hardRefresh) {
-
-		a ? a[0].appendChild(this.placeholder[0]) : i.item[0].parentNode.insertBefore(this.placeholder[0], (this.direction === "down" ? i.item[0] : i.item[0].nextSibling));
-
-		//Various things done here to improve the performance:
-		// 1. we create a setTimeout, that calls refreshPositions
-		// 2. on the instance, we have a counter variable, that get's higher after every append
-		// 3. on the local scope, we copy the counter variable, and check in the timeout, if it's still the same
-		// 4. this lets only the last addition to the timeout stack through
-		this.counter = this.counter ? ++this.counter : 1;
-		var counter = this.counter;
-
-		this._delay(function() {
-			if(counter === this.counter) {
-				this.refreshPositions(!hardRefresh); //Precompute after each DOM insertion, NOT on mousemove
-			}
-		});
-
-	},
-
-	_clear: function(event, noPropagation) {
-
-		this.reverting = false;
-		// We delay all events that have to be triggered to after the point where the placeholder has been removed and
-		// everything else normalized again
-		var i,
-			delayedTriggers = [];
-
-		// We first have to update the dom position of the actual currentItem
-		// Note: don't do it if the current item is already removed (by a user), or it gets reappended (see #4088)
-		if(!this._noFinalSort && this.currentItem.parent().length) {
-			this.placeholder.before(this.currentItem);
-		}
-		this._noFinalSort = null;
-
-		if(this.helper[0] === this.currentItem[0]) {
-			for(i in this._storedCSS) {
-				if(this._storedCSS[i] === "auto" || this._storedCSS[i] === "static") {
-					this._storedCSS[i] = "";
-				}
-			}
-			this.currentItem.css(this._storedCSS).removeClass("ui-sortable-helper");
-		} else {
-			this.currentItem.show();
-		}
-
-		if(this.fromOutside && !noPropagation) {
-			delayedTriggers.push(function(event) { this._trigger("receive", event, this._uiHash(this.fromOutside)); });
-		}
-		if((this.fromOutside || this.domPosition.prev !== this.currentItem.prev().not(".ui-sortable-helper")[0] || this.domPosition.parent !== this.currentItem.parent()[0]) && !noPropagation) {
-			delayedTriggers.push(function(event) { this._trigger("update", event, this._uiHash()); }); //Trigger update callback if the DOM position has changed
-		}
-
-		// Check if the items Container has Changed and trigger appropriate
-		// events.
-		if (this !== this.currentContainer) {
-			if(!noPropagation) {
-				delayedTriggers.push(function(event) { this._trigger("remove", event, this._uiHash()); });
-				delayedTriggers.push((function(c) { return function(event) { c._trigger("receive", event, this._uiHash(this)); };  }).call(this, this.currentContainer));
-				delayedTriggers.push((function(c) { return function(event) { c._trigger("update", event, this._uiHash(this));  }; }).call(this, this.currentContainer));
-			}
-		}
-
-
-		//Post events to containers
-		function delayEvent( type, instance, container ) {
-			return function( event ) {
-				container._trigger( type, event, instance._uiHash( instance ) );
-			};
-		}
-		for (i = this.containers.length - 1; i >= 0; i--){
-			if (!noPropagation) {
-				delayedTriggers.push( delayEvent( "deactivate", this, this.containers[ i ] ) );
-			}
-			if(this.containers[i].containerCache.over) {
-				delayedTriggers.push( delayEvent( "out", this, this.containers[ i ] ) );
-				this.containers[i].containerCache.over = 0;
-			}
-		}
-
-		//Do what was originally in plugins
-		if ( this.storedCursor ) {
-			this.document.find( "body" ).css( "cursor", this.storedCursor );
-			this.storedStylesheet.remove();
-		}
-		if(this._storedOpacity) {
-			this.helper.css("opacity", this._storedOpacity);
-		}
-		if(this._storedZIndex) {
-			this.helper.css("zIndex", this._storedZIndex === "auto" ? "" : this._storedZIndex);
-		}
-
-		this.dragging = false;
-
-		if(!noPropagation) {
-			this._trigger("beforeStop", event, this._uiHash());
-		}
-
-		//$(this.placeholder[0]).remove(); would have been the jQuery way - unfortunately, it unbinds ALL events from the original node!
-		this.placeholder[0].parentNode.removeChild(this.placeholder[0]);
-
-		if ( !this.cancelHelperRemoval ) {
-			if ( this.helper[ 0 ] !== this.currentItem[ 0 ] ) {
-				this.helper.remove();
-			}
-			this.helper = null;
-		}
-
-		if(!noPropagation) {
-			for (i=0; i < delayedTriggers.length; i++) {
-				delayedTriggers[i].call(this, event);
-			} //Trigger all delayed events
-			this._trigger("stop", event, this._uiHash());
-		}
-
-		this.fromOutside = false;
-		return !this.cancelHelperRemoval;
-
-	},
-
-	_trigger: function() {
-		if ($.Widget.prototype._trigger.apply(this, arguments) === false) {
-			this.cancel();
-		}
-	},
-
-	_uiHash: function(_inst) {
-		var inst = _inst || this;
-		return {
-			helper: inst.helper,
-			placeholder: inst.placeholder || $([]),
-			position: inst.position,
-			originalPosition: inst.originalPosition,
-			offset: inst.positionAbs,
-			item: inst.currentItem,
-			sender: _inst ? _inst.element : null
-		};
-	}
-
-});
-
-}));
-
-
-/***/ },
-
-/***/ "./node_modules/jquery-ui/ui/widget.js":
-/***/ function(module, exports, __webpack_require__) {
-
-var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
- * jQuery UI Widget 1.11.4
- * http://jqueryui.com
- *
- * Copyright jQuery Foundation and other contributors
- * Released under the MIT license.
- * http://jquery.org/license
- *
- * http://api.jqueryui.com/jQuery.widget/
- */
-(function( factory ) {
-	if ( true ) {
-
-		// AMD. Register as an anonymous module.
-		!(__WEBPACK_AMD_DEFINE_ARRAY__ = [ __webpack_require__("./node_modules/jquery/dist/jquery.js") ], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
-	} else {
-
-		// Browser globals
-		factory( jQuery );
-	}
-}(function( $ ) {
-
-var widget_uuid = 0,
-	widget_slice = Array.prototype.slice;
-
-$.cleanData = (function( orig ) {
-	return function( elems ) {
-		var events, elem, i;
-		for ( i = 0; (elem = elems[i]) != null; i++ ) {
-			try {
-
-				// Only trigger remove when necessary to save time
-				events = $._data( elem, "events" );
-				if ( events && events.remove ) {
-					$( elem ).triggerHandler( "remove" );
-				}
-
-			// http://bugs.jquery.com/ticket/8235
-			} catch ( e ) {}
-		}
-		orig( elems );
-	};
-})( $.cleanData );
-
-$.widget = function( name, base, prototype ) {
-	var fullName, existingConstructor, constructor, basePrototype,
-		// proxiedPrototype allows the provided prototype to remain unmodified
-		// so that it can be used as a mixin for multiple widgets (#8876)
-		proxiedPrototype = {},
-		namespace = name.split( "." )[ 0 ];
-
-	name = name.split( "." )[ 1 ];
-	fullName = namespace + "-" + name;
-
-	if ( !prototype ) {
-		prototype = base;
-		base = $.Widget;
-	}
-
-	// create selector for plugin
-	$.expr[ ":" ][ fullName.toLowerCase() ] = function( elem ) {
-		return !!$.data( elem, fullName );
-	};
-
-	$[ namespace ] = $[ namespace ] || {};
-	existingConstructor = $[ namespace ][ name ];
-	constructor = $[ namespace ][ name ] = function( options, element ) {
-		// allow instantiation without "new" keyword
-		if ( !this._createWidget ) {
-			return new constructor( options, element );
-		}
-
-		// allow instantiation without initializing for simple inheritance
-		// must use "new" keyword (the code above always passes args)
-		if ( arguments.length ) {
-			this._createWidget( options, element );
-		}
-	};
-	// extend with the existing constructor to carry over any static properties
-	$.extend( constructor, existingConstructor, {
-		version: prototype.version,
-		// copy the object used to create the prototype in case we need to
-		// redefine the widget later
-		_proto: $.extend( {}, prototype ),
-		// track widgets that inherit from this widget in case this widget is
-		// redefined after a widget inherits from it
-		_childConstructors: []
-	});
-
-	basePrototype = new base();
-	// we need to make the options hash a property directly on the new instance
-	// otherwise we'll modify the options hash on the prototype that we're
-	// inheriting from
-	basePrototype.options = $.widget.extend( {}, basePrototype.options );
-	$.each( prototype, function( prop, value ) {
-		if ( !$.isFunction( value ) ) {
-			proxiedPrototype[ prop ] = value;
-			return;
-		}
-		proxiedPrototype[ prop ] = (function() {
-			var _super = function() {
-					return base.prototype[ prop ].apply( this, arguments );
-				},
-				_superApply = function( args ) {
-					return base.prototype[ prop ].apply( this, args );
-				};
-			return function() {
-				var __super = this._super,
-					__superApply = this._superApply,
-					returnValue;
-
-				this._super = _super;
-				this._superApply = _superApply;
-
-				returnValue = value.apply( this, arguments );
-
-				this._super = __super;
-				this._superApply = __superApply;
-
-				return returnValue;
-			};
-		})();
-	});
-	constructor.prototype = $.widget.extend( basePrototype, {
-		// TODO: remove support for widgetEventPrefix
-		// always use the name + a colon as the prefix, e.g., draggable:start
-		// don't prefix for widgets that aren't DOM-based
-		widgetEventPrefix: existingConstructor ? (basePrototype.widgetEventPrefix || name) : name
-	}, proxiedPrototype, {
-		constructor: constructor,
-		namespace: namespace,
-		widgetName: name,
-		widgetFullName: fullName
-	});
-
-	// If this widget is being redefined then we need to find all widgets that
-	// are inheriting from it and redefine all of them so that they inherit from
-	// the new version of this widget. We're essentially trying to replace one
-	// level in the prototype chain.
-	if ( existingConstructor ) {
-		$.each( existingConstructor._childConstructors, function( i, child ) {
-			var childPrototype = child.prototype;
-
-			// redefine the child widget using the same prototype that was
-			// originally used, but inherit from the new version of the base
-			$.widget( childPrototype.namespace + "." + childPrototype.widgetName, constructor, child._proto );
-		});
-		// remove the list of existing child constructors from the old constructor
-		// so the old child constructors can be garbage collected
-		delete existingConstructor._childConstructors;
-	} else {
-		base._childConstructors.push( constructor );
-	}
-
-	$.widget.bridge( name, constructor );
-
-	return constructor;
-};
-
-$.widget.extend = function( target ) {
-	var input = widget_slice.call( arguments, 1 ),
-		inputIndex = 0,
-		inputLength = input.length,
-		key,
-		value;
-	for ( ; inputIndex < inputLength; inputIndex++ ) {
-		for ( key in input[ inputIndex ] ) {
-			value = input[ inputIndex ][ key ];
-			if ( input[ inputIndex ].hasOwnProperty( key ) && value !== undefined ) {
-				// Clone objects
-				if ( $.isPlainObject( value ) ) {
-					target[ key ] = $.isPlainObject( target[ key ] ) ?
-						$.widget.extend( {}, target[ key ], value ) :
-						// Don't extend strings, arrays, etc. with objects
-						$.widget.extend( {}, value );
-				// Copy everything else by reference
-				} else {
-					target[ key ] = value;
-				}
-			}
-		}
-	}
-	return target;
-};
-
-$.widget.bridge = function( name, object ) {
-	var fullName = object.prototype.widgetFullName || name;
-	$.fn[ name ] = function( options ) {
-		var isMethodCall = typeof options === "string",
-			args = widget_slice.call( arguments, 1 ),
-			returnValue = this;
-
-		if ( isMethodCall ) {
-			this.each(function() {
-				var methodValue,
-					instance = $.data( this, fullName );
-				if ( options === "instance" ) {
-					returnValue = instance;
-					return false;
-				}
-				if ( !instance ) {
-					return $.error( "cannot call methods on " + name + " prior to initialization; " +
-						"attempted to call method '" + options + "'" );
-				}
-				if ( !$.isFunction( instance[options] ) || options.charAt( 0 ) === "_" ) {
-					return $.error( "no such method '" + options + "' for " + name + " widget instance" );
-				}
-				methodValue = instance[ options ].apply( instance, args );
-				if ( methodValue !== instance && methodValue !== undefined ) {
-					returnValue = methodValue && methodValue.jquery ?
-						returnValue.pushStack( methodValue.get() ) :
-						methodValue;
-					return false;
-				}
-			});
-		} else {
-
-			// Allow multiple hashes to be passed on init
-			if ( args.length ) {
-				options = $.widget.extend.apply( null, [ options ].concat(args) );
-			}
-
-			this.each(function() {
-				var instance = $.data( this, fullName );
-				if ( instance ) {
-					instance.option( options || {} );
-					if ( instance._init ) {
-						instance._init();
-					}
-				} else {
-					$.data( this, fullName, new object( options, this ) );
-				}
-			});
-		}
-
-		return returnValue;
-	};
-};
-
-$.Widget = function( /* options, element */ ) {};
-$.Widget._childConstructors = [];
-
-$.Widget.prototype = {
-	widgetName: "widget",
-	widgetEventPrefix: "",
-	defaultElement: "<div>",
-	options: {
-		disabled: false,
-
-		// callbacks
-		create: null
-	},
-	_createWidget: function( options, element ) {
-		element = $( element || this.defaultElement || this )[ 0 ];
-		this.element = $( element );
-		this.uuid = widget_uuid++;
-		this.eventNamespace = "." + this.widgetName + this.uuid;
-
-		this.bindings = $();
-		this.hoverable = $();
-		this.focusable = $();
-
-		if ( element !== this ) {
-			$.data( element, this.widgetFullName, this );
-			this._on( true, this.element, {
-				remove: function( event ) {
-					if ( event.target === element ) {
-						this.destroy();
-					}
-				}
-			});
-			this.document = $( element.style ?
-				// element within the document
-				element.ownerDocument :
-				// element is window or document
-				element.document || element );
-			this.window = $( this.document[0].defaultView || this.document[0].parentWindow );
-		}
-
-		this.options = $.widget.extend( {},
-			this.options,
-			this._getCreateOptions(),
-			options );
-
-		this._create();
-		this._trigger( "create", null, this._getCreateEventData() );
-		this._init();
-	},
-	_getCreateOptions: $.noop,
-	_getCreateEventData: $.noop,
-	_create: $.noop,
-	_init: $.noop,
-
-	destroy: function() {
-		this._destroy();
-		// we can probably remove the unbind calls in 2.0
-		// all event bindings should go through this._on()
-		this.element
-			.unbind( this.eventNamespace )
-			.removeData( this.widgetFullName )
-			// support: jquery <1.6.3
-			// http://bugs.jquery.com/ticket/9413
-			.removeData( $.camelCase( this.widgetFullName ) );
-		this.widget()
-			.unbind( this.eventNamespace )
-			.removeAttr( "aria-disabled" )
-			.removeClass(
-				this.widgetFullName + "-disabled " +
-				"ui-state-disabled" );
-
-		// clean up events and states
-		this.bindings.unbind( this.eventNamespace );
-		this.hoverable.removeClass( "ui-state-hover" );
-		this.focusable.removeClass( "ui-state-focus" );
-	},
-	_destroy: $.noop,
-
-	widget: function() {
-		return this.element;
-	},
-
-	option: function( key, value ) {
-		var options = key,
-			parts,
-			curOption,
-			i;
-
-		if ( arguments.length === 0 ) {
-			// don't return a reference to the internal hash
-			return $.widget.extend( {}, this.options );
-		}
-
-		if ( typeof key === "string" ) {
-			// handle nested keys, e.g., "foo.bar" => { foo: { bar: ___ } }
-			options = {};
-			parts = key.split( "." );
-			key = parts.shift();
-			if ( parts.length ) {
-				curOption = options[ key ] = $.widget.extend( {}, this.options[ key ] );
-				for ( i = 0; i < parts.length - 1; i++ ) {
-					curOption[ parts[ i ] ] = curOption[ parts[ i ] ] || {};
-					curOption = curOption[ parts[ i ] ];
-				}
-				key = parts.pop();
-				if ( arguments.length === 1 ) {
-					return curOption[ key ] === undefined ? null : curOption[ key ];
-				}
-				curOption[ key ] = value;
-			} else {
-				if ( arguments.length === 1 ) {
-					return this.options[ key ] === undefined ? null : this.options[ key ];
-				}
-				options[ key ] = value;
-			}
-		}
-
-		this._setOptions( options );
-
-		return this;
-	},
-	_setOptions: function( options ) {
-		var key;
-
-		for ( key in options ) {
-			this._setOption( key, options[ key ] );
-		}
-
-		return this;
-	},
-	_setOption: function( key, value ) {
-		this.options[ key ] = value;
-
-		if ( key === "disabled" ) {
-			this.widget()
-				.toggleClass( this.widgetFullName + "-disabled", !!value );
-
-			// If the widget is becoming disabled, then nothing is interactive
-			if ( value ) {
-				this.hoverable.removeClass( "ui-state-hover" );
-				this.focusable.removeClass( "ui-state-focus" );
-			}
-		}
-
-		return this;
-	},
-
-	enable: function() {
-		return this._setOptions({ disabled: false });
-	},
-	disable: function() {
-		return this._setOptions({ disabled: true });
-	},
-
-	_on: function( suppressDisabledCheck, element, handlers ) {
-		var delegateElement,
-			instance = this;
-
-		// no suppressDisabledCheck flag, shuffle arguments
-		if ( typeof suppressDisabledCheck !== "boolean" ) {
-			handlers = element;
-			element = suppressDisabledCheck;
-			suppressDisabledCheck = false;
-		}
-
-		// no element argument, shuffle and use this.element
-		if ( !handlers ) {
-			handlers = element;
-			element = this.element;
-			delegateElement = this.widget();
-		} else {
-			element = delegateElement = $( element );
-			this.bindings = this.bindings.add( element );
-		}
-
-		$.each( handlers, function( event, handler ) {
-			function handlerProxy() {
-				// allow widgets to customize the disabled handling
-				// - disabled as an array instead of boolean
-				// - disabled class as method for disabling individual parts
-				if ( !suppressDisabledCheck &&
-						( instance.options.disabled === true ||
-							$( this ).hasClass( "ui-state-disabled" ) ) ) {
-					return;
-				}
-				return ( typeof handler === "string" ? instance[ handler ] : handler )
-					.apply( instance, arguments );
-			}
-
-			// copy the guid so direct unbinding works
-			if ( typeof handler !== "string" ) {
-				handlerProxy.guid = handler.guid =
-					handler.guid || handlerProxy.guid || $.guid++;
-			}
-
-			var match = event.match( /^([\w:-]*)\s*(.*)$/ ),
-				eventName = match[1] + instance.eventNamespace,
-				selector = match[2];
-			if ( selector ) {
-				delegateElement.delegate( selector, eventName, handlerProxy );
-			} else {
-				element.bind( eventName, handlerProxy );
-			}
-		});
-	},
-
-	_off: function( element, eventName ) {
-		eventName = (eventName || "").split( " " ).join( this.eventNamespace + " " ) +
-			this.eventNamespace;
-		element.unbind( eventName ).undelegate( eventName );
-
-		// Clear the stack to avoid memory leaks (#10056)
-		this.bindings = $( this.bindings.not( element ).get() );
-		this.focusable = $( this.focusable.not( element ).get() );
-		this.hoverable = $( this.hoverable.not( element ).get() );
-	},
-
-	_delay: function( handler, delay ) {
-		function handlerProxy() {
-			return ( typeof handler === "string" ? instance[ handler ] : handler )
-				.apply( instance, arguments );
-		}
-		var instance = this;
-		return setTimeout( handlerProxy, delay || 0 );
-	},
-
-	_hoverable: function( element ) {
-		this.hoverable = this.hoverable.add( element );
-		this._on( element, {
-			mouseenter: function( event ) {
-				$( event.currentTarget ).addClass( "ui-state-hover" );
-			},
-			mouseleave: function( event ) {
-				$( event.currentTarget ).removeClass( "ui-state-hover" );
-			}
-		});
-	},
-
-	_focusable: function( element ) {
-		this.focusable = this.focusable.add( element );
-		this._on( element, {
-			focusin: function( event ) {
-				$( event.currentTarget ).addClass( "ui-state-focus" );
-			},
-			focusout: function( event ) {
-				$( event.currentTarget ).removeClass( "ui-state-focus" );
-			}
-		});
-	},
-
-	_trigger: function( type, event, data ) {
-		var prop, orig,
-			callback = this.options[ type ];
-
-		data = data || {};
-		event = $.Event( event );
-		event.type = ( type === this.widgetEventPrefix ?
-			type :
-			this.widgetEventPrefix + type ).toLowerCase();
-		// the original event may come from any element
-		// so we need to reset the target on the new event
-		event.target = this.element[ 0 ];
-
-		// copy original event properties over to the new event
-		orig = event.originalEvent;
-		if ( orig ) {
-			for ( prop in orig ) {
-				if ( !( prop in event ) ) {
-					event[ prop ] = orig[ prop ];
-				}
-			}
-		}
-
-		this.element.trigger( event, data );
-		return !( $.isFunction( callback ) &&
-			callback.apply( this.element[0], [ event ].concat( data ) ) === false ||
-			event.isDefaultPrevented() );
-	}
-};
-
-$.each( { show: "fadeIn", hide: "fadeOut" }, function( method, defaultEffect ) {
-	$.Widget.prototype[ "_" + method ] = function( element, options, callback ) {
-		if ( typeof options === "string" ) {
-			options = { effect: options };
-		}
-		var hasOptions,
-			effectName = !options ?
-				method :
-				options === true || typeof options === "number" ?
-					defaultEffect :
-					options.effect || defaultEffect;
-		options = options || {};
-		if ( typeof options === "number" ) {
-			options = { duration: options };
-		}
-		hasOptions = !$.isEmptyObject( options );
-		options.complete = callback;
-		if ( options.delay ) {
-			element.delay( options.delay );
-		}
-		if ( hasOptions && $.effects && $.effects.effect[ effectName ] ) {
-			element[ method ]( options );
-		} else if ( effectName !== method && element[ effectName ] ) {
-			element[ effectName ]( options.duration, options.easing, callback );
-		} else {
-			element.queue(function( next ) {
-				$( this )[ method ]();
-				if ( callback ) {
-					callback.call( element[ 0 ] );
-				}
-				next();
-			});
-		}
-	};
-});
-
-return $.widget;
-
-}));
-
-
-/***/ },
-
-/***/ "./src/app/grid/grid-demo/grid-demo.ts":
+/***/ "./node_modules/rxjs/add/operator/do.js":
 /***/ function(module, exports, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(jQuery) {"use strict";
-var core_1 = __webpack_require__("./node_modules/@angular/core/index.js");
-var GridDemo = (function () {
-    function GridDemo() {
+"use strict";
+var Observable_1 = __webpack_require__("./node_modules/rxjs/Observable.js");
+var do_1 = __webpack_require__("./node_modules/rxjs/operator/do.js");
+Observable_1.Observable.prototype.do = do_1._do;
+Observable_1.Observable.prototype._do = do_1._do;
+//# sourceMappingURL=do.js.map
+
+/***/ },
+
+/***/ "./node_modules/rxjs/operator/do.js":
+/***/ function(module, exports, __webpack_require__) {
+
+"use strict";
+"use strict";
+var __extends = (this && this.__extends) || function (d, b) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    function __() { this.constructor = d; }
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+};
+var Subscriber_1 = __webpack_require__("./node_modules/rxjs/Subscriber.js");
+/**
+ * Perform a side effect for every emission on the source Observable, but return
+ * an Observable that is identical to the source.
+ *
+ * <span class="informal">Intercepts each emission on the source and runs a
+ * function, but returns an output which is identical to the source.</span>
+ *
+ * <img src="./img/do.png" width="100%">
+ *
+ * Returns a mirrored Observable of the source Observable, but modified so that
+ * the provided Observer is called to perform a side effect for every value,
+ * error, and completion emitted by the source. Any errors that are thrown in
+ * the aforementioned Observer or handlers are safely sent down the error path
+ * of the output Observable.
+ *
+ * This operator is useful for debugging your Observables for the correct values
+ * or performing other side effects.
+ *
+ * Note: this is different to a `subscribe` on the Observable. If the Observable
+ * returned by `do` is not subscribed, the side effects specified by the
+ * Observer will never happen. `do` therefore simply spies on existing
+ * execution, it does not trigger an execution to happen like `subscribe` does.
+ *
+ * @example <caption>Map every every click to the clientX position of that click, while also logging the click event</caption>
+ * var clicks = Rx.Observable.fromEvent(document, 'click');
+ * var positions = clicks
+ *   .do(ev => console.log(ev))
+ *   .map(ev => ev.clientX);
+ * positions.subscribe(x => console.log(x));
+ *
+ * @see {@link map}
+ * @see {@link subscribe}
+ *
+ * @param {Observer|function} [nextOrObserver] A normal Observer object or a
+ * callback for `next`.
+ * @param {function} [error] Callback for errors in the source.
+ * @param {function} [complete] Callback for the completion of the source.
+ * @return {Observable} An Observable identical to the source, but runs the
+ * specified Observer or callback(s) for each item.
+ * @method do
+ * @name do
+ * @owner Observable
+ */
+function _do(nextOrObserver, error, complete) {
+    return this.lift(new DoOperator(nextOrObserver, error, complete));
+}
+exports._do = _do;
+var DoOperator = (function () {
+    function DoOperator(nextOrObserver, error, complete) {
+        this.nextOrObserver = nextOrObserver;
+        this.error = error;
+        this.complete = complete;
     }
-    GridDemo.prototype.render = function () {
-        jQuery.fn.widgster.Constructor.DEFAULTS.bodySelector = '.widget-body';
-        var $widgets = jQuery('.widget'), $newsWidget = jQuery('#news-widget'), $sharesWidget = jQuery('#shares-widget'), $autoloadWidget = jQuery('#autoload-widget');
-        /**
-         * turn off .content-wrap transforms & disable sorting when widget fullscreened
-         */
-        $widgets.on('fullscreen.widgster', function () {
-            jQuery('.content-wrap').css({
-                '-webkit-transform': 'none',
-                '-ms-transform': 'none',
-                transform: 'none',
-                'margin': 0,
-                'z-index': 2
-            });
-            // prevent widget from dragging when fullscreened
-            jQuery('.widget-container').sortable('option', 'disabled', true);
-        }).on('restore.widgster closed.widgster', function () {
-            jQuery('.content-wrap').css({
-                '-webkit-transform': '',
-                '-ms-transform': '',
-                transform: '',
-                margin: '',
-                'z-index': ''
-            });
-            jQuery('body').css({
-                'overflow-y': 'scroll'
-            });
-            // allow dragging back
-            jQuery('.widget-container').sortable('option', 'disabled', false);
+    DoOperator.prototype.call = function (subscriber, source) {
+        return source._subscribe(new DoSubscriber(subscriber, this.nextOrObserver, this.error, this.complete));
+    };
+    return DoOperator;
+}());
+/**
+ * We need this JSDoc comment for affecting ESDoc.
+ * @ignore
+ * @extends {Ignored}
+ */
+var DoSubscriber = (function (_super) {
+    __extends(DoSubscriber, _super);
+    function DoSubscriber(destination, nextOrObserver, error, complete) {
+        _super.call(this, destination);
+        var safeSubscriber = new Subscriber_1.Subscriber(nextOrObserver, error, complete);
+        safeSubscriber.syncErrorThrowable = true;
+        this.add(safeSubscriber);
+        this.safeSubscriber = safeSubscriber;
+    }
+    DoSubscriber.prototype._next = function (value) {
+        var safeSubscriber = this.safeSubscriber;
+        safeSubscriber.next(value);
+        if (safeSubscriber.syncErrorThrown) {
+            this.destination.error(safeSubscriber.syncErrorValue);
+        }
+        else {
+            this.destination.next(value);
+        }
+    };
+    DoSubscriber.prototype._error = function (err) {
+        var safeSubscriber = this.safeSubscriber;
+        safeSubscriber.error(err);
+        if (safeSubscriber.syncErrorThrown) {
+            this.destination.error(safeSubscriber.syncErrorValue);
+        }
+        else {
+            this.destination.error(err);
+        }
+    };
+    DoSubscriber.prototype._complete = function () {
+        var safeSubscriber = this.safeSubscriber;
+        safeSubscriber.complete();
+        if (safeSubscriber.syncErrorThrown) {
+            this.destination.error(safeSubscriber.syncErrorValue);
+        }
+        else {
+            this.destination.complete();
+        }
+    };
+    return DoSubscriber;
+}(Subscriber_1.Subscriber));
+//# sourceMappingURL=do.js.map
+
+/***/ },
+
+/***/ "./src/app/customers/CustomerMeasurementForm.style.css":
+/***/ function(module, exports) {
+
+module.exports = ".add-btn{\r\n    border:none;\r\n    height:46px;\r\n    padding:10px 2px;\r\n    min-width:250px;\r\n    margin:0 auto;\r\n  }\r\n\r\n  fieldset{\r\n    border: 1px solid #ccc;\r\n    padding: 10px;\r\n  }\r\n\r\n  legend{\r\n    color: black;\r\n    font-size: 22px;\r\n    border-bottom: none;\r\n    padding-left: 30px;\r\n  }\r\n.customername\r\n{\r\n  \r\n  width: 174px;\r\n  height: 40px;\r\n  border: 1px solid #ccc;\r\n  border-radius: 0;\r\n  padding-left: 5px;\r\n  color: #555555;\r\n  padding: 10px;\r\n  margin: 25px auto;\r\n}\r\n  #selectEmployee{\r\n    display:none;\r\n  }\r\n\r\n  .common-form{\r\n    -webkit-box-shadow: 0 10px 6px -6px #777;\r\n\t   -moz-box-shadow: 0 10px 6px -6px #777;\r\n\t        box-shadow: 0 10px 6px -6px #777;\r\n  }\r\n\r\n  .row{\r\n    margin-top:20px;\r\n  }\r\n  .row-2{\r\n    margin-top:100px;\r\n  }\r\n\r\n  .measurementsType{\r\n    width:350px;\r\n    height:40px;\r\n    border:1px solid #ccc;\r\n    border-radius: 0;\r\n    padding-left:5px;\r\n    color:#555555;\r\n    padding:10px;\r\n    margin:25px auto;\r\n  }\r\n\r\n  .record-text{\r\n    margin:25px auto;\r\n    text-align: center;\r\n    columns: #222222;\r\n    text-transform: uppercase;\r\n  }\r\n\r\n\r\n\r\n  /* The snackbar - position it at the bottom and in the middle of the screen */\r\n#snackbar {\r\n  visibility: hidden; /* Hidden by default. Visible on click */\r\n  min-width: 250px; /* Set a default minimum width */\r\n  margin-left: -125px; /* Divide value of min-width by 2 */\r\n  background-color: #333; /* Black background color */\r\n  color: #fff; /* White text color */\r\n  text-align: center; /* Centered text */\r\n  border-radius: 2px; /* Rounded borders */\r\n  padding: 16px; /* Padding */\r\n  position: fixed; /* Sit on top of the screen */\r\n  z-index: 1; /* Add a z-index if needed */\r\n  left: 50%; /* Center the snackbar */\r\n  bottom: 30px; /* 30px from the bottom */\r\n}\r\n\r\n/* Show the snackbar when clicking on a button (class added with JavaScript) */\r\n#snackbar.show {\r\n  visibility: visible; /* Show the snackbar */\r\n\r\n/* Add animation: Take 0.5 seconds to fade in and out the snackbar. \r\nHowever, delay the fade out process for 2.5 seconds */\r\n  -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;\r\n  animation: fadein 0.5s, fadeout 0.5s 2.5s;\r\n}\r\n\r\n/* Animations to fade the snackbar in and out */\r\n@-webkit-keyframes fadein {\r\n  from {bottom: 0; opacity: 0;} \r\n  to {bottom: 30px; opacity: 1;}\r\n}\r\n\r\n@keyframes fadein {\r\n  from {bottom: 0; opacity: 0;}\r\n  to {bottom: 30px; opacity: 1;}\r\n}\r\n\r\n@-webkit-keyframes fadeout {\r\n  from {bottom: 30px; opacity: 1;} \r\n  to {bottom: 0; opacity: 0;}\r\n}\r\n\r\n@keyframes fadeout {\r\n  from {bottom: 30px; opacity: 1;}\r\n  to {bottom: 0; opacity: 0;}\r\n}\r\n\r\n#selectType{\r\n  display:none;\r\n  text-align: center;\r\n}"
+
+/***/ },
+
+/***/ "./src/app/customers/CustomerMeasurementForm.template.html":
+/***/ function(module, exports) {
+
+module.exports = "<h1>Add Measurement Form</h1>\r\n<div id=\"snackbar\"></div>\r\n\r\n<div class=\"container\">\r\n\r\n  <div class=\"row\">\r\n    <div class=\"col-md-6 col-lg-6 col-sm-6 offset-lg-3 offset-md-3 offset-sm-3 common-form\">\r\n      <div class=\"form-group\">\r\n        \r\n                <label for=\"normal-field\" class=\"col-form-label\">Enter Contact Name</label>\r\n        \r\n                <input type=\"text\"  [(ngModel)]=\"newMeasurement.FullName\" id=\"normal-field\" class=\"form-control custom-inputs\"\r\n                  placeholder=\"Please Enter Customer Contact Name\">\r\n        \r\n              </div>\r\n              <div class=\"form-group\">\r\n                <button (click)=\"searchByName()\" class=\"btn btn-primary\">Search</button>\r\n              </div>\r\n      <div class=\"form-group\">\r\n\r\n        <label for=\"normal-field\" class=\"col-form-label\">Enter Contact Number</label>\r\n\r\n        <input type=\"text\" [(ngModel)]=\"newMeasurement.CustomerContactNumber\" id=\"normal-field\" class=\"form-control custom-inputs\"\r\n          placeholder=\"Please Enter Customer Contact Number\">\r\n\r\n      </div>\r\n\r\n      <div class=\"form-group\">\r\n        <button (click)=\"search()\" class=\"btn btn-primary\">Search</button>\r\n      </div>\r\n\r\n\r\n      <div class=\"form-group\">\r\n        <select class=\"customername\"(change)=\"onChange($event.target.value)\">\r\n          <option disabled selected>Select Customers</option>\r\n          <option *ngFor='let customer of customers' value={{customer._id}}>\r\n            {{customer.FullName}}\r\n          </option>\r\n        </select>\r\n      </div>\r\n\r\n      <div class=\"row\" id=\"selectType\">\r\n        <h1 class=\"record-text\">Record Measurements for:</h1>\r\n        <select class=\"measurementsType\" (change)=\"getForms($event.target.value)\">\r\n          <option disabled selected>Select Option</option>\r\n          <option value=\"Shalwar Kameez\">Shalwar Kameez</option>\r\n          <option value=\"Coat\">Coat</option>\r\n          <option value=\"Sherwani\">Sherwani</option>\r\n          <option value=\"Waist Coat\">Waist Coat</option>\r\n          <option value=\"Pant\">Pant</option>\r\n          <option value=\"Trouser\">Trouser</option>\r\n          <option value=\"Shawl\">Shawl</option>\r\n          <option value=\"Shoes\">Shoes</option>\r\n        </select>\r\n      </div>\r\n\r\n      <div class=\"row\">\r\n        <div class=\"form-group\" id=\"selectEmployee\">\r\n          <select  class=\"measurementsType\" (change)=\"getEmployeesShalwarKameezId($event.target.value)\">\r\n            <option disabled selected>Select Employee</option>\r\n            <option *ngFor='let Employees of employees' value={{Employees._id}}>\r\n              {{Employees.FullName}}\r\n            </option>\r\n          </select>\r\n        </div>\r\n      </div>\r\n      \r\n\r\n    </div>\r\n  </div>\r\n  \r\n  <div class=\"row row-2\">\r\n\r\n    <div class=\"col-md-6 col-lg-6 col-sm-6 offset-md-3 offset-sm-3 offset-lg-3 col-xs-12\">\r\n\r\n\r\n      <div class=\"shalwar\" *ngIf=\"ShalwarKameez\">\r\n        <!-- Shalwar Kameez Div -->\r\n\r\n        <fieldset>\r\n\r\n          <legend>Shalwar Kameez</legend>\r\n         \r\n          \r\n          <div class=\"form-group\">\r\n            <label for=\"normal-field\" class=\"col-form-label\">Please Enter Length</label>\r\n\r\n            <input type=\"text\" #lengthRef=\"ngModel\" [(ngModel)]=\"newMeasurement.ShalwarKameezLength\" id=\"normal-field\" class=\"form-control custom-inputs\"\r\n              placeholder=\"Length Must Be Numeric\" required pattern=\"[0-9]*\" ngModel>\r\n              <div *ngIf=\"lengthRef.errors && (lengthRef.dirty || lengthRef.touched)\" class=\"alert alert-danger\">\r\n              <div [hidden]=\"!lengthRef.errors.required\">\r\n                Length Must Be Required\r\n              </div>\r\n              <div [hidden]=\"!lengthRef.errors.pattern\">\r\n                  Please Input Only Numeric Value\r\n                </div>\r\n              \r\n              </div>\r\n          </div>\r\n\r\n\r\n          <div class=\"form-group\">\r\n            <label for=\"normal-field\" class=\"col-form-label\"> Please Enter Chest </label>\r\n\r\n            <input type=\"text\" #chestRef=\"ngModel\" [(ngModel)]=\"newMeasurement.ShalwarKameezChest\" id=\"normal-field\" class=\"form-control custom-inputs\" placeholder=\"Length Must Be Numeric\"\r\n              required pattern=\"[0-9]*\" ngModel>\r\n              <div *ngIf=\"chestRef.errors && (chestRef.dirty || chestRef.touched)\" class=\"alert alert-danger\">\r\n                  <div [hidden]=\"!chestRef.errors.required\">\r\n                    Length Must Be Required\r\n                  </div>\r\n                  <div [hidden]=\"!chestRef.errors.pattern\">\r\n                      Please Input Only Numeric Value\r\n                    </div>\r\n                  </div>\r\n\r\n          </div>\r\n\r\n\r\n          <div class=\"form-group\">\r\n            <label for=\"normal-field\" class=\"col-form-label\">Please Enter Waist</label>\r\n\r\n            <input type=\"text\" #waistRef=\"ngModel\" [(ngModel)]=\"newMeasurement.ShalwarKameezWaist\" id=\"normal-field\" class=\"form-control custom-inputs\" placeholder=\"Waist Must Be Numeric\"\r\n              required pattern=\"[0-9]*\" ngModel>\r\n              <div *ngIf=\"waistRef.errors && (waistRef.dirty || waistRef.touched)\" class=\"alert alert-danger\">\r\n                  <div [hidden]=\"!waistRef.errors.required\">\r\n                    Length Must Be Required\r\n                  </div>\r\n                  <div [hidden]=\"!waistRef.errors.pattern\">\r\n                      Please Input Only Numeric Value\r\n                    </div>\r\n                  </div>\r\n\r\n          </div>\r\n\r\n\r\n\r\n          <div class=\"form-group\">\r\n            <label for=\"normal-field\" class=\"col-form-label\"> Please Enter Hip Measurement</label>\r\n\r\n            <input type=\"text\" #hipRef=\"ngModel\" [(ngModel)]=\"newMeasurement.ShalwarKameezHip\" id=\"normal-field\" class=\"form-control custom-inputs\" placeholder=\"Hip Measurement Must Be Numeric\" \r\n              required pattern=\"[0-9]*\" ngModel>\r\n              <div *ngIf=\"hipRef.errors && (hipRef.dirty || hipRef.touched)\" class=\"alert alert-danger\">\r\n                  <div [hidden]=\"!hipRef.errors.required\">\r\n                    Length Must Be Required\r\n                  </div>\r\n                  <div [hidden]=\"!hipRef.errors.pattern\">\r\n                      Please Input Only Numeric Value\r\n                    </div>\r\n                  </div>\r\n\r\n          </div>\r\n\r\n\r\n\r\n          <div class=\"form-group\">\r\n            <label for=\"normal-field\" class=\"col-form-label\">Please Enter Sleeve Length</label>\r\n\r\n            <input type=\"text\" #sleeveRef=\"ngModel\" [(ngModel)]=\"newMeasurement.ShalwarKameezSleeve\" id=\"normal-field\" class=\"form-control custom-inputs\"\r\n              placeholder=\"Length Must Be Numeric\" required pattern=\"[0-9]*\" ngModel>\r\n              <div *ngIf=\"sleeveRef.errors && (sleeveRef.dirty || sleeveRef.touched)\" class=\"alert alert-danger\">\r\n                  <div [hidden]=\"!sleeveRef.errors.required\">\r\n                    Length Must Be Required\r\n                  </div>\r\n                  <div [hidden]=\"!sleeveRef.errors.pattern\">\r\n                      Please Input Only Numeric Value\r\n                    </div>\r\n                  </div>\r\n\r\n          </div>\r\n\r\n\r\n\r\n          <div class=\"form-group\">\r\n            <label for=\"normal-field\" class=\"col-form-label\">Please Enter Shoulder Length</label>\r\n\r\n            <input type=\"text\" #shRef=\"ngModel\" [(ngModel)]=\"newMeasurement.ShalwarKameezShoulder\" id=\"normal-field\" class=\"form-control custom-inputs\"\r\n              placeholder=\"Length Must Be Numeric\" required pattern=\"[0-9]*\" ngModel>\r\n              <div *ngIf=\"shRef.errors && (shRef.dirty || shRef.touched)\" class=\"alert alert-danger\">\r\n                  <div [hidden]=\"!shRef.errors.required\">\r\n                    Length Must Be Required\r\n                  </div>\r\n                  <div [hidden]=\"!shRef.errors.pattern\">\r\n                      Please Input Only Numeric Value\r\n                    </div>\r\n                  </div>\r\n\r\n          </div>\r\n\r\n\r\n\r\n          <div class=\"form-group\">\r\n            <label for=\"normal-field\" class=\"col-form-label\">Please Enter Neck Measurement</label>\r\n\r\n            <input type=\"text\" #neckRef=\"ngModel\" [(ngModel)]=\"newMeasurement.ShalwarKameezNeck\" id=\"normal-field\" class=\"form-control custom-inputs\" placeholder=\"Neck Measurement Must Be Numeric\"\r\n              required pattern=\"[0-9]*\" ngModel>\r\n              <div *ngIf=\"neckRef.errors && (neckRef.dirty || neckRef.touched)\" class=\"alert alert-danger\">\r\n                  <div [hidden]=\"!neckRef.errors.required\">\r\n                    Length Must Be Required\r\n                  </div>\r\n                  <div [hidden]=\"!neckRef.errors.pattern\">\r\n                      Please Input Only Numeric Value\r\n                    </div>\r\n                  </div>\r\n\r\n          </div>\r\n\r\n\r\n\r\n          <div class=\"form-group\">\r\n            <label for=\"normal-field\" class=\"col-form-label\">Please Enter Bysep Length</label>\r\n\r\n            <input type=\"text\" #bysepRef=\"ngModel\" [(ngModel)]=\"newMeasurement.ShalwarKameezBysep\" id=\"normal-field\" class=\"form-control custom-inputs\" placeholder=\"Length Must Be Numeric\"\r\n              required pattern=\"[0-9]*\" ngModel>\r\n              <div *ngIf=\"bysepRef.errors && (bysepRef.dirty || bysepRef.touched)\" class=\"alert alert-danger\">\r\n                  <div [hidden]=\"!bysepRef.errors.required\">\r\n                    Length Must Be Required\r\n                  </div>\r\n                  <div [hidden]=\"!bysepRef.errors.pattern\">\r\n                      Please Input Only Numeric Value\r\n                    </div>\r\n                  </div>\r\n\r\n          </div>\r\n\r\n          <div class=\"form-group\">\r\n            <label for=\"normal-field\" class=\"col-form-label\">Please Enter S. Length</label>\r\n\r\n            <input type=\"text\" #sRef=\"ngModel\" [(ngModel)]=\"newMeasurement.ShalwarKameezSLength\" id=\"normal-field\" class=\"form-control custom-inputs\"\r\n              placeholder=\"Length Must Be Numeric\" required pattern=\"[0-9]*\" ngModel>\r\n              <div *ngIf=\"sRef.errors && (sRef.dirty || sRef.touched)\" class=\"alert alert-danger\">\r\n                  <div [hidden]=\"!sRef.errors.required\">\r\n                    Length Must Be Required\r\n                  </div>\r\n                  <div [hidden]=\"!sRef.errors.pattern\">\r\n                      Please Input Only Numeric Value\r\n                    </div>\r\n                  </div>\r\n\r\n          </div>\r\n\r\n          <div class=\"form-group\">\r\n            <label for=\"normal-field\" class=\"col-form-label\">Please Enter Bottom</label>\r\n\r\n            <input type=\"text\" #bottomRef=\"ngModel\" [(ngModel)]=\"newMeasurement.ShalwarKameezBottom\" id=\"normal-field\" class=\"form-control custom-inputs\"\r\n              placeholder=\"Bottom Must Be Numeric\" required pattern=\"[0-9]*\" ngModel>\r\n              <div *ngIf=\"bottomRef.errors && (bottomRef.dirty || bottomRef.touched)\" class=\"alert alert-danger\">\r\n                  <div [hidden]=\"!bottomRef.errors.required\">\r\n                    Length Must Be Required\r\n                  </div>\r\n                  <div [hidden]=\"!bottomRef.errors.pattern\">\r\n                      Please Input Only Numeric Value\r\n                    </div>\r\n                  </div>\r\n\r\n          </div>\r\n\r\n          <button (click)=\"addMeasurement()\" class=\"btn btn-success add-btn\">Add Measurement</button>\r\n\r\n        </fieldset>\r\n\r\n      </div>\r\n      <!-- Shalwar Kameez div  -->\r\n\r\n\r\n\r\n\r\n      <div class=\"shalwar\" *ngIf=\"Coat\">\r\n        <!-- Coat -div -->\r\n\r\n        <fieldset>\r\n\r\n          <legend>Coat</legend>\r\n          \r\n         <!--  <div class=\"form-group\">\r\n            <select (change)=\"getEmployeesShalwarCoatId($event.target.value)\">\r\n              <option disabled selected>Select Employee</option>\r\n              <option *ngFor='let Employees of employees' value={{Employees._id}}>\r\n                {{Employees.FullName}}\r\n              </option>\r\n            </select>\r\n          </div> -->\r\n\r\n          <div class=\"form-group\">\r\n            <label for=\"normal-field\" class=\"col-form-label\">Please Enter Coat Length</label>\r\n\r\n            <input type=\"text\" #coatRef=\"ngModel\" [(ngModel)]=\"newMeasurement.CoatLength\" id=\"normal-field\" class=\"form-control custom-inputs\" placeholder=\"Length Must Be Numeric\"\r\n              required ngModel>\r\n              <div *ngIf=\"coatRef.errors && (coatRef.dirty || coatRef.touched)\" class=\"alert alert-danger\">\r\n                  <div [hidden]=\"!coatRef.errors.required\">\r\n                    Length Must Be Required\r\n                  </div>\r\n                  </div>\r\n\r\n          </div>\r\n\r\n\r\n          <div class=\"form-group\">\r\n            <label for=\"normal-field\" class=\"col-form-label\">Please Enter Coat Chest</label>\r\n\r\n            <input type=\"text\" #coatCRef=\"ngModel\" [(ngModel)]=\"newMeasurement.CoatChest\" id=\"normal-field\" class=\"form-control custom-inputs\" placeholder=\"Length Must Be Numeric\"\r\n              required ngModel>\r\n              <div *ngIf=\"coatCRef.errors && (coatCRef.dirty || coatCRef.touched)\" class=\"alert alert-danger\">\r\n                  <div [hidden]=\"!coatCRef.errors.required\">\r\n                    Length Must Be Required\r\n                  </div>\r\n                  </div>\r\n\r\n          </div>\r\n\r\n\r\n          <div class=\"form-group\">\r\n            <label for=\"normal-field\" class=\"col-form-label\">Please Enter coat Waist</label>\r\n\r\n            <input type=\"text\" #coatWRef=\"ngModel\" [(ngModel)]=\"newMeasurement.CoatWaist\" id=\"normal-field\" class=\"form-control custom-inputs\" placeholder=\"Waist Length Must Be Numeric\"\r\n              required ngModel>\r\n              <div *ngIf=\"coatWRef.errors && (coatWRef.dirty || coatWRef.touched)\" class=\"alert alert-danger\">\r\n                  <div [hidden]=\"!coatWRef.errors.required\">\r\n                    Length Must Be Required\r\n                  </div>\r\n                  </div>\r\n\r\n          </div>\r\n\r\n\r\n\r\n          <div class=\"form-group\">\r\n            <label for=\"normal-field\" class=\"col-form-label\">Please Enter Hip Measurement</label>\r\n\r\n            <input type=\"text\" #coatHRef=\"ngModel\" [(ngModel)]=\"newMeasurement.CoatHip\" id=\"normal-field\" class=\"form-control custom-inputs\" placeholder=\"Hip Measurement Length Must Be Numeric\"\r\n              required ngModel>\r\n              <div *ngIf=\"coatHRef.errors && (coatHRef.dirty || coatHRef.touched)\" class=\"alert alert-danger\">\r\n                  <div [hidden]=\"!coatHRef.errors.required\">\r\n                    Length Must Be Required\r\n                  </div>\r\n                  </div>\r\n\r\n          </div>\r\n\r\n\r\n\r\n          <div class=\"form-group\">\r\n            <label for=\"normal-field\" class=\"col-form-label\">Please Enter Sleeve Length</label>\r\n\r\n            <input type=\"text\" #coatSLRef=\"ngModel\" [(ngModel)]=\"newMeasurement.CoatSleeve\" id=\"normal-field\" class=\"form-control custom-inputs\" placeholder=\"Sleeve Length Must Be Numeric\"\r\n              required ngModel>\r\n              <div *ngIf=\"coatSLRef.errors && (coatSLRef.dirty || coatSLRef.touched)\" class=\"alert alert-danger\">\r\n                  <div [hidden]=\"!coatSLRef.errors.required\">\r\n                    Length Must Be Required\r\n                  </div>\r\n                  </div>\r\n\r\n          </div>\r\n\r\n\r\n\r\n          <div class=\"form-group\">\r\n            <label for=\"normal-field\" class=\"col-form-label\">Please Enter Shoulder Length</label>\r\n\r\n            <input type=\"text\" #coatSORef=\"ngModel\" [(ngModel)]=\"newMeasurement.CoatShoulder\" id=\"normal-field\" class=\"form-control custom-inputs\" placeholder=\"Shoulder Length Must Be Numeric\"\r\n              required ngModel>\r\n              <div *ngIf=\"coatSORef.errors && (coatSORef.dirty || coatSORef.touched)\" class=\"alert alert-danger\">\r\n                  <div [hidden]=\"!coatSORef.errors.required\">\r\n                    Length Must Be Required\r\n                  </div>\r\n                  </div>\r\n\r\n          </div>\r\n\r\n\r\n\r\n          <div class=\"form-group\">\r\n            <label for=\"normal-field\" class=\"col-form-label\">Please Enter Neck Measurement</label>\r\n\r\n            <input type=\"text\" #coatNeckRef=\"ngModel\" [(ngModel)]=\"newMeasurement.CoatNeck\" id=\"normal-field\" class=\"form-control custom-inputs\" placeholder=\"Neck Measurement Must Be Numeric\"\r\n              required ngModel>\r\n              <div *ngIf=\"coatNeckRef.errors && (coatNeckRef.dirty || coatNeckRef.touched)\" class=\"alert alert-danger\">\r\n                  <div [hidden]=\"!coatNeckRef.errors.required\">\r\n                    Length Must Be Required\r\n                  </div>\r\n                  </div>\r\n\r\n          </div>\r\n\r\n\r\n\r\n          <div class=\"form-group\">\r\n            <label for=\"normal-field\" class=\"col-form-label\">Please Enter Bysep Length</label>\r\n\r\n            <input type=\"text\" #coatBysepRef=\"ngModel\" [(ngModel)]=\"newMeasurement.CoatBysep\" id=\"normal-field\" class=\"form-control custom-inputs\" placeholder=\"Length Must Be Numeric\"\r\n              required ngModel>\r\n              <div *ngIf=\"coatBysepRef.errors && (coatBysepRef.dirty || coatBysepRef.touched)\" class=\"alert alert-danger\">\r\n                  <div [hidden]=\"!coatBysepRef.errors.required\">\r\n                    Length Must Be Required\r\n                  </div>\r\n                  </div>\r\n\r\n          </div>\r\n\r\n          <div class=\"form-group\">\r\n            <label for=\"normal-field\" class=\"col-form-label\">Please Enter H.B</label>\r\n\r\n            <input type=\"text\" #coatHBRef=\"ngModel\" [(ngModel)]=\"newMeasurement.CoatHB\" id=\"normal-field\" class=\"form-control custom-inputs\" placeholder=\"H.B Length Must Be Numeric\"\r\n              required ngModel>\r\n              <div *ngIf=\"coatHBRef.errors && (coatHBRef.dirty || coatHBRef.touched)\" class=\"alert alert-danger\">\r\n                  <div [hidden]=\"!coatHBRef.errors.required\">\r\n                    Length Must Be Required\r\n                  </div>\r\n                  </div>\r\n\r\n          </div>\r\n \r\n          <div class=\"form-group\">\r\n            <label for=\"normal-field\" class=\"col-form-label\">Please Enter C.B</label>\r\n\r\n            <input type=\"text\"  #coatCBRef=\"ngModel\" [(ngModel)]=\"newMeasurement.CoatCB\" id=\"normal-field\" class=\"form-control custom-inputs\" placeholder=\"C.B Length Must Be Numeric\"\r\n              required ngModel>\r\n              <div *ngIf=\"coatCBRef.errors && (coatCBRef.dirty || coatCBRef.touched)\" class=\"alert alert-danger\">\r\n                  <div [hidden]=\"!coatCBRef.errors.required\">\r\n                    Length Must Be Required\r\n                  </div>\r\n                  </div>\r\n\r\n          </div>\r\n\r\n          <button (click)=\"addMeasurement()\" class=\"btn btn-success add-btn\">Add Measurement</button>\r\n\r\n        </fieldset>\r\n\r\n      </div>\r\n      <!-- Coat div  -->\r\n\r\n\r\n\r\n\r\n\r\n\r\n      <div class=\"shalwar\" *ngIf=\"Sherwani\">\r\n\r\n        <fieldset>\r\n          <!-- Sherwani div  -->\r\n\r\n          <legend>Sherwani</legend>\r\n          \r\n        <!--   <div class=\"form-group\">\r\n            <select (change)=\"getEmployeesSherwaniId($event.target.value)\">\r\n              <option disabled selected>Select Employee</option>\r\n              <option *ngFor='let Employees of employees' value={{Employees._id}}>\r\n                {{Employees.FullName}}\r\n              </option>\r\n            </select>\r\n          </div> -->\r\n\r\n          <div class=\"form-group\">\r\n            <label for=\"normal-field\" class=\"col-form-label\">Please Enter Length</label>\r\n\r\n            <input type=\"text\" #waniRef=\"ngModel\" [(ngModel)]=\"newMeasurement.SherwaniLength\" id=\"normal-field\" class=\"form-control custom-inputs\" placeholder=\"Length Must Be Numeric\"\r\n              required ngModel>\r\n              <div *ngIf=\"waniRef.errors && (waniRef.dirty || waniRef.touched)\" class=\"alert alert-danger\">\r\n                  <div [hidden]=\"!waniRef.errors.required\">\r\n                    Length Must Be Required\r\n                  </div>\r\n                  </div>\r\n\r\n          </div>\r\n\r\n\r\n          <div class=\"form-group\">\r\n            <label for=\"normal-field\" class=\"col-form-label\">Please Enter Sherwani Chest</label>\r\n\r\n            <input type=\"text\" #waniCRef=\"ngModel\" [(ngModel)]=\"newMeasurement.SherwaniChest\" id=\"normal-field\" class=\"form-control custom-inputs\" placeholder=\"Length Must Be Numeric\"\r\n              required ngModel>\r\n              <div *ngIf=\"waniCRef.errors && (waniCRef.dirty || waniCRef.touched)\" class=\"alert alert-danger\">\r\n                  <div [hidden]=\"!waniCRef.errors.required\">\r\n                    Length Must Be Required\r\n                  </div>\r\n                  </div>\r\n\r\n          </div>\r\n\r\n\r\n          <div class=\"form-group\">\r\n            <label for=\"normal-field\" class=\"col-form-label\">Please Enter Sherwani Waist</label>\r\n\r\n            <input type=\"text\" #waniWRef=\"ngModel\" [(ngModel)]=\"newMeasurement.SherwaniWaist\" id=\"normal-field\" class=\"form-control custom-inputs\" placeholder=\"Waist Length Must Be Numeric\"\r\n              required ngModel>\r\n              <div *ngIf=\"waniWRef.errors && (waniWRef.dirty || waniWRef.touched)\" class=\"alert alert-danger\">\r\n                  <div [hidden]=\"!waniWRef.errors.required\">\r\n                    Length Must Be Required\r\n                  </div>\r\n                  </div>\r\n\r\n          </div>\r\n\r\n\r\n\r\n          <div class=\"form-group\">\r\n            <label for=\"normal-field\" class=\"col-form-label\">Please Enter Hip Measurement</label>\r\n\r\n            <input type=\"text\" #waniHRef=\"ngModel\" [(ngModel)]=\"newMeasurement.SherwaniHip\" id=\"normal-field\" class=\"form-control custom-inputs\" placeholder=\"Hip Measurement Length Must Be Numeric\"\r\n              required ngModel>\r\n              <div *ngIf=\"waniHRef.errors && (waniHRef.dirty || waniHRef.touched)\" class=\"alert alert-danger\">\r\n                  <div [hidden]=\"!waniHRef.errors.required\">\r\n                    Length Must Be Required\r\n                  </div>\r\n                  </div>\r\n\r\n          </div>\r\n\r\n\r\n\r\n          <div class=\"form-group\">\r\n            <label for=\"normal-field\" class=\"col-form-label\">Please Enter Sleeve Length</label>\r\n\r\n            <input type=\"text\" #waniHSRef=\"ngModel\" [(ngModel)]=\"newMeasurement.SherwaniSleeve\" id=\"normal-field\" class=\"form-control custom-inputs\" placeholder=\"Sleeve Length Must Be Numeric\"\r\n              required ngModel>\r\n              <div *ngIf=\"waniHSRef.errors && (waniHSRef.dirty || waniHSRef.touched)\" class=\"alert alert-danger\">\r\n                  <div [hidden]=\"!waniHSRef.errors.required\">\r\n                    Length Must Be Required\r\n                  </div>\r\n                  </div>\r\n\r\n          </div>\r\n\r\n\r\n\r\n          <div class=\"form-group\">\r\n            <label for=\"normal-field\" class=\"col-form-label\">Please Enter Shoulder Length</label>\r\n\r\n            <input type=\"text\" #waniHSSRef=\"ngModel\" [(ngModel)]=\"newMeasurement.SherwaniShoulder\" id=\"normal-field\" class=\"form-control custom-inputs\" placeholder=\"Shoulder Length Must Be Numeric\"\r\n              required ngModel>\r\n              <div *ngIf=\"waniHSSRef.errors && (waniHSSRef.dirty || waniHSSRef.touched)\" class=\"alert alert-danger\">\r\n                  <div [hidden]=\"!waniHSSRef.errors.required\">\r\n                    Length Must Be Required\r\n                  </div>\r\n                  </div>\r\n\r\n          </div>\r\n\r\n\r\n\r\n          <div class=\"form-group\">\r\n            <label for=\"normal-field\" class=\"col-form-label\">Please Enter Neck Measurement</label>\r\n\r\n            <input type=\"text\" #waniNeckRef=\"ngModel\" [(ngModel)]=\"newMeasurement.SherwaniNeck\" id=\"normal-field\" class=\"form-control custom-inputs\" placeholder=\"Neck Measurement Length Must Be Numeric\"\r\n              required ngModel>\r\n              <div *ngIf=\"waniNeckRef.errors && (waniNeckRef.dirty || waniNeckRef.touched)\" class=\"alert alert-danger\">\r\n                  <div [hidden]=\"!waniNeckRef.errors.required\">\r\n                    Length Must Be Required\r\n                  </div>\r\n                  </div>\r\n\r\n          </div>\r\n\r\n\r\n          <div class=\"form-group\">\r\n            <label for=\"normal-field\" class=\"col-form-label\">Please Enter Bysep Length</label>\r\n\r\n            <input type=\"text\" #waniBysepRef=\"ngModel\" [(ngModel)]=\"newMeasurement.SherwaniBysep\" id=\"normal-field\" class=\"form-control custom-inputs\" placeholder=\" Bysep Length Must Be Numeric\"\r\n              required ngModel>\r\n              <div *ngIf=\"waniBysepRef.errors && (waniBysepRef.dirty || waniBysepRef.touched)\" class=\"alert alert-danger\">\r\n                  <div [hidden]=\"!waniBysepRef.errors.required\">\r\n                    Length Must Be Required\r\n                  </div>\r\n                  </div>\r\n\r\n          </div>\r\n\r\n          <div class=\"form-group\">\r\n            <label for=\"normal-field\" class=\"col-form-label\">Please Enter H.B</label>\r\n\r\n            <input type=\"text\" #waniHBRef=\"ngModel\" [(ngModel)]=\"newMeasurement.SherwaniHB\" id=\"normal-field\" class=\"form-control custom-inputs\" placeholder=\"H.B Length Must Be Numeric\"\r\n              required ngModel>\r\n              <div *ngIf=\"waniHBRef.errors && (waniHBRef.dirty || waniHBRef.touched)\" class=\"alert alert-danger\">\r\n                  <div [hidden]=\"!waniHBRef.errors.required\">\r\n                    Length Must Be Required\r\n                  </div>\r\n                  </div>\r\n\r\n          </div>\r\n\r\n          <div class=\"form-group\">\r\n            <label for=\"normal-field\" class=\"col-form-label\">Please Enter C.B</label>\r\n\r\n            <input type=\"text\" #waniCBRef=\"ngModel\" [(ngModel)]=\"newMeasurement.SherwaniCB\" id=\"normal-field\" class=\"form-control custom-inputs\" placeholder=\"C.B Length Must Be Numeric\"\r\n              required ngModel>\r\n              <div *ngIf=\"waniCBRef.errors && (waniCBRef.dirty || waniCBRef.touched)\" class=\"alert alert-danger\">\r\n                  <div [hidden]=\"!waniCBRef.errors.required\">\r\n                    Length Must Be Required\r\n                  </div>\r\n                  </div>\r\n\r\n          </div>\r\n\r\n          <button (click)=\"addMeasurement()\" class=\"btn btn-success add-btn\">Add Measurement</button>\r\n\r\n        </fieldset>\r\n\r\n      </div>\r\n      <!-- sherwani div  -->\r\n\r\n\r\n\r\n\r\n\r\n\r\n      <div class=\"shalwar\" *ngIf=\"WaistCoat\">\r\n\r\n        <fieldset>\r\n          <!-- waist coat div  -->\r\n\r\n          <legend>Waist Coat</legend>\r\n        <!--   \r\n          <div class=\"form-group\">\r\n            <select (change)=\"getEmployeesWaistCoatId($event.target.value)\">\r\n              <option disabled selected>Select Employee</option>\r\n              <option *ngFor='let Employees of employees' value={{Employees._id}}>\r\n                {{Employees.FullName}}\r\n              </option>\r\n            </select>\r\n          </div> -->\r\n\r\n          <div class=\"form-group\">\r\n            <label for=\"normal-field\" class=\"col-form-label\">Please Enter Coat Length</label>\r\n\r\n            <input type=\"text\" [(ngModel)]=\"newMeasurement.CoatLength\" id=\"normal-field\" class=\"form-control custom-inputs\" placeholder=\"Coat Length Must Be Numeric\"\r\n              required>\r\n\r\n          </div>\r\n\r\n\r\n          <div class=\"form-group\">\r\n            <label for=\"normal-field\" class=\"col-form-label\">Please Enter Coat Chest</label>\r\n\r\n            <input type=\"text\" [(ngModel)]=\"newMeasurement.CoatChest\" id=\"normal-field\" class=\"form-control custom-inputs\" placeholder=\"Coat Chest Length Must Be Numeric\"\r\n              required>\r\n\r\n          </div>\r\n\r\n\r\n          <div class=\"form-group\">\r\n            <label for=\"normal-field\" class=\"col-form-label\">Please Enter coat Waist</label>\r\n\r\n            <input type=\"text\" [(ngModel)]=\"newMeasurement.CoatWaist\" id=\"normal-field\" class=\"form-control custom-inputs\" placeholder=\"coat Waist Must Be Numeric\"\r\n              required>\r\n\r\n          </div>\r\n\r\n\r\n\r\n          <div class=\"form-group\">\r\n            <label for=\"normal-field\" class=\"col-form-label\">Please Enter Hip Measurement</label>\r\n\r\n            <input type=\"text\" [(ngModel)]=\"newMeasurement.CoatHip\" id=\"normal-field\" class=\"form-control custom-inputs\" placeholder=\"Hip Measurement Length Must Be Numeric\"\r\n              required>\r\n\r\n          </div>\r\n\r\n\r\n\r\n          <div class=\"form-group\">\r\n            <label for=\"normal-field\" class=\"col-form-label\">Please Enter Shoulder Length</label>\r\n\r\n            <input type=\"text\" [(ngModel)]=\"newMeasurement.CoatShoulder\" id=\"normal-field\" class=\"form-control custom-inputs\" placeholder=\"Shoulder Length Must Be Numeric\"\r\n              required>\r\n\r\n          </div>\r\n\r\n\r\n\r\n          <div class=\"form-group\">\r\n            <label for=\"normal-field\" class=\"col-form-label\">Please Enter Neck Measurement</label>\r\n\r\n            <input type=\"text\" [(ngModel)]=\"newMeasurement.CoatNeck\" id=\"normal-field\" class=\"form-control custom-inputs\" placeholder=\"Neck Measurement Length Must Be Numeric\"\r\n              required>\r\n\r\n          </div>\r\n\r\n\r\n          <div class=\"form-group\">\r\n            <label for=\"normal-field\" class=\"col-form-label\">Please Enter H.B</label>\r\n\r\n            <input type=\"text\" [(ngModel)]=\"newMeasurement.CoatHB\" id=\"normal-field\" class=\"form-control custom-inputs\" placeholder=\"H.B Length Must Be Numeric\"\r\n              required>\r\n\r\n          </div>\r\n\r\n          <div class=\"form-group\">\r\n            <label for=\"normal-field\" class=\"col-form-label\">Please Enter C.B</label>\r\n\r\n            <input type=\"text\" [(ngModel)]=\"newMeasurement.CoatCB\" id=\"normal-field\" class=\"form-control custom-inputs\" placeholder=\"C.B Length Must Be Numeric\"\r\n              required>\r\n\r\n          </div>\r\n\r\n          <button (click)=\"addMeasurement()\" class=\"btn btn-success add-btn\">Add Measurement</button>\r\n\r\n        </fieldset>\r\n\r\n      </div>\r\n      <!-- waist coat div  -->\r\n\r\n\r\n\r\n\r\n      <div class=\"shalwar\" *ngIf=\"Pant\">\r\n        <!-- pants div  -->\r\n\r\n        <fieldset>\r\n\r\n          <legend>Pant</legend>\r\n\r\n  <!--         <div class=\"form-group\">\r\n            <select (change)=\"getEmployeesPantId($event.target.value)\">\r\n              <option disabled selected>Select Employee</option>\r\n              <option *ngFor='let Employees of employees' value={{Employees._id}}>\r\n                {{Employees.FullName}}\r\n              </option>\r\n            </select>\r\n          </div> -->\r\n\r\n\r\n\r\n          <div class=\"form-group\">\r\n            <label for=\"normal-field\" class=\"col-form-label\">Please Enter Pent Waist</label>\r\n\r\n            <input type=\"text\" [(ngModel)]=\"newMeasurement.PentWaist\" id=\"normal-field\" class=\"form-control custom-inputs\" placeholder=\"Waist Length Must Be Numaric\"\r\n              required>\r\n\r\n          </div>\r\n\r\n\r\n\r\n          <div class=\"form-group\">\r\n            <label for=\"normal-field\" class=\"col-form-label\">Please Enter Hip Measurement</label>\r\n\r\n            <input type=\"text\" [(ngModel)]=\"newMeasurement.PentHip\" id=\"normal-field\" class=\"form-control custom-inputs\" placeholder=\"Hip Measurement Length Must Be Numeric\"\r\n              required>\r\n\r\n          </div>\r\n\r\n\r\n\r\n          <div class=\"form-group\">\r\n            <label for=\"normal-field\" class=\"col-form-label\">Please Enter Length</label>\r\n\r\n            <input type=\"text\" [(ngModel)]=\"newMeasurement.PentLength\" id=\"normal-field\" class=\"form-control custom-inputs\" placeholder=\"Length Must Be Numeric\"\r\n              required>\r\n\r\n          </div>\r\n\r\n\r\n\r\n          <div class=\"form-group\">\r\n            <label for=\"normal-field\" class=\"col-form-label\">Please Enter Knee Measurement</label>\r\n\r\n            <input type=\"text\" [(ngModel)]=\"newMeasurement.PentKnee\" id=\"normal-field\" class=\"form-control custom-inputs\" placeholder=\"Knee Measurement Length Must Be Numeric\"\r\n              required>\r\n\r\n          </div>\r\n\r\n\r\n          <div class=\"form-group\">\r\n            <label for=\"normal-field\" class=\"col-form-label\">Please Enter Bottom</label>\r\n\r\n            <input type=\"text\" [(ngModel)]=\"newMeasurement.PentBottom\" id=\"normal-field\" class=\"form-control custom-inputs\" placeholder=\"Bottom Length Must Be Numeric\"\r\n              required>\r\n\r\n          </div>\r\n\r\n          <div class=\"form-group\">\r\n            <label for=\"normal-field\" class=\"col-form-label\">Please Enter Inside</label>\r\n\r\n            <input type=\"text\" [(ngModel)]=\"newMeasurement.PentInside\" id=\"normal-field\" class=\"form-control custom-inputs\" placeholder=\"Inside Length Must Be Numeric\"\r\n              required>\r\n\r\n          </div>\r\n\r\n          <button (click)=\"addMeasurement()\" class=\"btn btn-success add-btn\">Add Measurement</button>\r\n\r\n        </fieldset>\r\n\r\n      </div>\r\n      <!-- pants div  -->\r\n\r\n\r\n\r\n\r\n      \r\n\r\n\r\n\r\n      <div class=\"shalwar\" *ngIf=\"Trouser\">\r\n        <!-- Trouser div  -->\r\n\r\n        <fieldset>\r\n\r\n          <legend>Trouser</legend>\r\n\r\n      <!--     <div class=\"form-group\">\r\n            <select (change)=\"getEmployeesTrouserId($event.target.value)\">\r\n              <option disabled selected>Select Employee</option>\r\n              <option *ngFor='let Employees of employees' value={{Employees._id}}>\r\n                {{Employees.FullName}}\r\n              </option>\r\n            </select>\r\n          </div>\r\n -->\r\n\r\n\r\n          <div class=\"form-group\">\r\n            <label for=\"normal-field\" class=\"col-form-label\">Please Enter Trouser Waist</label>\r\n\r\n            <input type=\"text\" [(ngModel)]=\"newMeasurement.TrouserWaist\" id=\"normal-field\" class=\"form-control custom-inputs\" placeholder=\"Waist Must Be Numeric\"\r\n              required>\r\n\r\n          </div>\r\n\r\n\r\n\r\n          <div class=\"form-group\">\r\n            <label for=\"normal-field\" class=\"col-form-label\">Please Enter Hip Measurement</label>\r\n\r\n            <input type=\"text\" [(ngModel)]=\"newMeasurement.TrouserHip\" id=\"normal-field\" class=\"form-control custom-inputs\" placeholder=\"Hip Measurement Length Must Be Numeric\"\r\n              required>\r\n\r\n          </div>\r\n\r\n\r\n\r\n          <div class=\"form-group\">\r\n            <label for=\"normal-field\" class=\"col-form-label\">Please Enter Trouser Length</label>\r\n\r\n            <input type=\"text\" [(ngModel)]=\"newMeasurement.TrouserLength\" id=\"normal-field\" class=\"form-control custom-inputs\" placeholder=\"Length Must Be Numeric\"\r\n              required>\r\n\r\n          </div>\r\n\r\n\r\n\r\n          <div class=\"form-group\">\r\n            <label for=\"normal-field\" class=\"col-form-label\">Please Enter Knee Measurement</label>\r\n\r\n            <input type=\"text\" [(ngModel)]=\"newMeasurement.TrouserKnee\" id=\"normal-field\" class=\"form-control custom-inputs\" placeholder=\"Knee Measurement Must Be Numeric\"\r\n              required>\r\n\r\n          </div>\r\n\r\n\r\n          <div class=\"form-group\">\r\n            <label for=\"normal-field\" class=\"col-form-label\">Please Enter Trouser Bottom</label>\r\n\r\n            <input type=\"text\" [(ngModel)]=\"newMeasurement.TrouserBottom\" id=\"normal-field\" class=\"form-control custom-inputs\" placeholder=\"Bottom Length Must Be Numeric\"\r\n              required>\r\n\r\n          </div>\r\n\r\n          <div class=\"form-group\">\r\n            <label for=\"normal-field\" class=\"col-form-label\">Please Enter Trouser Inside</label>\r\n\r\n            <input type=\"text\" [(ngModel)]=\"newMeasurement.TrouserInside\" id=\"normal-field\" class=\"form-control custom-inputs\" placeholder=\"Length Must Be Numeric\"\r\n              required>\r\n\r\n          </div>\r\n\r\n          <button (click)=\"addMeasurement()\" class=\"btn btn-success add-btn\">Add Measurement</button>\r\n\r\n        </fieldset>\r\n\r\n      </div>\r\n      <!-- Trouser div  -->\r\n\r\n\r\n\r\n\r\n      <div class=\"shalwar\" *ngIf=\"Shawl\">\r\n        <!-- Trouser div  -->\r\n\r\n        <fieldset>\r\n\r\n          <legend>Shawl</legend>\r\n          \r\n      <!--     <div class=\"form-group\">\r\n            <select (change)=\"getEmployeesTrouserId($event.target.value)\">\r\n              <option disabled selected>Select Employee</option>\r\n              <option *ngFor='let Employees of employees' value={{Employees._id}}>\r\n                {{Employees.FullName}}\r\n              </option>\r\n            </select>\r\n          </div> -->\r\n\r\n\r\n\r\n          <div class=\"form-group\">\r\n            <label for=\"normal-field\" class=\"col-form-label\">Please Enter Shawl Length</label>\r\n\r\n            <input type=\"text\" [(ngModel)]=\"newMeasurement.ShawlLength\" id=\"normal-field\" class=\"form-control custom-inputs\" placeholder=\"Length Must Be Numeric\"\r\n              required>\r\n\r\n          </div>\r\n\r\n\r\n\r\n          <div class=\"form-group\">\r\n            <label for=\"normal-field\" class=\"col-form-label\">Please Enter Shawl Width</label>\r\n\r\n            <input type=\"text\" [(ngModel)]=\"newMeasurement.ShawlWidth\" id=\"normal-field\" class=\"form-control custom-inputs\" placeholder=\"Width Must Be Numeric\"\r\n              required>\r\n\r\n          </div>\r\n\r\n\r\n\r\n       \r\n\r\n          <button (click)=\"addMeasurement()\" class=\"btn btn-success add-btn\">Add Measurement</button>\r\n\r\n        </fieldset>\r\n\r\n      </div>\r\n\r\n\r\n      <div class=\"shalwar\" *ngIf=\"Shoes\">\r\n        <!-- Trouser div  -->\r\n\r\n        <fieldset>\r\n\r\n          <legend>Shoes</legend>\r\n          \r\n        \r\n\r\n       \r\n\r\n          <button (click)=\"addMeasurement()\" class=\"btn btn-success add-btn\">Add Measurement</button>\r\n\r\n        </fieldset>\r\n\r\n      </div>\r\n      <!-- Trouser div  -->\r\n\r\n\r\n\r\n    </div>\r\n  </div>\r\n</div>"
+
+/***/ },
+
+/***/ "./src/app/customers/customerMeasurementForm.component.ts":
+/***/ function(module, exports, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function($) {"use strict";
+var core_1 = __webpack_require__("./node_modules/@angular/core/index.js");
+var measurement_1 = __webpack_require__("./src/models/measurement.ts");
+var customer_Service_1 = __webpack_require__("./src/services/customer.Service.ts");
+var measurement_Service_1 = __webpack_require__("./src/services/measurement.Service.ts");
+var employee_Service_1 = __webpack_require__("./src/services/employee.Service.ts");
+var CustomerMeasurementForm = (function () {
+    function CustomerMeasurementForm(_measurementService, _customerService, _employeeService) {
+        this._measurementService = _measurementService;
+        this._customerService = _customerService;
+        this._employeeService = _employeeService;
+        this.ShalwarKameez = false;
+        this.Coat = false;
+        this.Sherwani = false;
+        this.WaistCoat = false;
+        this.Pant = false;
+        this.Trouser = false;
+        this.Shawl = false;
+        this.Shoes = false;
+    }
+    CustomerMeasurementForm.prototype.searchByName = function () {
+        var _this = this;
+        this._customerService.getCustomersByContactName(this.newMeasurement.FullName).subscribe(function (res) {
+            if (res.code == 200) {
+                _this.customers = res.data;
+                $("#snackbar").html("Data is Available");
+            }
+            else {
+                _this.customers = null;
+                $("#snackbar").html("Data not Available");
+            }
+            console.log("customer for referance is");
+            console.log(_this.customers);
         });
-        /**
-         * Make refresh button spin when loading
-         */
-        $newsWidget.on('load.widgster', function () {
-            jQuery(this).find('[data-widgster="load"] > i').addClass('fa-spin');
-        }).on('loaded.widgster', function () {
-            jQuery(this).find('[data-widgster="load"] > i').removeClass('fa-spin');
-        });
-        /**
-         * Custom close prompt for news widget
-         */
-        $newsWidget.widgster({
-            showLoader: false,
-            closePrompt: function (callback) {
-                jQuery('#news-close-modal').modal('show');
-                jQuery('#news-widget-remove').on('click', function () {
-                    jQuery('#news-close-modal').on('hidden.bs.modal', callback).modal('hide');
+        this.newMeasurement.CustomerContactName = undefined;
+    };
+    CustomerMeasurementForm.prototype.addMeasurement = function () {
+        var _this = this;
+        if (this.ShalwarKameez == true) {
+            if (this.newMeasurement.ShalwarKameezLength == null || this.newMeasurement.ShalwarKameezChest == null || this.newMeasurement.ShalwarKameezWaist == null || this.newMeasurement.ShalwarKameezHip == null || this.newMeasurement.ShalwarKameezSleeve == null || this.newMeasurement.ShalwarKameezShoulder == null || this.newMeasurement.ShalwarKameezNeck == null || this.newMeasurement.ShalwarKameezBysep == null || this.newMeasurement.ShalwarKameezSLength == null || this.newMeasurement.ShalwarKameezBottom == null) {
+                $("#snackbar").html("Please fill the empty Field");
+                this.showToast();
+                console.log("shalwarkameez");
+            }
+            else {
+                console.log(this.newMeasurement);
+                this._measurementService.addMeasurement(this.newMeasurement).subscribe(function (res) {
+                    console.log(res);
+                    if (res.code == 200) {
+                        $("#snackbar").html("Values Saved!");
+                        _this.showToast();
+                        _this.newMeasurement = new measurement_1.Measurement();
+                        $("#selectType").hide();
+                        _this.allFalse();
+                        $('.measurementsType option').prop('selected', function () {
+                            return this.defaultSelected;
+                        });
+                    }
+                    else {
+                        $("#snackbar").html(res.message);
+                        _this.showToast();
+                    }
                 });
             }
-        });
-        /**
-         * Use custom loader template
-         */
-        $sharesWidget.widgster({
-            loaderTemplate: '<div class="loader animated fadeIn">' +
-                '   <span class="spinner"><i class="fa fa-spinner fa-spin"></i></span>' +
-                '</div>'
-        });
-        /**
-         * Make hidden spinner appear & spin when loading
-         */
-        $autoloadWidget.on('load.widgster', function () {
-            jQuery(this).find('.fa-spinner').addClass('fa-spin in');
-        }).on('loaded.widgster', function () {
-            jQuery(this).find('.fa-spinner').removeClass('fa-spin in');
-        }).on('load.widgster fullscreen.widgster restore.widgster', function () {
-            jQuery(this).find('.dropdown.open > .dropdown-toggle').dropdown('toggle');
-        });
-        /**
-         * Init all other widgets with default settings & settings retrieved from data-* attributes
-         */
-        $widgets.widgster();
-        /**
-         * Init tooltips for all widget controls on page
-         */
-        jQuery('.widget-controls > a').tooltip({ placement: 'bottom' });
+        }
+        else if (this.Coat == true) {
+            if (this.newMeasurement.CoatLength == null || this.newMeasurement.CoatChest == null || this.newMeasurement.CoatWaist == null || this.newMeasurement.CoatHip == null || this.newMeasurement.CoatSleeve == null || this.newMeasurement.CoatShoulder == null || this.newMeasurement.CoatNeck == null || this.newMeasurement.CoatBysep == null || this.newMeasurement.CoatHB == null || this.newMeasurement.CoatCB == null) {
+                $("#snackbar").html("Please fill the empty Field");
+                this.showToast();
+            }
+            else {
+                console.log(this.newMeasurement);
+                this._measurementService.addMeasurement(this.newMeasurement).subscribe(function (res) {
+                    console.log(res);
+                    if (res.code == 200) {
+                        $("#snackbar").html("Values Saved!");
+                        _this.showToast();
+                        _this.newMeasurement = new measurement_1.Measurement();
+                        $("#selectType").hide();
+                        _this.allFalse();
+                        $('.measurementsType option').prop('selected', function () {
+                            return this.defaultSelected;
+                        });
+                    }
+                    else {
+                        $("#snackbar").html(res.message);
+                        _this.showToast();
+                    }
+                });
+            }
+        }
+        else if (this.Sherwani == true) {
+            if (this.newMeasurement.SherwaniLength == null || this.newMeasurement.SherwaniChest == null || this.newMeasurement.SherwaniWaist == null || this.newMeasurement.SherwaniHip == null || this.newMeasurement.SherwaniSleeve == null || this.newMeasurement.SherwaniShoulder == null || this.newMeasurement.SherwaniNeck == null || this.newMeasurement.SherwaniBysep == null || this.newMeasurement.SherwaniHB == null || this.newMeasurement.SherwaniCB == null) {
+                $("#snackbar").html("Please fill the empty Field");
+                this.showToast();
+            }
+            else {
+                console.log(this.newMeasurement);
+                this._measurementService.addMeasurement(this.newMeasurement).subscribe(function (res) {
+                    console.log(res);
+                    if (res.code == 200) {
+                        $("#snackbar").html("Values Saved!");
+                        _this.showToast();
+                        _this.newMeasurement = new measurement_1.Measurement();
+                        $("#selectType").hide();
+                        _this.allFalse();
+                        $('.measurementsType option').prop('selected', function () {
+                            return this.defaultSelected;
+                        });
+                    }
+                    else {
+                        $("#snackbar").html(res.message);
+                        _this.showToast();
+                    }
+                });
+            }
+        }
+        else if (this.WaistCoat == true) {
+            if (this.newMeasurement.CoatLength == null || this.newMeasurement.CoatChest == null || this.newMeasurement.CoatWaist == null || this.newMeasurement.CoatHip == null || this.newMeasurement.CoatHip == null || this.newMeasurement.CoatShoulder == null || this.newMeasurement.CoatNeck == null || this.newMeasurement.CoatBysep == null || this.newMeasurement.CoatHB == null || this.newMeasurement.CoatCB == null) {
+                $("#snackbar").html("Please fill the empty Field");
+                this.showToast();
+            }
+            else {
+                console.log(this.newMeasurement);
+                this._measurementService.addMeasurement(this.newMeasurement).subscribe(function (res) {
+                    console.log(res);
+                    if (res.code == 200) {
+                        $("#snackbar").html("Values Saved!");
+                        _this.showToast();
+                        _this.newMeasurement = new measurement_1.Measurement();
+                        $("#selectType").hide();
+                        _this.allFalse();
+                        $('.measurementsType option').prop('selected', function () {
+                            return this.defaultSelected;
+                        });
+                    }
+                    else {
+                        $("#snackbar").html(res.message);
+                        _this.showToast();
+                    }
+                });
+            }
+        }
+        else if (this.Pant == true) {
+            if (this.newMeasurement.PentWaist == null || this.newMeasurement.PentHip == null || this.newMeasurement.PentLength == null || this.newMeasurement.PantKnee == null || this.newMeasurement.PentBottom == null || this.newMeasurement.PentInside == null) {
+                $("#snackbar").html("Please fill the empty Field");
+                this.showToast();
+            }
+            else {
+                console.log(this.newMeasurement);
+                this._measurementService.addMeasurement(this.newMeasurement).subscribe(function (res) {
+                    console.log(res);
+                    if (res.code == 200) {
+                        $("#snackbar").html("Values Saved!");
+                        _this.showToast();
+                        _this.newMeasurement = new measurement_1.Measurement();
+                        $("#selectType").hide();
+                        _this.allFalse();
+                        $('.measurementsType option').prop('selected', function () {
+                            return this.defaultSelected;
+                        });
+                    }
+                    else {
+                        $("#snackbar").html(res.message);
+                        _this.showToast();
+                    }
+                });
+            }
+        }
+        else if (this.Trouser == true) {
+            if (this.newMeasurement.TrouserWaist == null || this.newMeasurement.TrouserHip == null || this.newMeasurement.TrouserLength == null || this.newMeasurement.TrouserKnee == null || this.newMeasurement.TrouserBottom == null || this.newMeasurement.TrouserInside == null) {
+                $("#snackbar").html("Please fill the empty Field");
+                this.showToast();
+            }
+            else {
+                console.log('employeeid', this.newMeasurement);
+                console.log(this.newMeasurement);
+                this._measurementService.addMeasurement(this.newMeasurement).subscribe(function (res) {
+                    console.log(res);
+                    if (res.code == 200) {
+                        $("#snackbar").html("Values Saved!");
+                        _this.showToast();
+                        _this.newMeasurement = new measurement_1.Measurement();
+                        $("#selectType").hide();
+                        _this.allFalse();
+                        $('.measurementsType option').prop('selected', function () {
+                            return this.defaultSelected;
+                        });
+                    }
+                    else {
+                        $("#snackbar").html(res.message);
+                        _this.showToast();
+                    }
+                });
+            }
+        }
+        else if (this.Shawl == true) {
+            if (this.newMeasurement.ShawlLength == null || this.newMeasurement.ShawlWidth == null) {
+                $("#snackbar").html("Please fill the empty Field");
+                this.showToast();
+            }
+            else {
+                this._measurementService.addMeasurement(this.newMeasurement).subscribe(function (res) {
+                    console.log(res);
+                    if (res.code == 200) {
+                        $("#snackbar").html("Values Saved!");
+                        _this.showToast();
+                        _this.newMeasurement = new measurement_1.Measurement();
+                        $("#selectType").hide();
+                        _this.allFalse();
+                        $('.measurementsType option').prop('selected', function () {
+                            return this.defaultSelected;
+                        });
+                    }
+                    else {
+                        $("#snackbar").html(res.message);
+                        _this.showToast();
+                    }
+                });
+            }
+        }
+        else if (this.Shoes == true) {
+            this._measurementService.addMeasurement(this.newMeasurement).subscribe(function (res) {
+                console.log(res);
+                if (res.code == 200) {
+                    $("#snackbar").html("Values Saved!");
+                    _this.showToast();
+                    _this.newMeasurement = new measurement_1.Measurement();
+                    $("#selectType").hide();
+                    $('.measurementsType option').prop('selected', function () {
+                        return this.defaultSelected;
+                    });
+                    _this.allFalse();
+                }
+                else {
+                    $("#snackbar").html(res.message);
+                    _this.showToast();
+                }
+            });
+        }
+        else {
+            $("#snackbar").html("Please Select Right Choice");
+            this.showToast();
+        }
     };
-    GridDemo.prototype.ngOnInit = function () {
-        this.render();
+    CustomerMeasurementForm.prototype.search = function () {
+        var _this = this;
+        this._customerService.getCustomersByContactNumber(this.newMeasurement.CustomerContactNumber).subscribe(function (res) {
+            if (res.code == 200) {
+                _this.customers = res.data;
+            }
+            else {
+                _this.customers = null;
+            }
+            console.log("customer for referance is");
+            console.log(_this.customers);
+        });
     };
-    GridDemo = __decorate([
-        core_1.Directive({
-            selector: '[grid-demo]',
-        }), 
-        __metadata('design:paramtypes', [])
-    ], GridDemo);
-    return GridDemo;
-}());
-exports.GridDemo = GridDemo;
-
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__("./node_modules/jquery/dist/jquery.js")))
-
-/***/ },
-
-/***/ "./src/app/grid/grid.component.ts":
-/***/ function(module, exports, __webpack_require__) {
-
-"use strict";
-/* WEBPACK VAR INJECTION */(function(jQuery) {"use strict";
-var core_1 = __webpack_require__("./node_modules/@angular/core/index.js");
-var GridComponent = (function () {
-    function GridComponent() {
-        this.sortOptions = {
-            connectWith: '.widget-container',
-            handle: 'header, .handle',
-            cursor: 'move',
-            iframeFix: false,
-            items: '.widget:not(.locked)',
-            opacity: 0.8,
-            helper: 'original',
-            revert: true,
-            forceHelperSize: true,
-            placeholder: 'widget widget-placeholder',
-            forcePlaceholderSize: true,
-            tolerance: 'pointer'
-        };
-    }
-    GridComponent.prototype.ngOnInit = function () {
-        jQuery('.widget-container').sortable(this.sortOptions);
+    CustomerMeasurementForm.prototype.showToast = function () {
+        // Get the snackbar DIV
+        var x = document.getElementById("snackbar");
+        // Add the "show" class to DIV
+        x.className = "show";
+        // After 3 seconds, remove the show class from DIV
+        setTimeout(function () { x.className = x.className.replace("show", ""); }, 3000);
     };
-    GridComponent = __decorate([
+    CustomerMeasurementForm.prototype.onChange = function (_id) {
+        console.log("CHange is Clicked" + _id);
+        this.newMeasurement.CustomerId = _id;
+        $("#selectType").show();
+    };
+    CustomerMeasurementForm.prototype.allFalse = function () {
+        this.Sherwani = false;
+        this.WaistCoat = false;
+        this.Coat = false;
+        this.ShalwarKameez = false;
+        this.Pant = false;
+        this.Trouser = false;
+    };
+    CustomerMeasurementForm.prototype.getForms = function (elem) {
+        $("#selectEmployee").show();
+        if (elem == "Shalwar Kameez") {
+            this.allFalse();
+            this.ShalwarKameez = true;
+        }
+        else if (elem == "Coat") {
+            this.allFalse();
+            this.Coat = true;
+        }
+        else if (elem == "Sherwani") {
+            this.allFalse();
+            this.Sherwani = true;
+        }
+        else if (elem == "Waist Coat") {
+            this.allFalse();
+            this.WaistCoat = true;
+        }
+        else if (elem == "Pant") {
+            this.allFalse();
+            this.Pant = true;
+        }
+        else if (elem == "Shawl") {
+            this.allFalse();
+            this.Shawl = true;
+        }
+        else {
+            this.allFalse();
+            this.Shoes = true;
+        }
+    };
+    CustomerMeasurementForm.prototype.getEmployeesShalwarKameezId = function (employeesId) {
+        /*  this.Employee_Id = employeesId;
+         console.log(this.Employee_Id);
+         this._Measurement =new Measurement();
+         this._Measurement.ShalwarKameezMeasurementTakenBy=this.Employee_Id;
+       this.newMeasurement.ShalwarKameezMeasurementTakenBy=this.Employee_Id;
+         console.log('employeeid',this.newMeasurement); */
+        this.EmployeeId = employeesId;
+    };
+    CustomerMeasurementForm.prototype.getEmployeesSherwaniId = function (employeesId) {
+        this._Measurement = new measurement_1.Measurement();
+        this.Employee_Id = employeesId;
+        this._Measurement.SherwaniMeasurementTakenBy = this.Employee_Id;
+        this.newMeasurement.SherwaniMeasurementTakenBy = this.Employee_Id;
+        console.log('employeeid', this.newMeasurement);
+    };
+    CustomerMeasurementForm.prototype.getEmployeesWaistCoatId = function (employeesId) {
+        this._Measurement = new measurement_1.Measurement();
+        this.Employee_Id = employeesId;
+        this._Measurement.WaistCoatMeasurementTakenBy = this.Employee_Id;
+        this.newMeasurement.WaistCoatMeasurementTakenBy = this.Employee_Id;
+        console.log('employeeid', this.newMeasurement);
+    };
+    CustomerMeasurementForm.prototype.getEmployeesPantId = function (employeesId) {
+        this._Measurement = new measurement_1.Measurement();
+        this.Employee_Id = employeesId;
+        this._Measurement.PentMeasurementTakenBy = this.Employee_Id;
+        this.newMeasurement.PentMeasurementTakenBy = this.Employee_Id;
+        console.log('employeeid', this.newMeasurement);
+    };
+    CustomerMeasurementForm.prototype.getEmployeesCoatId = function (employeesId) {
+        this._Measurement = new measurement_1.Measurement();
+        this.Employee_Id = employeesId;
+        this._Measurement.CoatMeasurementTakenBy = this.Employee_Id;
+        this.newMeasurement.CoatMeasurementTakenBy = this.Employee_Id;
+        console.log('employeeid', this.newMeasurement);
+    };
+    CustomerMeasurementForm.prototype.getEmployeesTrouserId = function (employeesId) {
+        this._Measurement = new measurement_1.Measurement();
+        this.Employee_Id = employeesId;
+        this._Measurement.TrouserMeasurementTakenBy = this.Employee_Id;
+        this.newMeasurement.TrouserMeasurementTakenBy = this.Employee_Id;
+        console.log('employeeid', this.newMeasurement);
+    };
+    CustomerMeasurementForm.prototype.ngOnInit = function () {
+        var _this = this;
+        this.newMeasurement = new measurement_1.Measurement();
+        this._employeeService.getEmployees().subscribe(function (res) {
+            if (res.code == 200) {
+                _this.employees = res.data;
+                console.log('Employeesss', _this.employees);
+            }
+            else {
+                _this.employees = null;
+            }
+            console.log("Employees Received are");
+            console.log(_this.employees);
+        });
+    };
+    CustomerMeasurementForm = __decorate([
         core_1.Component({
-            selector: '[grid]',
-            template: __webpack_require__("./src/app/grid/grid.template.html"),
-            encapsulation: core_1.ViewEncapsulation.None,
-            styles: [__webpack_require__("./src/app/grid/grid.style.scss")]
+            selector: 'customerMeasurement-form',
+            template: __webpack_require__("./src/app/customers/CustomerMeasurementForm.template.html"),
+            styles: [__webpack_require__("./src/app/customers/CustomerMeasurementForm.style.css")],
+            providers: [customer_Service_1.CustomerService, measurement_Service_1.MeasurementService, employee_Service_1.EmployeeService]
         }), 
-        __metadata('design:paramtypes', [])
-    ], GridComponent);
-    return GridComponent;
+        __metadata('design:paramtypes', [(typeof (_a = typeof measurement_Service_1.MeasurementService !== 'undefined' && measurement_Service_1.MeasurementService) === 'function' && _a) || Object, (typeof (_b = typeof customer_Service_1.CustomerService !== 'undefined' && customer_Service_1.CustomerService) === 'function' && _b) || Object, (typeof (_c = typeof employee_Service_1.EmployeeService !== 'undefined' && employee_Service_1.EmployeeService) === 'function' && _c) || Object])
+    ], CustomerMeasurementForm);
+    return CustomerMeasurementForm;
+    var _a, _b, _c;
 }());
-exports.GridComponent = GridComponent;
+exports.CustomerMeasurementForm = CustomerMeasurementForm;
 
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__("./node_modules/jquery/dist/jquery.js")))
 
 /***/ },
 
-/***/ "./src/app/grid/grid.module.ts":
+/***/ "./src/app/customers/customerMeasurementForm.module.ts":
 /***/ function(module, exports, __webpack_require__) {
 
 "use strict";
 "use strict";
-__webpack_require__("./node_modules/jquery-ui/ui/sortable.js");
-var core_1 = __webpack_require__("./node_modules/@angular/core/index.js");
 var common_1 = __webpack_require__("./node_modules/@angular/common/index.js");
+var forms_1 = __webpack_require__("./node_modules/@angular/forms/index.js");
+var core_1 = __webpack_require__("./node_modules/@angular/core/index.js");
 var router_1 = __webpack_require__("./node_modules/@angular/router/index.js");
-var grid_component_1 = __webpack_require__("./src/app/grid/grid.component.ts");
-var grid_demo_1 = __webpack_require__("./src/app/grid/grid-demo/grid-demo.ts");
+var customerMeasurementForm_component_1 = __webpack_require__("./src/app/customers/customerMeasurementForm.component.ts");
 exports.routes = [
-    { path: '', component: grid_component_1.GridComponent, pathMatch: 'full' }
+    { path: '', component: customerMeasurementForm_component_1.CustomerMeasurementForm, pathMatch: 'full' }
 ];
-var GridModule = (function () {
-    function GridModule() {
+var CustomerMeasurementFormModule = (function () {
+    function CustomerMeasurementFormModule() {
     }
-    GridModule.routes = exports.routes;
-    GridModule = __decorate([
+    CustomerMeasurementFormModule.routes = exports.routes;
+    CustomerMeasurementFormModule = __decorate([
         core_1.NgModule({
-            imports: [common_1.CommonModule, router_1.RouterModule.forChild(exports.routes)],
-            declarations: [grid_component_1.GridComponent, grid_demo_1.GridDemo]
+            declarations: [
+                customerMeasurementForm_component_1.CustomerMeasurementForm
+            ],
+            imports: [
+                common_1.CommonModule,
+                forms_1.FormsModule,
+                router_1.RouterModule.forChild(exports.routes),
+            ]
         }), 
         __metadata('design:paramtypes', [])
-    ], GridModule);
-    return GridModule;
+    ], CustomerMeasurementFormModule);
+    return CustomerMeasurementFormModule;
 }());
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.default = GridModule;
+exports.default = CustomerMeasurementFormModule;
 
 
 /***/ },
 
-/***/ "./src/app/grid/grid.style.scss":
+/***/ "./src/models/employeeRole.ts":
 /***/ function(module, exports) {
 
-module.exports = "/***********************************/\n/**          NEWS LIST           **/\n/**********************************/\n.news-list {\n  margin-bottom: 0;\n  padding-left: 0; }\n  .news-list li {\n    list-style: none;\n    box-sizing: content-box;\n    border-top: 1px solid #eeeeee;\n    padding: 12px;\n    cursor: pointer;\n    transition: background-color 0.2s ease-out; }\n    .news-list li:hover {\n      background: #f6f6f6; }\n    .news-list li:last-child {\n      margin-bottom: -10px; }\n  .news-list img,\n  .news-list .icon {\n    float: left;\n    height: 50px;\n    width: 50px; }\n  .news-list .icon {\n    line-height: 50px;\n    border-radius: 50%;\n    text-align: center;\n    font-size: 28px; }\n  .news-list .news-item-info {\n    margin-left: 62px;\n    /*50 + 12px padding*/ }\n  .news-list .name {\n    text-transform: uppercase; }\n    .news-list .name a {\n      text-decoration: none; }\n      .news-list .name a:hover {\n        color: #218BC3; }\n"
+"use strict";
+"use strict";
+var EmployeeRole = (function () {
+    function EmployeeRole() {
+    }
+    return EmployeeRole;
+}());
+exports.EmployeeRole = EmployeeRole;
+
 
 /***/ },
 
-/***/ "./src/app/grid/grid.template.html":
+/***/ "./src/models/measurement.ts":
 /***/ function(module, exports) {
 
-module.exports = "<!-- jquery ui sortable chrome overflow-x fix. when set to hidden does not behaves as expected. resetting back\r\n     just for this page.\r\n     http://bugs.jqueryui.com/ticket/9588 -->\r\n<style>\r\n  body{\r\n    overflow-x: visible;\r\n  }\r\n</style>\r\n<ol class=\"breadcrumb\">\r\n  <li class=\"breadcrumb-item\">YOU ARE HERE</li>\r\n  <li class=\"breadcrumb-item active\">Grid</li>\r\n</ol>\r\n<h1 class=\"page-title\">Grid - <span class=\"fw-semi-bold\">Options</span></h1>\r\n<div class=\"row\">\r\n  <div class=\"col-lg-7 offset-xl-1 \">\r\n    <section class=\"widget\" widget>\r\n      <header>\r\n        <h5>Draggable Grid &nbsp;<span class=\"tag tag-danger fw-normal\">since 2.1</span></h5>\r\n      </header>\r\n      <div class=\"widget-body\">\r\n        <p>\r\n          <strong>Widgster</strong> is a plugin that allows to easily implement basic widget functions that\r\n          lots of our customers have requested.  For now it has the following essential\r\n          widget features:\r\n        </p>\r\n        <ul class=\"text-list\">\r\n          <li><strong>Collapse/Expand</strong> - all widgets can be collapsed to fill only header's vertical space;</li>\r\n          <li><strong>Close</strong> - closable. Any widget may be removed by clicking the close btn;</li>\r\n          <li><strong>Full Screen</strong> - an option to make widget fill the whole window (just like OS);</li>\r\n          <li><strong>Ajax Load</strong> - the hottest option allowing to load/reload widget content asynchronously. You just\r\n            need to provide an url to fetch the data from. With loader delivered.</li>\r\n        </ul>\r\n        <p>It's available under MIT license, check out <a href=\"https://github.com/flatlogic/widgster\" target=\"_blank\">github</a> to find it.</p>\r\n        <p>\r\n          Test it out!\r\n        </p>\r\n      </div>\r\n    </section>\r\n  </div>\r\n</div>\r\n<div class=\"row\" grid-demo>\r\n  <div class=\"col-lg-6  widget-container\">\r\n    <section class=\"widget\" widget id=\"default-widget\" data-widgster-load=\"assets/demo/grid/default.php\">\r\n      <header>\r\n        <h6>Default <span class=\"fw-semi-bold\">Widget</span></h6>\r\n        <div class=\"widget-controls\">\r\n          <a data-widgster=\"load\" title=\"Reload\" href=\"#\"><i class=\"fa fa-refresh\"></i></a>\r\n          <a data-widgster=\"expand\" title=\"Expand\" href=\"#\"><i class=\"glyphicon glyphicon-chevron-up\"></i></a>\r\n          <a data-widgster=\"collapse\" title=\"Collapse\" href=\"#\"><i class=\"glyphicon glyphicon-chevron-down\"></i></a>\r\n          <a data-widgster=\"fullscreen\" title=\"Full Screen\" href=\"#\"><i class=\"glyphicon glyphicon-fullscreen\"></i></a>\r\n          <a data-widgster=\"restore\" title=\"Restore\" href=\"#\"><i class=\"glyphicon glyphicon-resize-small\"></i></a>\r\n          <a data-widgster=\"close\" title=\"Close\" href=\"#\"><i class=\"glyphicon glyphicon-remove\"></i></a>\r\n        </div>\r\n      </header>\r\n      <div class=\"widget-body\">\r\n        <p>A timestamp this widget was created: Apr 24, 19:07:07</p>\r\n        <p>A timestamp this widget was updated: Apr 24, 19:07:07</p>\r\n      </div>\r\n    </section>\r\n    <section class=\"widget\" widget id=\"shares-widget\"\r\n             data-widgster-load=\"assets/demo/grid/shares.php\"\r\n             data-post-processing=\"true\">\r\n      <header>\r\n        <h6>\r\n          <span class=\"tag tag-primary\"><i class=\"fa fa-facebook\"></i></span> &nbsp;\r\n          Latest <span class=\"fw-semi-bold\">Shares</span>\r\n        </h6>\r\n        <div class=\"widget-controls\">\r\n          <a data-widgster=\"load\" title=\"Reload\" href=\"#\"><strong class=\"text-gray-light\">Reload</strong></a>\r\n          <a data-widgster=\"close\" title=\"Close\" href=\"#\"><strong class=\"text-gray-light\">Close</strong></a>\r\n        </div>\r\n      </header>\r\n      <div class=\"widget-body no-padding\">\r\n        <div class=\"list-group list-group-lg\">\r\n          <a href=\"#\" class=\"list-group-item\">\r\n                                <span class=\"thumb-sm pull-xs-left mr\">\r\n                                    <img class=\"img-circle\" src=\"assets/img/people/a1.jpg\" alt=\"...\">\r\n                                </span>\r\n            <i class=\"fa fa-circle pull-xs-right text-danger mt-sm\"></i>\r\n            <h6 class=\"no-margin\">Maikel Basso</h6>\r\n            <small class=\"text-muted\">about 2 mins ago</small>\r\n          </a>\r\n          <a href=\"#\" class=\"list-group-item\">\r\n                                <span class=\"thumb-sm pull-xs-left mr\">\r\n                                    <img class=\"img-circle\" src=\"assets/img/people/a2.jpg\" alt=\"...\">\r\n                                </span>\r\n            <i class=\"fa fa-circle pull-xs-right text-info mt-sm\"></i>\r\n            <h6 class=\"no-margin\">Ianus Arendse</h6>\r\n            <small class=\"text-muted\">about 42 mins ago</small>\r\n          </a>\r\n          <a href=\"#\" class=\"list-group-item\">\r\n                                <span class=\"thumb-sm pull-xs-left mr\">\r\n                                    <img class=\"img-circle\" src=\"assets/img/people/a3.jpg\" alt=\"...\">\r\n                                </span>\r\n            <i class=\"fa fa-circle pull-xs-right text-success mt-sm\"></i>\r\n            <h6 class=\"no-margin\">Valdemar Landau</h6>\r\n            <small class=\"text-muted\">one hour ago</small>\r\n          </a>\r\n          <a href=\"#\" class=\"list-group-item mb-n-md\">\r\n                                <span class=\"thumb-sm pull-xs-left mr\">\r\n                                    <img class=\"img-circle\" src=\"assets/img/people/a4.jpg\" alt=\"...\">\r\n                                </span>\r\n            <i class=\"fa fa-circle pull-xs-right text-warning mt-sm\"></i>\r\n            <h6 class=\"no-margin\">Rick Teagan</h6>\r\n            <small class=\"text-muted\">3 hours ago</small>\r\n          </a>\r\n        </div>\r\n      </div>\r\n    </section>\r\n    <section class=\"widget\" widget id=\"autoload-widget\"\r\n             data-widgster-load=\"assets/demo/grid/autoload.php\"\r\n             data-post-processing=\"true\"\r\n             data-widgster-autoload=\"true\"\r\n             data-widgster-show-loader=\"false\">\r\n      <header>\r\n        <h6>Autoload <span class=\"fw-semi-bold\">Widget</span></h6>\r\n        <div class=\"widget-controls dropdown\" data-dropdown data-ng-init=\"isOpen = false\" data-is-open=\"isOpen\">\r\n                            <span>\r\n                                <i class=\"fa fa-spinner fa-lg fade mr-xs\"></i>\r\n                            </span>\r\n          <a href=\"#\" class=\"dropdown-toggle\" data-toggle=\"dropdown\">\r\n            <i class=\"fa fa-cog\"></i>\r\n          </a>\r\n          <ul class=\"dropdown-menu dropdown-menu-right\">\r\n            <li>\r\n              <a class=\"dropdown-item\" data-widgster=\"load\" title=\"Reload\" ng-click=\"isOpen = false\">Reload\r\n                &nbsp;&nbsp;<span class=\"tag tag-pill tag-success animated bounceIn\"><strong>9</strong></span>\r\n              </a>\r\n            </li>\r\n            <li>\r\n              <a class=\"dropdown-item\" data-widgster=\"fullscreen\" title=\"Full Screen\" ng-click=\"isOpen = false\">Fullscreen</a>\r\n              <a class=\"dropdown-item\" data-widgster=\"restore\" title=\"Restore\" ng-click=\"isOpen = false\">Restore</a>\r\n            </li>\r\n            <li class=\"dropdown-divider\"></li>\r\n            <li><a class=\"dropdown-item\" data-widgster=\"close\" title=\"Close\" ng-click=\"isOpen = false\">Close</a></li>\r\n          </ul>\r\n        </div>\r\n      </header>\r\n      <div class=\"widget-body\">\r\n        <h3 class=\"text-xs-center no-margin\">Sign up, it's <strong>free</strong></h3>\r\n        <p class=\"lead text-muted text-xs-center\">\r\n          Faith makes it possible to achieve that which man's mind can conceive and believe.\r\n        </p>\r\n        <form>\r\n          <div class=\"form-group\">\r\n            <label for=\"exampleInputEmail1\"><i class=\"fa fa-circle text-warning\"></i> &nbsp; Email address</label>\r\n            <input type=\"email\" class=\"form-control\" id=\"exampleInputEmail1\"\r\n                   placeholder=\"Enter email\">\r\n          </div>\r\n          <div class=\"form-group\">\r\n            <label for=\"pswd\"><i class=\"fa fa-circle text-danger\"></i> &nbsp; Password</label>\r\n            <input class=\"form-control\" id=\"pswd\" type=\"text\" placeholder=\"Min 8 characters\">\r\n          </div>\r\n          <p>\r\n            To make a widget automatically load it's content you just need to set\r\n            <strong>data-widgster-autoload</strong> attribute and provide an url.\r\n          </p>\r\n<pre><code>data-widgster-load=\"server/ajax_widget.html\"\r\ndata-widgster-autoload=\"true\"</code></pre>\r\n          <p>\r\n            <strong>data-widgster-autoload</strong> may be set to an integer value. If set, for example, to\r\n            2000 will refresh widget every 2 seconds.\r\n          </p>\r\n          <div class=\"clearfix\">\r\n            <div class=\"btn-toolbar pull-xs-right\">\r\n              <button type=\"button\" class=\"btn btn-transparent\">Cancel</button>\r\n              <button type=\"button\" class=\"btn btn-success\">&nbsp;Submit&nbsp;</button>\r\n            </div>\r\n          </div>\r\n        </form>\r\n      </div>\r\n    </section>\r\n    <section class=\"widget\" widget style=\"min-height: 200px\">\r\n      <header>\r\n        <h6>Custom <span class=\"fw-semi-bold\">Loader</span></h6>\r\n      </header>\r\n      <div class=\"widget-body\">\r\n        <div class=\"loader animated fadeIn handle\">\r\n                        <span class=\"spinner\">\r\n                            <i class=\"fa fa-spinner fa-spin\"></i>\r\n                        </span>\r\n        </div>\r\n      </div>\r\n    </section>\r\n  </div>\r\n  <div class=\"col-lg-6  widget-container\">\r\n    <section class=\"widget\" widget id=\"news-widget\" data-widgster-load=\"assets/demo/grid/news.php\" data-post-processing=\"true\">\r\n      <header>\r\n        <h6>\r\n          News <span class=\"tag tag-pill tag-success\">17</span>\r\n        </h6>\r\n        <span class=\"text-muted\">spinning refresh button & close prompt</span>\r\n        <div class=\"widget-controls\">\r\n          <a data-widgster=\"expand\" title=\"Expand\" href=\"#\"><i class=\"glyphicon glyphicon-chevron-up\"></i></a>\r\n          <a data-widgster=\"collapse\" title=\"Collapse\" href=\"#\"><i class=\"glyphicon glyphicon-chevron-down\"></i></a>\r\n          <a data-widgster=\"load\" title=\"I am spinning!\" href=\"#\"><i class=\"fa fa-refresh\"></i></a>\r\n          <a data-widgster=\"close\" title=\"Close\" href=\"#\"><i class=\"glyphicon glyphicon-remove\"></i></a>\r\n        </div>\r\n      </header>\r\n      <div class=\"widget-body no-padding\">\r\n        <ul class=\"news-list stretchable\">\r\n          <li>\r\n                                <span class=\"icon bg-danger text-white\">\r\n                                    <i class=\"fa fa-star\"></i>\r\n                                </span>\r\n            <div class=\"news-item-info\">\r\n              <h5 class=\"name no-margin mb-xs\"><a href=\"#\">First Human Colony on Mars</a></h5>\r\n              <p class=\"fs-mini\">\r\n                First 700 people will take part in building first human settlement outside of Earth.\r\n                That's awesome, right?\r\n              </p>\r\n              <time class=\"help-block\">Mar 20, 18:46</time>\r\n            </div>\r\n          </li>\r\n          <li>\r\n                                <span class=\"icon bg-info text-white\">\r\n                                    <i class=\"fa fa-microphone\"></i>\r\n                                </span>\r\n            <div class=\"news-item-info\">\r\n              <h5 class=\"name no-margin mb-xs\"><a href=\"#\">Light Blue reached $300</a></h5>\r\n              <p class=\"fs-mini\">\r\n                Light Blue Inc. shares just hit $300 price. \"This was inevitable. It should\r\n                have happen sooner or later\" - says NYSE expert.\r\n              </p>\r\n              <time class=\"help-block\">Sep 25, 11:59</time>\r\n            </div>\r\n          </li>\r\n          <li>\r\n                                <span class=\"icon bg-success text-white\">\r\n                                    <i class=\"fa fa-eye\"></i>\r\n                                </span>\r\n            <div class=\"news-item-info\">\r\n              <h5 class=\"name no-margin mb-xs\"><a href=\"#\">No more spying</a></h5>\r\n              <p class=\"fs-mini\">\r\n                Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor\r\n                incididunt ut labore et dolore magna aliqua.\r\n              </p>\r\n              <time class=\"help-block\">Mar 20, 18:46</time>\r\n            </div>\r\n          </li>\r\n        </ul>\r\n      </div>\r\n      <div id=\"news-close-modal\" class=\"modal fade\" tabindex=\"-1\" role=\"dialog\" aria-labelledby=\"news-close-modal-label\" aria-hidden=\"true\" style=\"display: none;\">\r\n        <div class=\"modal-dialog\">\r\n          <div class=\"modal-content\">\r\n            <div class=\"modal-header\">\r\n              <button type=\"button\" class=\"close\" data-dismiss=\"modal\" aria-hidden=\"true\">×</button>\r\n              <h5 class=\"modal-title\" id=\"news-close-modal-label\">Sure?</h5>\r\n            </div>\r\n            <div class=\"modal-body\">\r\n              Do you really want to unrevertably remove this super news widget?\r\n            </div>\r\n            <div class=\"modal-footer\">\r\n              <button type=\"button\" class=\"btn btn-default\" data-dismiss=\"modal\">No</button>\r\n              <button type=\"button\" class=\"btn btn-danger\" id=\"news-widget-remove\">Yes, remove widget</button>\r\n            </div>\r\n\r\n          </div><!-- /.modal-content -->\r\n        </div><!-- /.modal-dialog -->\r\n      </div>\r\n    </section>\r\n    <section class=\"widget locked\" widget data-widgster-collapsed=\"true\">\r\n      <header>\r\n        <h6>Collapsed by default & locked</h6>\r\n        <div class=\"widget-controls\">\r\n          <a data-widgster=\"expand\" title=\"Expand\" href=\"#\"><i class=\"glyphicon glyphicon-chevron-up\"></i></a>\r\n          <a data-widgster=\"collapse\" title=\"Collapse\" href=\"#\"><i class=\"glyphicon glyphicon-chevron-down\"></i></a>\r\n          <a data-widgster=\"close\" title=\"Close\" href=\"#\"><i class=\"glyphicon glyphicon-remove\"></i></a>\r\n        </div>\r\n      </header>\r\n      <div class=\"widget-body\">\r\n        <blockquote >\r\n          There are no limits. There are plateaus, but you must not stay there, you must go beyond\r\n          them. If it kills you, it kills you. A man must constantly exceed his level.\r\n          <footer>\r\n            Bruce Lee\r\n          </footer>\r\n        </blockquote>\r\n        <p>To make a widget initially collapsed just add <code>data-widgster-collapsed=\"true\"</code> attribute to <code>.widget</code>.</p>\r\n        <p>To make it locked (prevent dragging) add <code>.locked</code> class.</p>\r\n      </div>\r\n    </section>\r\n    <section class=\"widget bg-gray\" widget>\r\n      <div class=\"widget-body no-padding\">\r\n        <div class=\"jumbotron handle bg-gray text-white mb-0\">\r\n          <div class=\"container\">\r\n            <h1>Draggable story!</h1>\r\n            <p class=\"lead\">\r\n              <em>Build</em> your own\r\n              interfaces! Sit back and relax.\r\n            </p>\r\n            <p class=\"text-xs-center\">\r\n              <a class=\"btn btn-danger btn-lg\" data-widgster=\"fullscreen\">\r\n                Fullscreen me! &nbsp;\r\n                <i class=\"fa fa-check\"></i>\r\n              </a>\r\n            </p>\r\n            <a class=\"btn btn-danger btn-lg\" data-widgster=\"restore\">\r\n              Want to go back?\r\n            </a>\r\n          </div>\r\n        </div>\r\n      </div>\r\n    </section>\r\n  </div>\r\n</div>\r\n"
+"use strict";
+"use strict";
+var Measurement = (function () {
+    function Measurement() {
+    }
+    return Measurement;
+}());
+exports.Measurement = Measurement;
+
+
+/***/ },
+
+/***/ "./src/services/customer.Service.ts":
+/***/ function(module, exports, __webpack_require__) {
+
+"use strict";
+"use strict";
+var core_1 = __webpack_require__("./node_modules/@angular/core/index.js");
+var http_1 = __webpack_require__("./node_modules/@angular/http/index.js");
+var http_2 = __webpack_require__("./node_modules/@angular/http/index.js");
+__webpack_require__("./node_modules/rxjs/add/operator/map.js");
+__webpack_require__("./node_modules/rxjs/add/operator/do.js");
+var Server_1 = __webpack_require__("./src/utilities/Server.ts");
+var CustomerService = (function () {
+    function CustomerService(_http) {
+        this._http = _http;
+        this._addCustomerURL = 'customers/addCustomer';
+        this._getAllCustomersURL = 'customers/addCustomer';
+        this.getCustomersByContactNumberURL = 'customers/getCustomerAndReferancesByContactNumber?ContactNumber=';
+        this.getMeasurementURL = 'customers/getMeasurementByCustomerId?CustomerId=';
+        this.getAllCustomerNameURL = 'customers/getCustomersByName?FullName=';
+        this._addPattern = "customers/addCustomerPattern";
+        var server = new Server_1.Server();
+        this.baseURL = server.getServerURL();
+    }
+    // private _addCustomerURL = 'http://localhost:3100/customers/addCustomer';
+    //  private _addCustomerURL = "https://ssbotique.herokuapp.com/customers/addCustomer";
+    //  private _getAllCustomersURL = 'https://ssbotique.herokuapp.com/customers/getAllCustomers';
+    // private getCustomersByContactNumberURL = 'https://ssbotique.herokuapp.com/customers/getCustomerAndReferancesByContactNumber?ContactNumber=';
+    // private getMeasurementURL = 'https://ssbotique.herokuapp.com/customers/getMeasurementByCustomerId?CustomerId=';
+    // private getAllCustomerNameURL ='https://ssbotique.herokuapp.com/customers/getCustomersByName?FullName=';
+    CustomerService.prototype.addCustomer = function (customer) {
+        var headers = new http_2.Headers({ 'Content-Type': 'application/json' });
+        var options = new http_2.RequestOptions({ headers: headers });
+        console.log(this.baseURL);
+        console.log("Customer Received in Service");
+        console.log(customer);
+        return this._http.post(this.baseURL + this._addCustomerURL, customer, options)
+            .map(function (res) { return res.json(); });
+    };
+    CustomerService.prototype.getAllCustomers = function () {
+        return this._http.get(this.baseURL + this._getAllCustomersURL)
+            .map(function (response) { return response.json(); })
+            .do(function (data) { return console.log(JSON.stringify(data)); });
+    };
+    CustomerService.prototype.getCustomersByContactNumber = function (contactNumber) {
+        return this._http.get(this.baseURL + this.getCustomersByContactNumberURL + contactNumber)
+            .map(function (response) { return response.json(); })
+            .do(function (data) { return console.log(JSON.stringify(data)); });
+    };
+    CustomerService.prototype.getCustomersByFullName = function (FullName) {
+        console.log("Its get in service Full Name ID ", FullName);
+        var obj = { id: FullName };
+        console.log("object is " + obj);
+        return this._http.get(this.baseURL + this.getAllCustomerNameURL + FullName)
+            .map(function (response) { return response.json(); })
+            .do(function (data) { return console.log(JSON.stringify(data)); });
+    };
+    CustomerService.prototype.addPatternService = function (customer_id) {
+        var obj = { id: customer_id };
+        console.log("Object is");
+        console.log(obj);
+        var headers = new http_2.Headers({ 'Content-Type': 'application/json' });
+        var options = new http_2.RequestOptions({ headers: headers });
+        console.log("Base URL is " + this.baseURL);
+        return this._http.post(this.baseURL + this._addPattern, obj, options)
+            .map(function (res) { return res.json(); })
+            .do(function (data) { return console.log(JSON.stringify(data)); });
+    };
+    CustomerService.prototype.getCustomersByContactName = function (FullName) {
+        return this._http.get(this.baseURL + this.getAllCustomerNameURL + FullName)
+            .map(function (response) { return response.json(); })
+            .do(function (data) { return console.log(JSON.stringify(data)); });
+    };
+    CustomerService.prototype.extractData = function (res) {
+        var body = res.json();
+        console.log("Extract Data");
+        console.log(body);
+        return body.data || {};
+    };
+    CustomerService.prototype.GetMeasurementById = function (CustomerId) {
+        var headers = new http_2.Headers();
+        headers.append('Content-Type', 'application/json; charset=UTF-8');
+        return this._http.get(this.baseURL + this.getMeasurementURL + CustomerId, { headers: headers })
+            .map(function (res) { return res.json(); });
+    };
+    CustomerService = __decorate([
+        core_1.Injectable(), 
+        __metadata('design:paramtypes', [(typeof (_a = typeof http_1.Http !== 'undefined' && http_1.Http) === 'function' && _a) || Object])
+    ], CustomerService);
+    return CustomerService;
+    var _a;
+}());
+exports.CustomerService = CustomerService;
+
+
+/***/ },
+
+/***/ "./src/services/employee.Service.ts":
+/***/ function(module, exports, __webpack_require__) {
+
+"use strict";
+"use strict";
+var core_1 = __webpack_require__("./node_modules/@angular/core/index.js");
+var http_1 = __webpack_require__("./node_modules/@angular/http/index.js");
+var http_2 = __webpack_require__("./node_modules/@angular/http/index.js");
+__webpack_require__("./node_modules/rxjs/add/operator/map.js");
+__webpack_require__("./node_modules/rxjs/add/operator/do.js");
+var Server_1 = __webpack_require__("./src/utilities/Server.ts");
+var employeeRole_1 = __webpack_require__("./src/models/employeeRole.ts");
+var EmployeeService = (function () {
+    function EmployeeService(_http) {
+        this._http = _http;
+        this._addEmployeeURL = 'employees/addEmployee';
+        this.getEmployeeRolesURL = 'app/employees/EmployeeRole.js';
+        var server = new Server_1.Server();
+        this.baseURL = server.getServerURL();
+    }
+    EmployeeService.prototype.addEmployee = function (employee) {
+        var headers = new http_2.Headers({ 'Content-Type': 'application/json' });
+        var options = new http_2.RequestOptions({ headers: headers });
+        return this._http.post(this.baseURL + this._addEmployeeURL, employee, options)
+            .map(this.extractData);
+    };
+    EmployeeService.prototype.getEmployeeRoles = function () {
+        var employeeRoles = [];
+        var employeeRole = new employeeRole_1.EmployeeRole();
+        employeeRole.Name = "Master";
+        employeeRole.RoleID = 1;
+        employeeRoles.push(employeeRole);
+        employeeRole = new employeeRole_1.EmployeeRole();
+        employeeRole.Name = "Shoe Maker";
+        employeeRole.RoleID = 2;
+        employeeRoles.push(employeeRole);
+        employeeRole = new employeeRole_1.EmployeeRole();
+        employeeRole.Name = "Sticher";
+        employeeRole.RoleID = 3;
+        employeeRoles.push(employeeRole);
+        employeeRole = new employeeRole_1.EmployeeRole();
+        employeeRole.Name = "Embroidery worker";
+        employeeRole.RoleID = 4;
+        employeeRoles.push(employeeRole);
+        return employeeRoles;
+    };
+    EmployeeService.prototype.extractData = function (res) {
+        var body = res.json();
+        console.log("Extract Data");
+        console.log(body);
+        return body.data || {};
+    };
+    EmployeeService.prototype.getEmployees = function () {
+        var headers = new http_2.Headers();
+        headers.append('Content-Type', 'application/json; charset=UTF-8');
+        return this._http.get(this.baseURL + "employees/getAllEmployees", { headers: headers })
+            .map(function (res) { return res.json(); });
+    };
+    EmployeeService.prototype.login = function (username, password) {
+        var data;
+        data = { UserName: username, Password: password };
+        var headers = new http_2.Headers();
+        headers.append('Content-Type', 'application/json; charset=UTF-8');
+        return this._http.post(this.baseURL + "employees/login", data, { headers: headers })
+            .map(function (res) { return res.json(); });
+    };
+    EmployeeService.prototype.getAssignedItems = function (assignedTo) {
+        var data;
+        data = { AssignedTo: assignedTo };
+        var headers = new http_2.Headers();
+        headers.append('Content-Type', 'application/json; charset=UTF-8');
+        return this._http.post(this.baseURL + "employees/getMyOrderItems", data, { headers: headers })
+            .map(function (res) { return res.json(); });
+    };
+    EmployeeService = __decorate([
+        core_1.Injectable(), 
+        __metadata('design:paramtypes', [(typeof (_a = typeof http_1.Http !== 'undefined' && http_1.Http) === 'function' && _a) || Object])
+    ], EmployeeService);
+    return EmployeeService;
+    var _a;
+}());
+exports.EmployeeService = EmployeeService;
+
+
+/***/ },
+
+/***/ "./src/services/measurement.Service.ts":
+/***/ function(module, exports, __webpack_require__) {
+
+"use strict";
+"use strict";
+var core_1 = __webpack_require__("./node_modules/@angular/core/index.js");
+var http_1 = __webpack_require__("./node_modules/@angular/http/index.js");
+var http_2 = __webpack_require__("./node_modules/@angular/http/index.js");
+__webpack_require__("./node_modules/rxjs/add/operator/map.js");
+__webpack_require__("./node_modules/rxjs/add/operator/do.js");
+var Server_1 = __webpack_require__("./src/utilities/Server.ts");
+var MeasurementService = (function () {
+    function MeasurementService(_http) {
+        this._http = _http;
+        this._addMeasurmentURL = 'customers/addMeasurement';
+        var server = new Server_1.Server();
+        this.baseURL = server.getServerURL();
+    }
+    MeasurementService.prototype.addMeasurement = function (measurement) {
+        console.log("Add Measurement is called in Service");
+        console.log(measurement);
+        var headers = new http_2.Headers({ 'Content-Type': 'application/json' });
+        var options = new http_2.RequestOptions({ headers: headers });
+        return this._http.post(this.baseURL + this._addMeasurmentURL, measurement, options)
+            .map(function (res) { return res.json(); });
+    };
+    MeasurementService.prototype.extractData = function (res) {
+        var body = res.json();
+        console.log("Extract Data");
+        console.log(body);
+        return body.data || {};
+    };
+    MeasurementService = __decorate([
+        core_1.Injectable(), 
+        __metadata('design:paramtypes', [(typeof (_a = typeof http_1.Http !== 'undefined' && http_1.Http) === 'function' && _a) || Object])
+    ], MeasurementService);
+    return MeasurementService;
+    var _a;
+}());
+exports.MeasurementService = MeasurementService;
+
+
+/***/ },
+
+/***/ "./src/utilities/Server.ts":
+/***/ function(module, exports) {
+
+"use strict";
+"use strict";
+var Server = (function () {
+    function Server() {
+    }
+    Server.prototype.getServerURL = function () {
+        // return "http://localhost:3100/";
+        return "https://ssbotiquenew.azurewebsites.net/";
+    };
+    return Server;
+}());
+exports.Server = Server;
+
 
 /***/ }
 

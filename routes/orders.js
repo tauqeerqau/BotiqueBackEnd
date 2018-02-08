@@ -121,6 +121,8 @@ addCustomerOrder.post(function (req, res) {
           orderItem.Quantity = orderItems[i].Quantity;
           orderItem.CustomerId = orderItems[i].CustomerId;
           orderItem.OrderItemStatus = orderItemStatuses.Pending();
+          orderItem.DeliveryDate = req.body.DeliveryDate;
+          orderItem.TryDate = req.body.TryDate;
           orderItem.save();
           customerOrder.OrderItemId.push(orderItem._id);
         }
@@ -247,7 +249,7 @@ OrderItem.find({OrderItemStatus:req.query.OrderItemStatus},function(err,orderIte
     console.log(response);
     res.json(response);
   }
-});
+}).populate('CustomerId').populate('SticherName').populate('MasterName');
 });
 
 module.exports = router;

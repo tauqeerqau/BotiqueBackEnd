@@ -28,6 +28,7 @@ var getAllCustomersByReferanceId = router.route('/getAllCustomersByReferanceId')
 var getMeasurementByCustomerId = router.route('/getMeasurementByCustomerId');
 var getCustomerAndReferancesByContactNumber = router.route('/getCustomerAndReferancesByContactNumber');
 var getCustomersByName = router.route('/getCustomersByName');
+var getPatternCustomers = router.route('/getPatternCustomers');
 
 /* GET users listing. */
 router.get('/', function (req, res, next) {
@@ -336,16 +337,14 @@ getCustomerAndReferancesByContactNumber.get(function (req, res) {
 
 getCustomersByName.get(function (req, res) {
   Customer.find({ FullName: { $regex: '.*' + req.query.FullName + '.*' } }, function (err, customers) {
-    if(err)
-    {
+    if (err) {
       console.log(err);
       response.message = messages.getFailureMessage();
       response.code = codes.getFailureCode();
       response.data = err;
-      res.json(response); 
+      res.json(response);
     }
-    else
-    {
+    else {
       response.message = messages.getSuccessMessage();
       response.code = codes.getSuccessCode();
       response.data = customers;
@@ -354,25 +353,43 @@ getCustomersByName.get(function (req, res) {
   });
 });
 
-addCustomerPattern.post(function(req,res){
-  Customer.findById(req.body.id,function(err,customer){
-    if(customer==null)
-    {
+addCustomerPattern.post(function (req, res) {
+  Customer.findById(req.body.id, function (err, customer) {
+    if (customer == null) {
       console.log(err);
       response.message = messages.getFailureMessage();
       response.code = codes.getFailureCode();
       response.data = err;
-      res.json(response); 
+      res.json(response);
     }
-    else
-    {
-      customer.HasPattern=true;
-      customer.save(function(err,customer){
+    else {
+      customer.HasPattern = true;
+      customer.save(function (err, customer) {
         response.message = messages.getSuccessMessage();
         response.code = codes.getSuccessCode();
         response.data = customer;
         res.json(response);
       });
+    }
+  });
+});
+
+getPatternCustomers.get(function (req, res) {
+  Customer.find({ HasPattern: true }, function (err, customers) {
+    if(err)
+    {
+      console.log(err);
+      response.message = messages.getFailureMessage();
+      response.code = codes.getFailureCode();
+      response.data = err;
+      res.json(response);
+    }
+    else
+    {
+      response.message = messages.getSuccessMessage();
+      response.code = codes.getSuccessCode();
+      response.data = customers;
+      res.json(response);
     }
   });
 });
