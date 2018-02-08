@@ -268,7 +268,7 @@ var CustomerMeasurementForm = (function () {
             }
         }
         else if (this.WaistCoat == true) {
-            if (this.newMeasurement.CoatLength == null || this.newMeasurement.CoatChest == null || this.newMeasurement.CoatWaist == null || this.newMeasurement.CoatHip == null || this.newMeasurement.CoatHip == null || this.newMeasurement.CoatShoulder == null || this.newMeasurement.CoatNeck == null || this.newMeasurement.CoatBysep == null || this.newMeasurement.CoatHB == null || this.newMeasurement.CoatCB == null) {
+            if (this.newMeasurement.CoatLength == null || this.newMeasurement.CoatChest == null || this.newMeasurement.CoatWaist == null || this.newMeasurement.CoatHip == null || this.newMeasurement.CoatShoulder == null || this.newMeasurement.CoatNeck == null || this.newMeasurement.CoatHB == null || this.newMeasurement.CoatCB == null) {
                 $("#snackbar").html("Please fill the empty Field");
                 this.showToast();
             }

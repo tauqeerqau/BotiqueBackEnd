@@ -21388,7 +21388,7 @@ var OrderFormComponent = (function () {
         this._customerService = _customerService;
     }
     OrderFormComponent.prototype.addOrder = function () {
-        if (this.newOrderItem.Quantity == null || this.newOrder.CustomerContactNumber == null || this.newOrder.AdvanceReceived == null || this.newOrder.SpecialInstructions == null || this.newOrder.TryDate == null || this.newOrder.DeliveryDate == null || this.newOrder.ProductName == null || this.newOrderItem.Price == null || this.newOrderItem.SpecialInstructions == null) {
+        if (this.newOrder.AdvanceReceived == null || this.newOrder.SpecialInstructions == null || this.newOrder.TryDate == null || this.newOrder.DeliveryDate == null || this.newOrderItem.ProductName == null || this.newOrderItem.Price == null || this.newOrderItem.SpecialInstructions == null || this.newOrderItem.Quantity == null) {
             alert("Please filled Order Item Fields");
         }
         else {
@@ -21404,7 +21404,7 @@ var OrderFormComponent = (function () {
         }
     };
     OrderFormComponent.prototype.addOrderItem = function () {
-        if (this.newOrderItem.Quantity == null || this.newOrder.CustomerContactNumber == null || this.newOrder.AdvanceReceived == null || this.newOrder.SpecialInstructions == null || this.newOrder.TryDate == null || this.newOrder.DeliveryDate == null || this.newOrder.ProductName == null || this.newOrderItem.Price == null || this.newOrderItem.SpecialInstructions == null) {
+        if (this.newOrder.AdvanceReceived == null || this.newOrder.SpecialInstructions == null || this.newOrder.TryDate == null || this.newOrder.DeliveryDate == null || this.newOrderItem.ProductName == null || this.newOrderItem.Price == null || this.newOrderItem.SpecialInstructions == null || this.newOrderItem.Quantity == null) {
             alert("Please fill Empty Field");
         }
         else {
