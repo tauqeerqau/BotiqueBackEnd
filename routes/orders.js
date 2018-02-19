@@ -27,10 +27,12 @@ var getOrderItems = router.route('/getOrderItems');
 var addCustomerOrder = router.route('/addCustomerOrder');
 var getOrderByOrderId = router.route('/getOrderByOrderId');
 var getOrderItemsByOrderId = router.route('/getOrderItemsByOrderId');
+var getOrderItemByItemId = router.route('/getOrderItemByItemId');
 var changeOrderStatus = router.route('/changeOrderStatus');
 var changeOrderItemAsignee = router.route('/changeOrderItemAsignee');
 var getOrdersByStatus = router.route('/getOrdersByStatus');
 var getOrderItemsByStatus = router.route('/getOrderItemsByStatus');
+var updateOrder = router.route('/updateOrder');
 /* GET users listing. */
 router.get('/', function (req, res, next) {
   res.send('respond with a resource');
@@ -100,6 +102,9 @@ addCustomerOrder.post(function (req, res) {
   customerOrder.OnUpdatetedUTC = req.body.OnUpdatetedUTC;
   customerOrder.OrderTakenBy = req.body.OrderTakenBy;
   customerOrder.SpecialInstructions = req.body.SpecialInstructions;
+  customerOrder.Discount = req.body.Discount;
+  customerOrder.BalanceToBePaid = req.body.BalanceToBePaid;
+  customerOrder.OrderTotalAfterDiscount = req.body.OrderTotalAfterDiscount;
   Customer.findOne({ ContactNumber: contactNumber }, function (err, customer) {
     if (customer == undefined) {
       response.code = codes.getDoesNotExistCode();
@@ -162,7 +167,7 @@ getOrderItemsByOrderId.get(function (req, res) {
   CustomerOrder.findById(req.query.OrderId, function (err, orderItems) {
     res.json(orderItems);
   })
-    .select('OrderItemId');
+    .select('OrderItemId').populate('CustomerId').populate('SticherName').populate('MasterName');
 });
 
 changeOrderStatus.post(function (req, res) {
@@ -233,23 +238,73 @@ getOrdersByStatus.get(function (req, res) {
   }).populate('CustomerId');
 });
 
-getOrderItemsByStatus.get(function(req,res){
-OrderItem.find({OrderItemStatus:req.query.OrderItemStatus},function(err,orderItems){
-  if (err) {
-    response.message = messages.getFailureMessage();
-    response.code = codes.getFailureCode();
-    response.data = err;
-    console.log(response);
-    res.json(response);
-  }
-  else {
-    response.message = messages.getSuccessMessage();
-    response.code = codes.getSuccessCode();
-    response.data = orderItems;
-    console.log(response);
-    res.json(response);
-  }
-}).populate('CustomerId').populate('SticherName').populate('MasterName');
+getOrderItemsByStatus.get(function (req, res) {
+  OrderItem.find({ OrderItemStatus: req.query.OrderItemStatus }, function (err, orderItems) {
+    if (err) {
+      response.message = messages.getFailureMessage();
+      response.code = codes.getFailureCode();
+      response.data = err;
+      console.log(response);
+      res.json(response);
+    }
+    else {
+      response.message = messages.getSuccessMessage();
+      response.code = codes.getSuccessCode();
+      response.data = orderItems;
+      console.log(response);
+      res.json(response);
+    }
+  }).populate('CustomerId').populate('SticherName').populate('MasterName');
+});
+
+updateOrder.post(function (req, res) {
+  CustomerOrder.findById(req.body.orderId, function (err, order) {
+    if (err) {
+      response.message = messages.getFailureMessage();
+      response.code = codes.getFailureCode();
+      response.data = err;
+      console.log(response);
+      res.json(response);
+    }
+    else {
+      if (req.body.DeliveryDate != null)
+        order.DeliveryDate = req.body.DeliveryDate;
+      if (req.body.TryDate != null)
+        order.TryDate = req.body.TryDate;
+      if (req.body.SpecialInstructions != null)
+        order.SpecialInstructions = req.body.SpecialInstructions;
+      if (req.body.OrderStatus != null)
+        order.OrderStatus = req.body.OrderStatus;
+      if (req.body.BalanceToBePaid != null)
+        order.BalanceToBePaid = req.body.BalanceToBePaid;
+      order.save(function (err, order) {
+        response.message = messages.getSuccessMessage();
+        response.code = codes.getSuccessCode();
+        response.data = order;
+        console.log(response);
+        res.json(response);
+      });
+    }
+  });
+});
+
+getOrderItemByItemId.get(function (req, res) {
+  OrderItem.findById(req.query.orderItemId, function (err, orderItem) {
+    if (err) {
+      response.message = messages.getFailureMessage();
+      response.code = codes.getFailureCode();
+      response.data = err;
+      console.log(response);
+      res.json(response);
+    }
+    else {
+      response.message = messages.getSuccessMessage();
+      response.code = codes.getSuccessCode();
+      response.data = orderItem;
+      console.log(response);
+      res.json(response);
+    }
+  }).populate('CustomerId').populate('SticherName').populate('MasterName');
 });
 
 module.exports = router;

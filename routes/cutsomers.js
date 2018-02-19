@@ -6,6 +6,7 @@ var router = express.Router();
 var Password = require('./../utilities/Password');
 var Customer = require('./../models/Customer');
 var Measurement = require('./../models/Measurement');
+var CustomerPattern = require('./../models/CustomerPattern');
 var Database = require('./../utilities/Database');
 var Messages = require('./../enum/Messages');
 var Codes = require('./../enum/Codes');
@@ -354,28 +355,10 @@ getCustomersByName.get(function (req, res) {
 });
 
 addCustomerPattern.post(function (req, res) {
-  Customer.findById(req.body.id, function (err, customer) {
-    if (customer == null) {
-      console.log(err);
-      response.message = messages.getFailureMessage();
-      response.code = codes.getFailureCode();
-      response.data = err;
-      res.json(response);
-    }
-    else {
-      customer.HasPattern = true;
-      customer.save(function (err, customer) {
-        response.message = messages.getSuccessMessage();
-        response.code = codes.getSuccessCode();
-        response.data = customer;
-        res.json(response);
-      });
-    }
-  });
-});
-
-getPatternCustomers.get(function (req, res) {
-  Customer.find({ HasPattern: true }, function (err, customers) {
+  var customerPattern = new CustomerPattern();
+  customerPattern.CustomerId =req.body.CustomerId;
+  customerPattern.DressType =req.body.DressType;
+  customerPattern.save(function(err,customerPattern){
     if(err)
     {
       console.log(err);
@@ -388,10 +371,30 @@ getPatternCustomers.get(function (req, res) {
     {
       response.message = messages.getSuccessMessage();
       response.code = codes.getSuccessCode();
-      response.data = customers;
+      response.data = customerPattern;
       res.json(response);
     }
   });
+});
+
+getPatternCustomers.get(function (req, res) {
+  CustomerPattern.find(function(err,customerPatterns){
+    if(err)
+    {
+      console.log(err);
+      response.message = messages.getFailureMessage();
+      response.code = codes.getFailureCode();
+      response.data = err;
+      res.json(response);
+    }
+    else
+    {
+      response.message = messages.getSuccessMessage();
+      response.code = codes.getSuccessCode();
+      response.data = customerPatterns;
+      res.json(response);
+    }
+  }).populate('CustomerId');
 });
 
 module.exports = router;
